@@ -25,7 +25,7 @@ nQPU is a **quantum computing platform** that combines:
 | **Multiple Backends** | State vector, tensor network, stabilizer simulation |
 | **Drug Discovery** | Quantum molecular fingerprinting & ADMET prediction |
 | **Quantum Biology** | Photosynthesis, enzyme catalysis, quantum coherence |
-| **Neuromorphic Integration** | Bio-signals controlling quantum circuits |
+| **Ever-Growing Library** | Drug design, quantum biology, finance, and more |
 
 ## Competitive Advantages
 
@@ -34,7 +34,7 @@ nQPU is a **quantum computing platform** that combines:
 | ✅ Native GPU (Metal) | ❌ CPU only | ❌ CPU only |
 | ✅ Rust core (fast) | ❌ Python only | ❌ Python only |
 | ✅ Drug design tools | ❌ General QC only | ❌ General QC only |
-| ✅ Bio integration | ❌ No bio module | ❌ No bio module |
+| ✅ Growing tool library | ❌ General QC only | ❌ General QC only |
 | ✅ Real-time dashboard | ❌ No dashboard | ❌ No dashboard |
 
 ## Quick Start

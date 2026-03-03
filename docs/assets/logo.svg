@@ -1,13 +1,73 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Jacquard+24&amp;display=swap');
-  </style>
-  <rect width="400" height="200" fill="#000000"/>
-  <text x="200" y="125"
-        font-family="'Jacquard 24', cursive"
-        font-size="80"
-        fill="#FFFFFF"
-        text-anchor="middle">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0a0a0a"/>
+      <stop offset="100%" stop-color="#1a1a2e"/>
+    </linearGradient>
+    <linearGradient id="textGlow" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="50%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#7b68ee"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="600" height="200" fill="url(#bgGrad)" rx="12"/>
+  <!-- Quantum circuit lines -->
+  <g opacity="0.15" stroke="#00d4ff" stroke-width="1">
+    <line x1="30" y1="60" x2="160" y2="60"/>
+    <line x1="30" y1="100" x2="160" y2="100"/>
+    <line x1="30" y1="140" x2="160" y2="140"/>
+    <circle cx="70" cy="60" r="4" fill="none" stroke-width="1.5"/>
+    <circle cx="70" cy="100" r="6" fill="none" stroke-width="1.5"/>
+    <line x1="70" y1="66" x2="70" y2="94"/>
+    <circle cx="120" cy="100" r="4" fill="none" stroke-width="1.5"/>
+    <circle cx="120" cy="140" r="6" fill="none" stroke-width="1.5"/>
+    <line x1="120" y1="106" x2="120" y2="134"/>
+    <line x1="440" y1="60" x2="570" y2="60"/>
+    <line x1="440" y1="100" x2="570" y2="100"/>
+    <line x1="440" y1="140" x2="570" y2="140"/>
+    <rect x="460" y="50" width="20" height="20" fill="none" rx="2"/>
+    <text x="470" y="65" font-size="10" fill="#00d4ff" text-anchor="middle" font-family="monospace">H</text>
+    <rect x="520" y="90" width="20" height="20" fill="none" rx="2"/>
+    <text x="530" y="105" font-size="10" fill="#00d4ff" text-anchor="middle" font-family="monospace">T</text>
+  </g>
+  <!-- Glow behind text -->
+  <text x="300" y="130"
+        font-family="Jacquard 24, cursive"
+        font-size="100"
+        fill="#00d4ff"
+        text-anchor="middle"
+        opacity="0.3"
+        filter="url(#softGlow)">
     nQPU
+  </text>
+  <!-- Main text -->
+  <text x="300" y="130"
+        font-family="Jacquard 24, cursive"
+        font-size="100"
+        fill="url(#textGlow)"
+        text-anchor="middle"
+        filter="url(#glow)">
+    nQPU
+  </text>
+  <!-- Subtitle -->
+  <text x="300" y="165"
+        font-family="Courier New, monospace"
+        font-size="12"
+        fill="#888888"
+        text-anchor="middle"
+        letter-spacing="6">
+    QUANTUM PROCESSING UNIT
   </text>
 </svg>
