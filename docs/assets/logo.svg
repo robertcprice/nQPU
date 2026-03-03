@@ -1,9 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 200">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Jacquard+24&amp;display=swap');
+  </style>
   <rect width="400" height="200" fill="#000000"/>
-  <text x="200" y="115"
-        font-family="Arial, Helvetica, sans-serif"
-        font-size="72"
-        font-weight="bold"
+  <text x="200" y="125"
+        font-family="'Jacquard 24', cursive"
+        font-size="80"
         fill="#FFFFFF"
         text-anchor="middle">
     nQPU

@@ -42,14 +42,32 @@ nQPU is a **quantum computing platform** that combines:
 ### Installation
 
 ```bash
-# Python SDK
+# Core SDK (quantum simulation)
 pip install nqpu
 
+# With chemistry/drug design tools
+pip install nqpu[chem]
+
+# With biology tools
+pip install nqpu[bio]
+
+# Everything
+pip install nqpu[all]
+
 # Or from source
-git clone https://github.com/your-org/nqpu.git
+git clone https://github.com/entropy-research/nqpu.git
 cd nqpu/sdk/python
-pip install -e .
+pip install -e ".[all]"
 ```
+
+### Optional Extras
+
+| Package | Install | Description |
+|---------|---------|-------------|
+| Core | `pip install nqpu` | Quantum simulation, GPU acceleration |
+| Chemistry | `pip install nqpu[chem]` | Drug design, ADMET, molecular fingerprints |
+| Biology | `pip install nqpu[bio]` | Quantum biology, genome tools |
+| All | `pip install nqpu[all]` | Everything |
 
 ### Basic Usage
 
