@@ -1,0 +1,664 @@
+//! Comprehensive Python API for nQPU-Metal
+//!
+//! Provides Qiskit-compatible Python interface with:
+//! - QuantumCircuit class
+//! - Backend selection (CPU/GPU/MPS/Auto)
+//! - Noise models
+//! - Result class with counts
+//! - Error mitigation
+
+#[cfg(feature = "python")]
+use pyo3::prelude::*;
+#[cfg(feature = "python")]
+use pyo3::exceptions::PyValueError;
+
+use crate::{
+    QuantumSimulator, QuantumState,
+    gates::Gate,
+    circuit_optimizer::{CircuitOptimizer, OptimizationLevel},
+    mid_circuit::{QuantumStateWithMeasurements, Operation},
+};
+
+#[cfg(feature = "python")]
+use std::collections::HashMap;
+
+// ============================================================================
+// BACKEND SELECTION
+// ============================================================================
+
+/// Backend type for simulation
+#[cfg(feature = "python")]
+#[pyclass(name = "Backend")]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PyBackend {
+    /// CPU backend (sequential)
+    CPU,
+    /// Fused CPU backend (optimized)
+    Fused,
+    /// Metal GPU backend
+    GPU,
+    /// Matrix Product State backend
+    MPS,
+    /// Automatic backend selection
+    Auto,
+}
+
+#[cfg(feature = "python")]
+impl PyBackend {
+    fn to_backend_type(&self) -> crate::auto_backend::BackendType {
+        match self {
+            PyBackend::CPU => crate::auto_backend::BackendType::CPU,
+            PyBackend::Fused => crate::auto_backend::BackendType::Fused,
+            PyBackend::GPU => crate::auto_backend::BackendType::GPU,
+            PyBackend::MPS => crate::auto_backend::BackendType::MPS,
+            PyBackend::Auto => crate::auto_backend::BackendType::GPU, // Will use auto-selection
+        }
+    }
+}
+
+#[cfg(feature = "python")]
+impl std::fmt::Display for PyBackend {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            PyBackend::CPU => write!(f, "CPU"),
+            PyBackend::Fused => write!(f, "Fused"),
+            PyBackend::GPU => write!(f, "GPU"),
+            PyBackend::MPS => write!(f, "MPS"),
+            PyBackend::Auto => write!(f, "Auto"),
+        }
+    }
+}
+
+// ============================================================================
+// NOISE MODELS
+// ============================================================================
+
+/// Noise model for simulation
+#[cfg(feature = "python")]
+#[pyclass(name = "NoiseModel")]
+#[derive(Debug, Clone)]
+pub struct PyNoiseModel {
+    /// Single-qubit error rates
+    pub single_qubit_error_rate: f64,
+    /// Two-qubit error rates
+    pub two_qubit_error_rate: f64,
+    /// Measurement error rate
+    pub measurement_error_rate: f64,
+    /// Thermal relaxation (T1, T2)
+    pub t1: Option<f64>,
+    pub t2: Option<f64>,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl PyNoiseModel {
+    #[new]
+    fn new(
+        single_qubit_error_rate: Option<f64>,
+        two_qubit_error_rate: Option<f64>,
+        measurement_error_rate: Option<f64>,
+    ) -> Self {
+        PyNoiseModel {
+            single_qubit_error_rate: single_qubit_error_rate.unwrap_or(0.0),
+            two_qubit_error_rate: two_qubit_error_rate.unwrap_or(0.0),
+            measurement_error_rate: measurement_error_rate.unwrap_or(0.0),
+            t1: None,
+            t2: None,
+        }
+    }
+
+    /// Create an ideal noise model (no errors)
+    #[staticmethod]
+    fn ideal() -> Self {
+        PyNoiseModel {
+            single_qubit_error_rate: 0.0,
+            two_qubit_error_rate: 0.0,
+            measurement_error_rate: 0.0,
+            t1: None,
+            t2: None,
+        }
+    }
+
+    /// Create an IBM-like noise model
+    #[staticmethod]
+    fn ibm_nqubit() -> Self {
+        PyNoiseModel {
+            single_qubit_error_rate: 0.001,
+            two_qubit_error_rate: 0.01,
+            measurement_error_rate: 0.02,
+            t1: Some(100.0),  // microseconds
+            t2: Some(50.0),
+        }
+    }
+}
+
+// ============================================================================
+// QUANTUM CIRCUIT
+// ============================================================================
+
+/// Quantum circuit for building quantum programs
+#[cfg(feature = "python")]
+#[pyclass(name = "QuantumCircuit")]
+#[derive(Debug, Clone)]
+pub struct PyQuantumCircuit {
+    /// Number of qubits
+    num_qubits: usize,
+    /// Number of classical bits
+    num_clbits: usize,
+    /// Gates in the circuit
+    gates: Vec<Gate>,
+    /// Classical register for mid-circuit measurements
+    classical_bits: Vec<bool>,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl PyQuantumCircuit {
+    /// Create a new quantum circuit
+    #[new]
+    #[pyo3(signature = (num_qubits, num_clbits=0))]
+    fn new(num_qubits: usize, num_clbits: usize) -> PyResult<Self> {
+        if num_qubits > 28 {
+            return Err(PyValueError::new_err("Maximum 28 qubits supported"));
+        }
+        if num_clbits > 32 {
+            return Err(PyValueError::new_err("Maximum 32 classical bits supported"));
+        }
+
+        Ok(PyQuantumCircuit {
+            num_qubits,
+            num_clbits,
+            gates: Vec::new(),
+            classical_bits: vec![false; num_clbits],
+        })
+    }
+
+    /// Get number of qubits
+    #[getter]
+    fn num_qubits(&self) -> usize {
+        self.num_qubits
+    }
+
+    /// Get number of classical bits
+    #[getter]
+    fn num_clbits(&self) -> usize {
+        self.num_clbits
+    }
+
+    /// Get number of gates in circuit
+    #[getter]
+    fn depth(&self) -> usize {
+        self.gates.len()
+    }
+
+    /// Apply Hadamard gate
+    fn h(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::h(qubit));
+        Ok(())
+    }
+
+    /// Apply Pauli-X gate
+    fn x(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::x(qubit));
+        Ok(())
+    }
+
+    /// Apply Pauli-Y gate
+    fn y(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::y(qubit));
+        Ok(())
+    }
+
+    /// Apply Pauli-Z gate
+    fn z(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::z(qubit));
+        Ok(())
+    }
+
+    /// Apply S gate (phase gate)
+    fn s(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::s(qubit));
+        Ok(())
+    }
+
+    /// Apply T gate (π/8 gate)
+    fn t(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::t(qubit));
+        Ok(())
+    }
+
+    /// Apply SX gate (√X gate)
+    fn sx(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::sx(qubit));
+        Ok(())
+    }
+
+    /// Apply RX rotation gate
+    fn rx(&mut self, qubit: usize, theta: f64) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::rx(qubit, theta));
+        Ok(())
+    }
+
+    /// Apply RY rotation gate
+    fn ry(&mut self, qubit: usize, theta: f64) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::ry(qubit, theta));
+        Ok(())
+    }
+
+    /// Apply RZ rotation gate
+    fn rz(&mut self, qubit: usize, theta: f64) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::rz(qubit, theta));
+        Ok(())
+    }
+
+    /// Apply Phase gate P(λ) = diag(1, e^(iλ))
+    fn p(&mut self, qubit: usize, lambda: f64) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::phase(qubit, lambda));
+        Ok(())
+    }
+
+    /// Apply U universal gate
+    fn u(&mut self, qubit: usize, theta: f64, phi: f64, lambda: f64) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        self.gates.push(Gate::u(qubit, theta, phi, lambda));
+        Ok(())
+    }
+
+    /// Apply CNOT gate
+    #[pyo3(signature = (control, target))]
+    fn cx(&mut self, control: usize, target: usize) -> PyResult<()> {
+        self.validate_two_qubit(control, target)?;
+        self.gates.push(Gate::cnot(control, target));
+        Ok(())
+    }
+
+    /// Apply CNOT gate (alias)
+    fn cnot(&mut self, control: usize, target: usize) -> PyResult<()> {
+        self.cx(control, target)
+    }
+
+    /// Apply CZ gate
+    fn cz(&mut self, control: usize, target: usize) -> PyResult<()> {
+        self.validate_two_qubit(control, target)?;
+        self.gates.push(Gate::cz(control, target));
+        Ok(())
+    }
+
+    /// Apply SWAP gate
+    fn swap(&mut self, a: usize, b: usize) -> PyResult<()> {
+        self.validate_two_qubit(a, b)?;
+        self.gates.push(Gate::swap(a, b));
+        Ok(())
+    }
+
+    /// Apply controlled RX rotation
+    fn crx(&mut self, control: usize, target: usize, theta: f64) -> PyResult<()> {
+        self.validate_two_qubit(control, target)?;
+        self.gates.push(Gate::crx(control, target, theta));
+        Ok(())
+    }
+
+    /// Apply controlled RY rotation
+    fn cry(&mut self, control: usize, target: usize, theta: f64) -> PyResult<()> {
+        self.validate_two_qubit(control, target)?;
+        self.gates.push(Gate::cry(control, target, theta));
+        Ok(())
+    }
+
+    /// Apply controlled RZ rotation
+    fn crz(&mut self, control: usize, target: usize, theta: f64) -> PyResult<()> {
+        self.validate_two_qubit(control, target)?;
+        self.gates.push(Gate::crz(control, target, theta));
+        Ok(())
+    }
+
+    /// Apply controlled phase rotation
+    fn cr(&mut self, control: usize, target: usize, theta: f64) -> PyResult<()> {
+        self.validate_two_qubit(control, target)?;
+        self.gates.push(Gate::cr(control, target, theta));
+        Ok(())
+    }
+
+    /// Apply Toffoli gate (CCX)
+    fn ccx(&mut self, control1: usize, control2: usize, target: usize) -> PyResult<()> {
+        self.validate_qubit(control1)?;
+        self.validate_qubit(control2)?;
+        self.validate_qubit(target)?;
+        if control1 == target || control2 == target || control1 == control2 {
+            return Err(PyValueError::new_err("Invalid qubit indices for CCX"));
+        }
+        self.gates.push(Gate::toffoli(control1, control2, target));
+        Ok(())
+    }
+
+    /// Measure a qubit
+    fn measure(&mut self, qubit: usize, clbit: Option<usize>) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        if let Some(bit) = clbit {
+            if bit >= self.num_clbits {
+                return Err(PyValueError::new_err(format!("Classical bit {} out of range", bit)));
+            }
+        }
+        // Store measurement operation (for mid-circuit measurement support)
+        // This will be handled during execution
+        Ok(())
+    }
+
+    /// Measure all qubits
+    fn measure_all(&mut self, inplace: Option<bool>) -> PyResult<()> {
+        // Add measurement operations for all qubits
+        for i in 0..self.num_qubits {
+            let bit = if i < self.num_clbits { Some(i) } else { None };
+            self.measure(i, bit)?;
+        }
+        Ok(())
+    }
+
+    /// Barrier operation (prevents reordering)
+    fn barrier(&mut self, qubits: Option<Vec<usize>>) -> PyResult<()> {
+        // Barrier is a marker for optimization
+        // In execution, it doesn't change the state
+        Ok(())
+    }
+
+    /// Reset a qubit to |0⟩
+    fn reset(&mut self, qubit: usize) -> PyResult<()> {
+        self.validate_qubit(qubit)?;
+        // Reset will be handled during execution
+        Ok(())
+    }
+
+    /// Get string representation of circuit
+    fn __repr__(&self) -> String {
+        format!("<QuantumCircuit {} qubits, {} gates, {} clbits>",
+                self.num_qubits, self.gates.len(), self.num_clbits)
+    }
+
+    /// Draw circuit (text representation)
+    fn draw(&self, output: Option<String>) -> PyResult<String> {
+        Ok(self.text_diagram())
+    }
+}
+
+#[cfg(feature = "python")]
+impl PyQuantumCircuit {
+    fn validate_qubit(&self, qubit: usize) -> PyResult<()> {
+        if qubit >= self.num_qubits {
+            return Err(PyValueError::new_err(format!("Qubit {} out of range (max {})", qubit, self.num_qubits - 1)));
+        }
+        Ok(())
+    }
+
+    fn validate_two_qubit(&self, a: usize, b: usize) -> PyResult<()> {
+        self.validate_qubit(a)?;
+        self.validate_qubit(b)?;
+        if a == b {
+            return Err(PyValueError::new_err("Control and target must be different qubits"));
+        }
+        Ok(())
+    }
+
+    fn text_diagram(&self) -> String {
+        if self.gates.is_empty() {
+            return format!("QuantumCircuit({} qubits)", self.num_qubits);
+        }
+
+        let mut lines = vec!["".to_string(); self.num_qubits];
+        let mut qubit_labels: Vec<String> = (0..self.num_qubits).map(|i| format!("q{}: ", i)).collect();
+
+        for gate in &self.gates() {
+            let qubits: Vec<usize> = gate.targets.iter().chain(gate.controls.iter()).copied().collect();
+            let gate_symbol = self.gate_symbol(gate);
+
+            for (i, line) in lines.iter_mut().enumerate() {
+                if qubits.contains(&i) {
+                    if i == qubits[0] {
+                        line.push_str(&gate_symbol);
+                    } else {
+                        // Connection point
+                        line.push_str("───");
+                    }
+                } else {
+                    line.push_str("   ");
+                }
+            }
+        }
+
+        let mut result = String::new();
+        for (i, (label, line)) in qubit_labels.iter().zip(lines.iter()).enumerate() {
+            result.push_str(label);
+            result.push_str(line);
+            result.push_str("\n");
+        }
+        result
+    }
+
+    fn gate_symbol(&self, gate: &Gate) -> String {
+        match &gate.gate_type {
+            crate::gates::GateType::H => "─H─".to_string(),
+            crate::gates::GateType::X => "─X─".to_string(),
+            crate::gates::GateType::Y => "─Y─".to_string(),
+            crate::gates::GateType::Z => "─Z─".to_string(),
+            crate::gates::GateType::S => "─S─".to_string(),
+            crate::gates::GateType::T => "─T─".to_string(),
+            crate::gates::GateType::SX => "─SX─".to_string(),
+            crate::gates::GateType::CNOT => "─■─".to_string(),
+            crate::gates::GateType::CZ => "─■─".to_string(),
+            crate::gates::GateType::SWAP => "─×─".to_string(),
+            _ => "─U─".to_string(),
+        }
+    }
+
+    pub fn gates(&self) -> &[Gate] {
+        &self.gates
+    }
+}
+
+// ============================================================================
+// SIMULATION RESULT
+// ============================================================================
+
+/// Result from quantum circuit execution
+#[cfg(feature = "python")]
+#[pyclass(name = "Result")]
+#[derive(Debug, Clone)]
+pub struct PyResult {
+    /// Measurement counts (bitstring -> count)
+    pub counts: HashMap<String, usize>,
+    /// Number of shots executed
+    pub shots: usize,
+    /// Final quantum state (optional)
+    pub state: Option<Vec<(f64, f64)>>,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl PyResult {
+    #[getter]
+    fn get_counts(&self) -> PyResult<HashMap<String, usize>> {
+        Ok(self.counts.clone())
+    }
+
+    /// Get counts as dictionary
+    fn to_dict(&self) -> PyResult<HashMap<String, usize>> {
+        Ok(self.counts.clone())
+    }
+
+    /// Get the most frequent measurement outcome
+    fn most_frequent(&self) -> PyResult<Option<(String, usize)>> {
+        let max_entry = self.counts.iter().max_by_key(|(_, &count)| count);
+        Ok(max_entry.map(|(k, v)| (k.clone(), *v)))
+    }
+
+    /// Get counts as a list of (outcome, count) tuples
+    fn get_memory(&self) -> Vec<(String, usize)> {
+        let mut counts: Vec<_> = self.counts.iter().map(|(k, v)| (k.clone(), *v)).collect();
+        counts.sort_by(|a, b| b.1.cmp(&a.1));
+        counts
+    }
+
+    fn __repr__(&self) -> String {
+        format!("<Result shots={}, outcomes={}>", self.shots, self.counts.len())
+    }
+}
+
+// ============================================================================
+// MAIN SIMULATOR
+// ============================================================================
+
+/// Main simulator class with backend selection and noise support
+#[cfg(feature = "python")]
+#[pyclass(name = "Simulator")]
+pub struct PySimulator {
+    backend: PyBackend,
+    noise_model: Option<PyNoiseModel>,
+    optimization_level: usize,
+}
+
+#[cfg(feature = "python")]
+#[pymethods]
+impl PySimulator {
+    /// Create a new simulator
+    #[new]
+    #[pyo3(signature = (backend=PyBackend::Auto, noise_model=None, optimization_level=2))]
+    fn new(
+        backend: PyBackend,
+        noise_model: Option<PyNoiseModel>,
+        optimization_level: usize,
+    ) -> Self {
+        PySimulator {
+            backend,
+            noise_model,
+            optimization_level: optimization_level.min(3),
+        }
+    }
+
+    /// Run a circuit with optional shots
+    #[pyo3(signature = (circuit, shots=None))]
+    fn run(&self, circuit: &PyQuantumCircuit, shots: Option<usize>) -> PyResult<PyResult> {
+        let shots = shots.unwrap_or(1024);
+
+        // Optimize circuit if requested
+        let gates = if self.optimization_level > 0 {
+            let level = match self.optimization_level {
+                1 => OptimizationLevel::Basic,
+                2 => OptimizationLevel::Moderate,
+                _ => OptimizationLevel::Aggressive,
+            };
+            let optimizer = CircuitOptimizer::new(level);
+            optimizer.optimize(circuit.gates())
+        } else {
+            circuit.gates().to_vec()
+        };
+
+        // Execute simulation
+        let mut sim = QuantumSimulator::new(circuit.num_qubits);
+
+        // Apply all gates
+        for gate in &gates {
+            match &gate.gate_type {
+                crate::gates::GateType::H => sim.h(gate.targets[0]),
+                crate::gates::GateType::X => sim.x(gate.targets[0]),
+                crate::gates::GateType::Y => sim.y(gate.targets[0]),
+                crate::gates::GateType::Z => sim.z(gate.targets[0]),
+                crate::gates::GateType::S => sim.s(gate.targets[0]),
+                crate::gates::GateType::T => sim.t(gate.targets[0]),
+                crate::gates::GateType::RX(theta) => sim.rx(gate.targets[0], *theta),
+                crate::gates::GateType::RY(theta) => sim.ry(gate.targets[0], *theta),
+                crate::gates::GateType::RZ(theta) => sim.rz(gate.targets[0], *theta),
+                crate::gates::GateType::CNOT => {
+                    if !gate.controls.is_empty() {
+                        sim.cnot(gate.controls[0], gate.targets[0]);
+                    }
+                }
+                crate::gates::GateType::CZ => {
+                    if !gate.controls.is_empty() {
+                        sim.cz(gate.controls[0], gate.targets[0]);
+                    }
+                }
+                crate::gates::GateType::SWAP => {
+                    sim.swap(gate.targets[0], gate.targets[1]);
+                }
+                crate::gates::GateType::Toffoli => {
+                    sim.toffoli(gate.controls[0], gate.controls[1], gate.targets[0]);
+                }
+                crate::gates::GateType::CRx(theta) => {
+                    if !gate.controls.is_empty() {
+                        sim.crx(gate.controls[0], gate.targets[0], *theta);
+                    }
+                }
+                crate::gates::GateType::CRy(theta) => {
+                    if !gate.controls.is_empty() {
+                        sim.cry(gate.controls[0], gate.targets[0], *theta);
+                    }
+                }
+                crate::gates::GateType::CRz(theta) => {
+                    if !gate.controls.is_empty() {
+                        sim.crz(gate.controls[0], gate.targets[0], *theta);
+                    }
+                }
+                _ => {} // Skip unsupported gates
+            }
+        }
+
+        // Perform measurements
+        let final_state = sim.state.amplitudes_ref().iter()
+            .map(|c| (c.re, c.im))
+            .collect();
+
+        // Sample multiple shots
+        let mut counts: HashMap<String, usize> = HashMap::new();
+        for _ in 0..shots {
+            let measured = sim.measure();
+            let bitstring = format!("{:0width$b}", measured, width = circuit.num_qubits);
+            *counts.entry(bitstring).or_insert(0) += 1;
+        }
+
+        Ok(PyResult {
+            counts,
+            shots,
+            state: Some(final_state),
+        })
+    }
+
+    /// Get backend information
+    fn backend_info(&self) -> String {
+        format!("{:?}", self.backend)
+    }
+
+    fn __repr__(&self) -> String {
+        format!("<Simulator backend={}, opt_level={}>", self.backend, self.optimization_level)
+    }
+}
+
+// ============================================================================
+// MODULE INITIALIZATION
+// ============================================================================
+
+/// Python module initialization
+#[cfg(feature = "python")]
+#[pymodule]
+fn nqpu_metal_v2(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<PyBackend>()?;
+    m.add_class::<PyNoiseModel>()?;
+    m.add_class::<PyQuantumCircuit>()?;
+    m.add_class::<PySimulator>()?;
+    m.add_class::<PyResult>()?;
+    
+    // Add constants
+    m.add("PI", std::f64::consts::PI)?;
+    m.add("VERSION", env!("CARGO_PKG_VERSION"))?;
+    
+    Ok(())
+}

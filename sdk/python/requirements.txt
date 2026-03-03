@@ -1,0 +1,21 @@
+# NQPU Drug Design Platform Dependencies
+
+# Core
+numpy>=1.20.0
+
+# Quantum Computing (required for real quantum features)
+pennylane>=0.30.0
+pennylane[qchem]>=0.30.0  # For molecular Hamiltonian construction
+
+# Optional: IBM Quantum hardware access
+# pennylane-qiskit>=0.30.0
+# qiskit-ibm-provider
+
+# Web Demo (optional)
+gradio>=4.0.0
+
+# Visualization (optional)
+matplotlib>=3.5.0
+
+# For HuggingFace Spaces deployment
+# These are the minimal dependencies for the demo

@@ -1,0 +1,29 @@
+# JAX Integration Requirements for nQPU-Metal
+
+# Core JAX (CPU only)
+jax>=0.4.20
+jaxlib>=0.4.20
+
+# For NVIDIA GPU support (optional)
+# jax[cuda12]>=0.4.20
+
+# Build tool for Rust-Python bindings
+maturin>=1.4.0
+
+# Scientific computing
+numpy>=1.24.0
+scipy>=1.11.0
+
+# Visualization (for examples/notebooks)
+matplotlib>=3.7.0
+
+# Jupyter notebook support (optional)
+jupyter>=1.0.0
+ipykernel>=6.25.0
+
+# Testing
+pytest>=7.4.0
+pytest-cov>=4.1.0
+
+# Type checking (optional)
+mypy>=1.5.0

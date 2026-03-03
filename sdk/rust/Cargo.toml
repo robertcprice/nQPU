@@ -1,0 +1,131 @@
+[package]
+name = "nqpu-metal"
+version = "1.0.0"
+edition = "2021"
+description = "Quantum simulation toolkit with Metal GPU acceleration, stabilizer/MPS/statevector backends, and QEC decoders"
+authors = ["nQPU-Metal Contributors"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/nqpu-metal/nqpu-metal"
+keywords = ["quantum", "simulator", "gpu", "metal", "cuda"]
+categories = ["science", "simulation"]
+
+[lib]
+name = "nqpu_metal"
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+# Math and complex numbers
+num-complex = "0.4"
+num-traits = "0.2"
+rand = "0.8"
+ndarray = { version = "0.15", features = ["rayon"] }
+nalgebra = "0.33"
+
+# Parallel processing (CPU multi-threading)
+rayon = "1.8"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"], optional = true }
+serde_json = { version = "1.0", optional = true }
+
+# Parsing
+nom = { version = "7.1", optional = true }
+regex = "1.10"
+
+# Logging / diagnostics
+tracing = "0.1"
+
+# Cryptographic hashing for entropy extraction
+sha2 = "0.10"
+
+# FFT for NIST spectral test
+rustfft = "6.2"
+
+# Metal GPU (macOS only)
+[target.'cfg(target_os = "macos")'.dependencies]
+metal = "0.27"
+objc = "0.2"
+cocoa = "0.25"
+
+# Python bindings (optional)
+pyo3 = { version = "0.28", optional = true }
+pyo3-build-config = { version = "0.28", optional = true }
+
+# CUDA backend (optional, Linux/Windows)
+cudarc = { version = "0.10", optional = true }
+
+# Visualization
+plotters = { version = "0.3", optional = true }
+image = { version = "0.24", optional = true }
+
+# MPI for distributed computing (optional)
+mpi = { version = "0.8", optional = true }
+
+# Web GUI (optional)
+axum = { version = "0.7", optional = true }
+tokio = { version = "1", features = ["full"], optional = true }
+tower-http = { version = "0.5", features = ["cors"], optional = true }
+
+# QPU connectivity (optional)
+reqwest = { version = "0.12", features = ["json", "rustls-tls"], optional = true }
+async-trait = { version = "0.1", optional = true }
+
+# WebAssembly bindings/runtime (optional)
+wasm-bindgen = { version = "0.2", optional = true }
+getrandom = { version = "0.2", features = ["js"], optional = true }
+
+[build-dependencies]
+pyo3-build-config = { version = "0.28", optional = true }
+
+[dev-dependencies]
+criterion = "0.5"
+
+[features]
+default = ["parallel", "serde"]
+parallel = []
+metal = []  # Metal GPU feature
+metal4 = ["metal"]  # Metal 4 tensor ops + inline ML (requires macOS 15+)
+amx = []  # Apple AMX (Accelerate) tensor contractions for MPS inner loops
+serde = ["dep:serde", "dep:serde_json"]  # Serialization support
+python = ["pyo3", "pyo3-build-config", "dep:serde", "dep:serde_json"]  # Python bindings
+cuda = ["cudarc"]  # NVIDIA GPU support
+rocm = []  # AMD GPU support (stub for now)
+qpu = ["dep:reqwest", "dep:async-trait", "tokio"]  # Real QPU hardware connectivity
+qpu-ibm = ["qpu"]  # IBM Quantum
+qpu-braket = ["qpu"]  # Amazon Braket
+qpu-azure = ["qpu"]  # Azure Quantum
+qpu-ionq = ["qpu"]  # IonQ Direct
+qpu-google = ["qpu"]  # Google Quantum AI
+qpu-all = ["qpu-ibm", "qpu-braket", "qpu-azure", "qpu-ionq", "qpu-google"]  # All QPU providers
+visualization = ["plotters", "image"]  # Visualization tools
+distributed = ["mpi"]  # Distributed memory support
+web = ["axum", "tokio", "tower-http", "serde"]  # Web GUI with REST API
+wasm = ["dep:wasm-bindgen", "dep:getrandom"]  # WebAssembly/WebGPU backend (conflicts with metal/cuda)
+lsp = ["dep:serde", "dep:serde_json"]  # QASM Language Server Protocol support
+chemistry = []  # Quantum chemistry: fermion mappings, molecular Hamiltonians
+networking = []  # Quantum networking: channels, repeaters, purification
+experimental = []  # Experimental/research modules: orch_or, creative_quantum
+all-gpus = ["metal", "cuda", "rocm"]  # All GPU backends
+full = ["python", "all-gpus", "visualization", "distributed", "web", "chemistry", "networking", "amx", "qpu-all"]  # Everything (excludes experimental)
+
+[[bin]]
+name = "microtubule_ablation"
+required-features = ["experimental"]
+
+[[bin]]
+name = "nqpu-qasm-lsp"
+path = "src/bin/nqpu_qasm_lsp.rs"
+required-features = ["lsp"]
+
+[[bench]]
+name = "quantum_vs_classical"
+harness = false
+
+# Optimize dependencies in test builds — numeric code (ndarray, nalgebra,
+# num-complex) is 10-50x slower at opt-level 0. This keeps our code debuggable
+# while making tests run fast.
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.test.package."*"]
+opt-level = 2

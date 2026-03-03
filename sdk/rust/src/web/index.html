@@ -1,0 +1,2404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nQPU-Metal Quantum Simulator</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%2322d3ee'/%3E%3C/svg%3E">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #09090b;
+            color: #e2e8f0;
+            line-height: 1.4;
+        }
+
+        .app {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ---- HEADER ---- */
+        .header {
+            height: 40px;
+            min-height: 40px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0 12px;
+            background: #0f1117;
+            border-bottom: 1px solid #1e293b;
+            flex-wrap: wrap;
+        }
+
+        .header-brand {
+            font-size: 14px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #22d3ee, #a78bfa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-right: 6px;
+            white-space: nowrap;
+        }
+
+        .header-sep {
+            width: 1px;
+            height: 18px;
+            background: #1e293b;
+            margin: 0 2px;
+        }
+
+        .header select {
+            padding: 4px 6px;
+            background: #151921;
+            border: 1px solid #1e293b;
+            color: #e2e8f0;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .header select:focus {
+            border-color: #22d3ee;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .header-actions button {
+            padding: 4px 10px;
+            background: #151921;
+            border: 1px solid #1e293b;
+            color: #e2e8f0;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .header-actions button:hover {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .header-actions button:active {
+            background: #22d3ee;
+            color: #09090b;
+            border-color: #22d3ee;
+        }
+
+        /* ---- BODY LAYOUT ---- */
+        .body-layout {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+
+        /* ---- SIDEBAR ---- */
+        .sidebar {
+            width: 360px;
+            min-width: 300px;
+            background: #0f1117;
+            border-right: 1px solid #1e293b;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .sidebar-section {
+            padding: 10px 12px;
+            border-bottom: 1px solid #162032;
+        }
+
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin-bottom: 6px;
+        }
+
+        /* ---- GATE PALETTE ---- */
+        .gate-palette {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 4px;
+        }
+
+        .gate-btn {
+            padding: 5px 0;
+            background: #151921;
+            border: 1px solid #1e293b;
+            color: #e2e8f0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.12s;
+        }
+
+        .gate-btn:hover {
+            background: #1e293b;
+            border-color: #334155;
+        }
+
+        .gate-btn.selected {
+            background: #a78bfa;
+            border-color: #c4b5fd;
+            color: #09090b;
+        }
+
+        /* ---- TEMPLATE CONTROLS ---- */
+        .template-controls {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .template-controls select {
+            flex: 1;
+            min-width: 160px;
+            padding: 4px 6px;
+            background: #151921;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 11px;
+            outline: none;
+        }
+
+        .template-controls button {
+            padding: 4px 8px;
+            background: #151921;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 11px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .template-controls button:hover {
+            background: #1e293b;
+        }
+
+        .template-info {
+            margin-top: 6px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #162032;
+            background: rgba(15, 17, 23, 0.7);
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre-line;
+        }
+
+        .template-info.pass {
+            border-color: rgba(52, 211, 153, 0.4);
+            color: #34d399;
+            background: rgba(16, 48, 36, 0.4);
+        }
+
+        .template-info.warn {
+            border-color: rgba(251, 191, 36, 0.4);
+            color: #fbbf24;
+            background: rgba(48, 40, 16, 0.4);
+        }
+
+        /* ---- CIRCUIT DISPLAY ---- */
+        .circuit-display {
+            background: #09090b;
+            border-radius: 4px;
+            border: 1px solid #162032;
+            padding: 8px 10px;
+            min-height: 80px;
+            max-height: 200px;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .qubit-wires {
+            position: relative;
+        }
+
+        .qubit-wire {
+            display: flex;
+            align-items: center;
+            height: 36px;
+            position: relative;
+        }
+
+        .qubit-label {
+            width: 48px;
+            text-align: right;
+            padding-right: 8px;
+            color: #64748b;
+            font-size: 11px;
+            font-family: monospace;
+            flex-shrink: 0;
+        }
+
+        .wire {
+            flex: 1;
+            height: 1px;
+            background: #1e293b;
+            position: relative;
+        }
+
+        .gates-container {
+            position: absolute;
+            top: 0;
+            left: 56px;
+            right: 6px;
+            height: 100%;
+            cursor: crosshair;
+        }
+
+        .circuit-gate {
+            position: absolute;
+            width: 32px;
+            height: 24px;
+            background: #151921;
+            border: 1px solid #22d3ee;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #22d3ee;
+            cursor: pointer;
+            transition: background 0.12s;
+        }
+
+        .circuit-gate:hover {
+            background: #1e293b;
+        }
+
+        /* ---- RESULTS ---- */
+        .results-section {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .stat-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: #151921;
+            border: 1px solid #162032;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .stat-badge .stat-label {
+            color: #64748b;
+        }
+
+        .stat-badge .stat-value {
+            color: #22d3ee;
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .prob-chart {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        .prob-chart h3 {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .prob-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3px;
+            height: 18px;
+        }
+
+        .prob-label {
+            width: 56px;
+            font-family: monospace;
+            font-size: 10px;
+            color: #64748b;
+            text-align: right;
+            padding-right: 6px;
+            flex-shrink: 0;
+        }
+
+        .prob-bar-fill {
+            flex: 1;
+            height: 14px;
+            background: #151921;
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .prob-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #22d3ee, #a78bfa);
+            transition: width 0.25s;
+            border-radius: 2px;
+        }
+
+        .prob-value {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 10px;
+            font-family: monospace;
+            color: #e2e8f0;
+        }
+
+        #circuitMessage {
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .error {
+            color: #f87171;
+            padding: 6px 8px;
+            background: rgba(248, 113, 113, 0.08);
+            border-radius: 4px;
+        }
+
+        .success {
+            color: #34d399;
+            padding: 6px 8px;
+            background: rgba(52, 211, 153, 0.08);
+            border-radius: 4px;
+        }
+
+        /* ---- MAIN VIZ ---- */
+        .main-viz {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viz-toolbar {
+            display: flex;
+            gap: 6px;
+            padding: 4px 10px;
+            align-items: center;
+            border-bottom: 1px solid #162032;
+            background: #0f1117;
+            min-height: 32px;
+            flex-wrap: wrap;
+        }
+
+        .viz-mode-group {
+            display: inline-flex;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .viz-mode-btn {
+            border: none;
+            border-right: 1px solid #1e293b;
+            background: transparent;
+            color: #64748b;
+            font-size: 11px;
+            padding: 3px 10px;
+            cursor: pointer;
+            transition: background 0.12s, color 0.12s;
+        }
+
+        .viz-mode-btn:last-child {
+            border-right: none;
+        }
+
+        .viz-mode-btn.active {
+            background: #22d3ee;
+            color: #09090b;
+            font-weight: 600;
+        }
+
+        .viz-toolbar button {
+            padding: 3px 8px;
+            background: #151921;
+            border: 1px solid #1e293b;
+            color: #e2e8f0;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        .viz-toolbar button:hover {
+            background: #1e293b;
+        }
+
+        .viz-meta {
+            font-size: 10px;
+            color: #64748b;
+            padding: 2px 6px;
+            background: #151921;
+            border: 1px solid #162032;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+
+        .viz-stage {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+            background: #0a0d14;
+        }
+
+        .viz-hidden {
+            display: none !important;
+        }
+
+        #asciiViz {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 8px;
+            font-family: "Courier New", Courier, monospace;
+            font-size: 10px;
+            line-height: 1;
+            letter-spacing: 0.02em;
+            white-space: pre;
+            color: #22d3ee;
+            user-select: none;
+            overflow: hidden;
+            display: block;
+            background: transparent;
+        }
+
+        #graphViz {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: block;
+            image-rendering: auto;
+        }
+
+        /* ---- STATUS BAR ---- */
+        .status-bar {
+            height: 24px;
+            min-height: 24px;
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            background: #0f1117;
+            border-top: 1px solid #1e293b;
+            font-size: 11px;
+            color: #64748b;
+        }
+
+        /* ---- MODAL ---- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #0f1117;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 560px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid #1e293b;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 12px;
+            color: #22d3ee;
+            font-size: 14px;
+        }
+
+        .modal-content textarea {
+            width: 100%;
+            height: 180px;
+            background: #09090b;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            color: #e2e8f0;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            resize: vertical;
+            outline: none;
+        }
+
+        .modal-content textarea:focus {
+            border-color: #22d3ee;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .modal-buttons button {
+            padding: 6px 14px;
+            background: #151921;
+            border: 1px solid #1e293b;
+            border-radius: 4px;
+            color: #e2e8f0;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .modal-buttons button:hover {
+            background: #1e293b;
+        }
+
+        /* ---- SCROLLBAR ---- */
+        .sidebar::-webkit-scrollbar,
+        .prob-chart::-webkit-scrollbar,
+        .circuit-display::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-track,
+        .prob-chart::-webkit-scrollbar-track,
+        .circuit-display::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb,
+        .prob-chart::-webkit-scrollbar-thumb,
+        .circuit-display::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+
+        /* ---- RESPONSIVE ---- */
+        @media (max-width: 800px) {
+            html, body {
+                overflow: auto;
+            }
+
+            .app {
+                height: auto;
+                min-height: 100vh;
+            }
+
+            .header {
+                height: auto;
+                min-height: 36px;
+                padding: 4px 8px;
+            }
+
+            .body-layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                min-width: unset;
+                max-height: 45vh;
+                border-right: none;
+                border-bottom: 1px solid #1e293b;
+            }
+
+            .main-viz {
+                min-height: 320px;
+            }
+
+            .viz-stage {
+                min-height: 280px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- HEADER -->
+        <div class="header">
+            <span class="header-brand">nQPU-Metal</span>
+            <div class="header-sep"></div>
+            <select id="qubitCount">
+                <option value="2">2Q</option>
+                <option value="3">3Q</option>
+                <option value="4" selected>4Q</option>
+                <option value="5">5Q</option>
+                <option value="8">8Q</option>
+                <option value="10">10Q</option>
+            </select>
+            <select id="backend">
+                <option value="auto">Auto</option>
+                <option value="cpu">CPU</option>
+                <option value="fused">Fused</option>
+                <option value="gpu">GPU</option>
+            </select>
+            <div class="header-actions">
+                <button onclick="executeCircuit()">Execute</button>
+                <button onclick="modelTrace()">Trace</button>
+                <button onclick="sampleCircuit()">Sample</button>
+                <button onclick="analyzeCircuit()">Analyze</button>
+                <button onclick="showQasmModal()">QASM</button>
+                <button onclick="clearCircuit()">Clear</button>
+                <button onclick="loadBenchmark()">Bench</button>
+            </div>
+        </div>
+
+        <!-- BODY -->
+        <div class="body-layout">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <!-- Gates -->
+                <div class="sidebar-section">
+                    <div class="section-title">Gates</div>
+                    <div class="gate-palette">
+                        <button class="gate-btn" data-gate="h">H</button>
+                        <button class="gate-btn" data-gate="x">X</button>
+                        <button class="gate-btn" data-gate="y">Y</button>
+                        <button class="gate-btn" data-gate="z">Z</button>
+                        <button class="gate-btn" data-gate="s">S</button>
+                        <button class="gate-btn" data-gate="t">T</button>
+                        <button class="gate-btn" data-gate="rx">Rx</button>
+                        <button class="gate-btn" data-gate="ry">Ry</button>
+                        <button class="gate-btn" data-gate="rz">Rz</button>
+                        <button class="gate-btn" data-gate="cnot">CNOT</button>
+                        <button class="gate-btn" data-gate="cz">CZ</button>
+                        <button class="gate-btn" data-gate="swap">SWAP</button>
+                    </div>
+                </div>
+
+                <!-- Templates -->
+                <div class="sidebar-section">
+                    <div class="section-title">Templates</div>
+                    <div class="template-controls">
+                        <select id="templateSelect">
+                            <option value="" selected>Select template...</option>
+                            <option value="bell_2">Bell Pair (2Q)</option>
+                            <option value="ghz_3">GHZ State (3Q)</option>
+                            <option value="grover_2">Grover |11> (2Q)</option>
+                            <option value="qft_3_basis101">QFT |101> (3Q)</option>
+                            <option value="phase_to_bit_2">Phase-to-Bit (2Q)</option>
+                        </select>
+                        <button onclick="loadTemplateCircuit()">Load</button>
+                        <button onclick="loadTemplateAndTrace()">+Trace</button>
+                    </div>
+                    <div class="template-info" id="templateInfo">Load a template to compare expected algorithm behavior against the live trace.</div>
+                </div>
+
+                <!-- Circuit -->
+                <div class="sidebar-section">
+                    <div class="section-title">Circuit</div>
+                    <div class="circuit-display" id="circuitDisplay">
+                        <div class="qubit-wires" id="qubitWires"></div>
+                    </div>
+                    <div id="circuitMessage"></div>
+                </div>
+
+                <!-- Results -->
+                <div class="sidebar-section results-section">
+                    <div class="section-title">Results</div>
+                    <div class="stats-row">
+                        <div class="stat-badge"><span class="stat-label">Time</span><span class="stat-value" id="statTime">-</span></div>
+                        <div class="stat-badge"><span class="stat-label">Backend</span><span class="stat-value" id="statBackend">-</span></div>
+                        <div class="stat-badge"><span class="stat-label">Gates</span><span class="stat-value" id="statGates">-</span></div>
+                        <div class="stat-badge"><span class="stat-label">Fidelity</span><span class="stat-value" id="statFidelity">-</span></div>
+                    </div>
+                    <div class="prob-chart" id="probChart"></div>
+                </div>
+            </div>
+
+            <!-- MAIN VIZ -->
+            <div class="main-viz">
+                <div class="viz-toolbar">
+                    <div class="viz-mode-group">
+                        <button id="vizModeAscii" class="viz-mode-btn active" type="button">ASCII</button>
+                        <button id="vizModeGraphical" class="viz-mode-btn" type="button">State View</button>
+                    </div>
+                    <button id="vizPause">Pause</button>
+                    <button id="vizRecenter">Pulse</button>
+                    <div class="viz-meta" id="vizEngineTag">Engine: ...</div>
+                    <div class="viz-meta" id="vizModeTag">Mode: ASCII</div>
+                </div>
+                <div class="viz-stage" id="vizStage">
+                    <pre id="asciiViz"></pre>
+                    <canvas id="graphViz" class="viz-hidden"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="vizStatus">Ready. Build a circuit and press Execute.</div>
+    </div>
+
+    <!-- QASM Modal -->
+    <div class="modal" id="qasmModal">
+        <div class="modal-content">
+            <h3>OpenQASM Import/Export</h3>
+            <textarea id="qasmTextarea" placeholder="OPENQASM 2.0;
+include 'qelib1.inc';
+qreg q[2];
+creg c[2];
+h q[0];
+cx q[0],q[1];
+"></textarea>
+            <div class="modal-buttons">
+                <button onclick="importQasm()">Import</button>
+                <button onclick="exportQasm()">Export</button>
+                <button onclick="closeQasmModal()">Close</button>
+            </div>
+            <div id="qasmMessage" style="margin-top: 10px;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Circuit state
+        let selectedGate = null;
+        let circuitGates = [];
+        let numQubits = 4;
+        let gateColumn = 0;
+        let pendingTwoQubit = null;
+        let vizController = null;
+        let activeTemplateId = null;
+
+        const PI = Math.PI;
+        const CIRCUIT_TEMPLATES = {
+            bell_2: {
+                id: 'bell_2',
+                name: 'Bell Pair (2 qubits)',
+                qubits: 2,
+                gates: [
+                    { type: 'h', target: 0 },
+                    { type: 'cnot', control: 0, target: 1 },
+                ],
+                expected: 'Expected: P(00)=0.5, P(11)=0.5. Entanglement should appear after the CNOT step.',
+                validator: {
+                    kind: 'target_states',
+                    tolerance: 0.08,
+                    states: { '00': 0.5, '11': 0.5 },
+                },
+            },
+            ghz_3: {
+                id: 'ghz_3',
+                name: 'GHZ State (3 qubits)',
+                qubits: 3,
+                gates: [
+                    { type: 'h', target: 0 },
+                    { type: 'cnot', control: 0, target: 1 },
+                    { type: 'cnot', control: 1, target: 2 },
+                ],
+                expected: 'Expected: P(000)=0.5, P(111)=0.5. Multi-qubit entanglement should rise by the final step.',
+                validator: {
+                    kind: 'target_states',
+                    tolerance: 0.09,
+                    states: { '000': 0.5, '111': 0.5 },
+                },
+            },
+            grover_2: {
+                id: 'grover_2',
+                name: 'Grover Marked |11> (2 qubits)',
+                qubits: 2,
+                gates: [
+                    { type: 'h', target: 0 },
+                    { type: 'h', target: 1 },
+                    { type: 'cz', control: 0, target: 1 },
+                    { type: 'h', target: 0 },
+                    { type: 'h', target: 1 },
+                    { type: 'x', target: 0 },
+                    { type: 'x', target: 1 },
+                    { type: 'cz', control: 0, target: 1 },
+                    { type: 'x', target: 0 },
+                    { type: 'x', target: 1 },
+                    { type: 'h', target: 0 },
+                    { type: 'h', target: 1 },
+                ],
+                expected: 'Expected: one Grover iteration should amplify |11> close to probability 1.0.',
+                validator: {
+                    kind: 'peak_state',
+                    state: '11',
+                    minProb: 0.90,
+                },
+            },
+            qft_3_basis101: {
+                id: 'qft_3_basis101',
+                name: 'QFT on |101> (3 qubits)',
+                qubits: 3,
+                gates: [
+                    { type: 'x', target: 0 },
+                    { type: 'x', target: 2 },
+                    { type: 'h', target: 0 },
+                    { type: 'rz', target: 1, angle: PI / 4 },
+                    { type: 'cnot', control: 0, target: 1 },
+                    { type: 'rz', target: 1, angle: -PI / 4 },
+                    { type: 'cnot', control: 0, target: 1 },
+                    { type: 'rz', target: 2, angle: PI / 8 },
+                    { type: 'cnot', control: 0, target: 2 },
+                    { type: 'rz', target: 2, angle: -PI / 8 },
+                    { type: 'cnot', control: 0, target: 2 },
+                    { type: 'h', target: 1 },
+                    { type: 'rz', target: 2, angle: PI / 4 },
+                    { type: 'cnot', control: 1, target: 2 },
+                    { type: 'rz', target: 2, angle: -PI / 4 },
+                    { type: 'cnot', control: 1, target: 2 },
+                    { type: 'h', target: 2 },
+                    { type: 'swap', q0: 0, q1: 2 },
+                ],
+                expected: 'Expected: near-uniform probabilities across all 8 basis states (QFT of a basis input).',
+                validator: {
+                    kind: 'near_uniform',
+                    tolerance: 0.05,
+                },
+            },
+            phase_to_bit_2: {
+                id: 'phase_to_bit_2',
+                name: 'Phase-to-Bit (2 qubits)',
+                qubits: 2,
+                gates: [
+                    { type: 'h', target: 0 },
+                    { type: 'rz', target: 0, angle: PI },
+                    { type: 'h', target: 0 },
+                ],
+                expected: 'Expected: destructive/constructive interference maps phase into bit value, peaking at |01>.',
+                validator: {
+                    kind: 'peak_state',
+                    state: '01',
+                    minProb: 0.90,
+                },
+            },
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            renderCircuit();
+            setupGatePalette();
+            await initVisualization();
+
+            document.getElementById('qubitCount').addEventListener('change', (e) => {
+                numQubits = parseInt(e.target.value);
+                circuitGates = [];
+                gateColumn = 0;
+                activeTemplateId = null;
+                const templateSelect = document.getElementById('templateSelect');
+                if (templateSelect) templateSelect.value = '';
+                renderCircuit();
+                setTemplateInfo('Load a template to compare expected algorithm behavior against the live trace.');
+            });
+
+            document.getElementById('templateSelect').addEventListener('change', (e) => {
+                const tmpl = CIRCUIT_TEMPLATES[e.target.value];
+                if (!tmpl) {
+                    setTemplateInfo('Load a template to compare expected algorithm behavior against the live trace.');
+                    return;
+                }
+                setTemplateInfo(`${tmpl.name}\n${tmpl.expected}`);
+            });
+        });
+
+        function setupGatePalette() {
+            document.querySelectorAll('.gate-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.gate-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    selectedGate = btn.dataset.gate;
+                    pendingTwoQubit = null;
+                });
+            });
+        }
+
+        function setTemplateInfo(text, tone = '') {
+            const info = document.getElementById('templateInfo');
+            if (!info) return;
+            info.textContent = text;
+            info.className = tone ? `template-info ${tone}` : 'template-info';
+        }
+
+        function getTemplateById(id) {
+            return id ? CIRCUIT_TEMPLATES[id] || null : null;
+        }
+
+        function detachTemplateContext() {
+            if (!activeTemplateId) return;
+            activeTemplateId = null;
+            const templateSelect = document.getElementById('templateSelect');
+            if (templateSelect) templateSelect.value = '';
+            setTemplateInfo('Custom circuit mode. Select a template again if you want expected-outcome checks.');
+        }
+
+        function loadTemplateCircuit() {
+            const id = document.getElementById('templateSelect')?.value;
+            const template = getTemplateById(id);
+            if (!template) {
+                showMessage('Choose a template first', 'error');
+                return;
+            }
+            applyTemplateCircuit(template);
+        }
+
+        async function loadTemplateAndTrace() {
+            const id = document.getElementById('templateSelect')?.value;
+            const template = getTemplateById(id);
+            if (!template) {
+                showMessage('Choose a template first', 'error');
+                return;
+            }
+            applyTemplateCircuit(template);
+            try {
+                await requestAlgorithmTrace(convertGatesToRequest(), true);
+            } catch (err) {
+                showMessage(`Trace error: ${err.message}`, 'error');
+            }
+        }
+
+        function applyTemplateCircuit(template) {
+            const qubitSelect = document.getElementById('qubitCount');
+            const qubitValue = String(template.qubits);
+            if (qubitSelect && !Array.from(qubitSelect.options).some((o) => o.value === qubitValue)) {
+                const opt = document.createElement('option');
+                opt.value = qubitValue;
+                opt.textContent = `${qubitValue} Qubits`;
+                qubitSelect.appendChild(opt);
+            }
+            if (qubitSelect) qubitSelect.value = qubitValue;
+
+            numQubits = template.qubits;
+            circuitGates = template.gates.map((g) => ({ ...g }));
+            pendingTwoQubit = null;
+            selectedGate = null;
+            activeTemplateId = template.id;
+            document.querySelectorAll('.gate-btn').forEach((b) => b.classList.remove('selected'));
+
+            renderCircuit();
+            clearResults();
+            setTemplateInfo(`${template.name}\n${template.expected}`);
+            showMessage(`Loaded template: ${template.name} (${template.gates.length} gates)`, 'success');
+        }
+
+        function validateTemplateResult(template, executeData) {
+            if (!template?.validator || !Array.isArray(executeData?.probabilities)) return null;
+
+            const probs = executeData.probabilities;
+            const validator = template.validator;
+            const getProb = (bitstring) => {
+                const idx = parseInt(bitstring, 2);
+                return Number.isInteger(idx) && idx >= 0 && idx < probs.length ? Number(probs[idx]) : 0;
+            };
+
+            if (validator.kind === 'target_states') {
+                const keys = Object.keys(validator.states || {});
+                if (keys.length === 0) return null;
+                const tol = Number(validator.tolerance) || 0.1;
+
+                let maxErr = 0;
+                let massOnExpected = 0;
+                keys.forEach((bits) => {
+                    const expected = Number(validator.states[bits]) || 0;
+                    const actual = getProb(bits);
+                    massOnExpected += actual;
+                    maxErr = Math.max(maxErr, Math.abs(actual - expected));
+                });
+                const outsideMass = Math.max(0, 1 - massOnExpected);
+                const pass = maxErr <= tol && outsideMass <= tol * 1.6;
+                return {
+                    pass,
+                    message: `max error ${maxErr.toFixed(3)}, outside mass ${outsideMass.toFixed(3)}`,
+                };
+            }
+
+            if (validator.kind === 'peak_state') {
+                const state = String(validator.state || '');
+                const minProb = Number(validator.minProb) || 0.8;
+                const p = getProb(state);
+                return {
+                    pass: p >= minProb,
+                    message: `P(${state})=${p.toFixed(3)} (target >= ${minProb.toFixed(3)})`,
+                };
+            }
+
+            if (validator.kind === 'near_uniform') {
+                const n = probs.length;
+                if (n <= 0) return null;
+                const target = 1 / n;
+                const tol = Number(validator.tolerance) || 0.05;
+                let maxDev = 0;
+                probs.forEach((p) => {
+                    maxDev = Math.max(maxDev, Math.abs(Number(p) - target));
+                });
+                return {
+                    pass: maxDev <= tol,
+                    message: `max deviation ${maxDev.toFixed(3)} from uniform ${target.toFixed(3)}`,
+                };
+            }
+
+            return null;
+        }
+
+        function updateTemplateValidation(executeData) {
+            const tmpl = getTemplateById(activeTemplateId);
+            if (!tmpl) return null;
+            const result = validateTemplateResult(tmpl, executeData);
+            if (!result) return null;
+
+            setTemplateInfo(
+                `${tmpl.name}\n${tmpl.expected}\nValidation: ${result.pass ? 'PASS' : 'CHECK'} - ${result.message}`,
+                result.pass ? 'pass' : 'warn'
+            );
+            return result;
+        }
+
+        async function initVisualization() {
+            const asciiEl = document.getElementById('asciiViz');
+            const canvasEl = document.getElementById('graphViz');
+            const stageEl = document.getElementById('vizStage');
+            if (!asciiEl || !canvasEl || !stageEl) return;
+
+            vizController = new QuantumVizController({
+                asciiEl,
+                canvasEl,
+                stageEl,
+                modeAsciiBtn: document.getElementById('vizModeAscii'),
+                modeGraphicalBtn: document.getElementById('vizModeGraphical'),
+                pauseBtn: document.getElementById('vizPause'),
+                recenterBtn: document.getElementById('vizRecenter'),
+                statusEl: document.getElementById('vizStatus'),
+                engineTagEl: document.getElementById('vizEngineTag'),
+                modeTagEl: document.getElementById('vizModeTag'),
+            });
+            await vizController.init();
+        }
+
+        async function loadVisualizationEngine(cols, rows) {
+            const pkgJsPath = '/pkg/nqpu_metal.js';
+            const pkgAvailable = await fetch(pkgJsPath, { cache: 'no-store' })
+                .then((r) => r.ok)
+                .catch(() => false);
+
+            try {
+                if (pkgAvailable) {
+                    const mod = await import(pkgJsPath);
+                    if (typeof mod.default === 'function') {
+                        try {
+                            await mod.default('/pkg/nqpu_metal_bg.wasm');
+                        } catch (_err) {
+                            await mod.default();
+                        }
+                    }
+                    if (typeof mod.JsQuantumVizEngine === 'function') {
+                        const engine = new mod.JsQuantumVizEngine(cols, rows);
+                        engine.__engineName = 'Rust/WASM';
+                        return engine;
+                    }
+                }
+            } catch (_err) {
+                // Fallback below.
+            }
+
+            const fallback = new JsFallbackWaveEngine(cols, rows);
+            fallback.__engineName = 'JS Fallback';
+            return fallback;
+        }
+
+        // ---- REWRITTEN QuantumVizController ----
+        class QuantumVizController {
+            constructor(opts) {
+                this.asciiEl = opts.asciiEl;
+                this.canvasEl = opts.canvasEl;
+                this.stageEl = opts.stageEl;
+                this.modeAsciiBtn = opts.modeAsciiBtn;
+                this.modeGraphicalBtn = opts.modeGraphicalBtn;
+                this.pauseBtn = opts.pauseBtn;
+                this.recenterBtn = opts.recenterBtn;
+                this.statusEl = opts.statusEl;
+                this.engineTagEl = opts.engineTagEl;
+                this.modeTagEl = opts.modeTagEl;
+
+                this.ctx = null;
+                this.engine = null;
+                this.mode = 'ascii';
+                this.running = true;
+                this.lastTs = 0;
+
+                // Trace playback
+                this.traceFrames = [];
+                this.traceCursor = 0;
+                this.tracePlaybackMs = 400;
+                this.traceLastAdvanceTs = 0;
+
+                // Quantum state display (for graphical mode)
+                this.displayWidth = 0;
+                this.displayHeight = 0;
+                this.numDisplayStates = 0;
+                this.displayProbs = [];
+                this.targetProbs = [];
+                this.hasQuantumData = false;
+                this.idleTime = 0;
+
+                // ASCII sizing
+                this.asciiCols = 120;
+                this.asciiRows = 52;
+                this.lastAsciiFrame = '';
+            }
+
+            async init() {
+                this.engine = await loadVisualizationEngine(this.asciiCols, this.asciiRows);
+                this.engineTagEl.textContent = `Engine: ${this.engine.__engineName}`;
+
+                this.ctx = this.canvasEl.getContext('2d', { alpha: false });
+                this.resizeCanvas();
+
+                this.bindControls();
+                this.setMode('ascii');
+                requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            resizeCanvas() {
+                const rect = this.stageEl.getBoundingClientRect();
+                const dpr = window.devicePixelRatio || 1;
+                const w = Math.max(200, Math.floor(rect.width));
+                const h = Math.max(200, Math.floor(rect.height));
+                this.canvasEl.width = w * dpr;
+                this.canvasEl.height = h * dpr;
+                this.canvasEl.style.width = w + 'px';
+                this.canvasEl.style.height = h + 'px';
+                this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                this.displayWidth = w;
+                this.displayHeight = h;
+            }
+
+            resizeAscii() {
+                const rect = this.stageEl.getBoundingClientRect();
+                const w = Math.max(200, rect.width);
+                const h = Math.max(200, rect.height);
+                const colSize = w / (this.asciiCols * 0.602);
+                const rowSize = h / (this.asciiRows * 1.18);
+                const fontSize = Math.max(5, Math.min(16, Math.min(colSize, rowSize)));
+                this.asciiEl.style.fontSize = fontSize.toFixed(2) + 'px';
+            }
+
+            bindControls() {
+                this.modeAsciiBtn?.addEventListener('click', () => this.setMode('ascii'));
+                this.modeGraphicalBtn?.addEventListener('click', () => this.setMode('graphical'));
+
+                this.pauseBtn?.addEventListener('click', () => {
+                    this.running = !this.running;
+                    this.pauseBtn.textContent = this.running ? 'Pause' : 'Resume';
+                    if (this.running) {
+                        this.lastTs = 0;
+                        requestAnimationFrame((ts) => this.loop(ts));
+                    }
+                });
+
+                this.recenterBtn?.addEventListener('click', () => {
+                    this.engine.pointer_click?.(0.5, 0.55, 9.0);
+                    this.engine.inject_quantum_pulse?.(8.0);
+                });
+
+                const toNorm = (evt) => {
+                    const rect = this.stageEl.getBoundingClientRect();
+                    return {
+                        x: Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width)),
+                        y: Math.max(0, Math.min(1, (evt.clientY - rect.top) / rect.height)),
+                    };
+                };
+
+                this.stageEl.addEventListener('pointermove', (evt) => {
+                    const { x, y } = toNorm(evt);
+                    this.engine.set_pointer?.(x, y, true);
+                });
+
+                this.stageEl.addEventListener('pointerleave', () => this.engine.pointer_leave?.());
+
+                this.stageEl.addEventListener('pointerdown', (evt) => {
+                    const { x, y } = toNorm(evt);
+                    this.engine.pointer_click?.(x, y, 8.0);
+                });
+
+                this.stageEl.addEventListener('touchmove', (evt) => {
+                    evt.preventDefault();
+                    if (!evt.touches[0]) return;
+                    const { x, y } = toNorm(evt.touches[0]);
+                    this.engine.set_pointer?.(x, y, true);
+                }, { passive: false });
+
+                this.stageEl.addEventListener('touchend', () => this.engine.pointer_leave?.());
+
+                window.addEventListener('resize', () => {
+                    if (this.mode === 'graphical') this.resizeCanvas();
+                    else this.resizeAscii();
+                });
+            }
+
+            setMode(mode) {
+                this.mode = mode === 'graphical' ? 'graphical' : 'ascii';
+                this.asciiEl.classList.toggle('viz-hidden', this.mode !== 'ascii');
+                this.canvasEl.classList.toggle('viz-hidden', this.mode !== 'graphical');
+                this.modeTagEl.textContent = `Mode: ${this.mode === 'ascii' ? 'ASCII' : 'State View'}`;
+                this.modeAsciiBtn?.classList.toggle('active', this.mode === 'ascii');
+                this.modeGraphicalBtn?.classList.toggle('active', this.mode === 'graphical');
+                if (this.mode === 'graphical') this.resizeCanvas();
+                else this.resizeAscii();
+            }
+
+            pushQuantumDistribution(probabilities) {
+                if (!probabilities || probabilities.length === 0) return;
+
+                // Update target probabilities for graphical display
+                this.numDisplayStates = probabilities.length;
+                this.targetProbs = probabilities.map((p, i) => ({ prob: p, phase: 0 }));
+                if (this.displayProbs.length !== probabilities.length) {
+                    this.displayProbs = probabilities.map((p, i) => ({ prob: 0, phase: 0 }));
+                }
+                this.hasQuantumData = true;
+
+                // Also pulse the wave engine for ASCII mode
+                let maxProb = 0;
+                let entropy = 0;
+                const dimLog = Math.log2(probabilities.length);
+                probabilities.forEach((p) => {
+                    if (p > maxProb) maxProb = p;
+                    if (p > 1e-12) entropy += -p * Math.log2(p);
+                });
+                const entropyNorm = dimLog > 0 ? entropy / dimLog : 0;
+                const strength = Math.min(12, Math.max(2.0, 2.2 + maxProb * 6.5 + (1 - entropyNorm) * 4.5));
+                const topStates = probabilities
+                    .map((p, i) => ({ p, i }))
+                    .filter(({ p }) => p > 1e-4)
+                    .sort((a, b) => b.p - a.p)
+                    .slice(0, 8);
+                const normMax = Math.max(maxProb, 1e-6);
+                topStates.forEach(({ p, i }, rank) => {
+                    const x = (i + 0.5) / probabilities.length;
+                    const band = rank / Math.max(1, topStates.length - 1);
+                    const y = Math.max(0.1, Math.min(0.9, 0.2 + (1 - (p / normMax)) * 0.6 + (band - 0.5) * 0.14));
+                    const s = Math.min(12, Math.max(2.0, strength * (0.55 + (p / normMax) * 0.65)));
+                    this.engine.pointer_click?.(x, y, s);
+                });
+                this.engine.inject_quantum_pulse?.(strength);
+                this.statusEl.textContent = `Quantum state: maxP=${maxProb.toFixed(3)}, entropy=${entropyNorm.toFixed(3)}`;
+            }
+
+            pulseCircuit(gates, qubitCount) {
+                if (!Array.isArray(gates) || gates.length === 0) return;
+                const total = Math.min(gates.length, 28);
+                const denom = Math.max(1, qubitCount - 1);
+                for (let idx = 0; idx < total; idx++) {
+                    const g = gates[idx];
+                    const x = (idx + 1) / (total + 1);
+                    const target = Number.isFinite(Number(g.target)) ? Number(g.target) : 0;
+                    const yTarget = 0.15 + (Math.max(0, Math.min(denom, target)) / denom) * 0.7;
+                    this.engine.pointer_click?.(x, yTarget, 2.6);
+                    if (g.type === 'cnot' || g.type === 'cx' || g.type === 'cz') {
+                        const control = Number.isFinite(Number(g.control)) ? Number(g.control) : target;
+                        const yControl = 0.15 + (Math.max(0, Math.min(denom, control)) / denom) * 0.7;
+                        this.engine.pointer_click?.(x, yControl, 2.2);
+                    } else if (g.type === 'swap') {
+                        const q0 = Number.isFinite(Number(g.q0)) ? Number(g.q0) : target;
+                        const q1 = Number.isFinite(Number(g.q1)) ? Number(g.q1) : q0;
+                        this.engine.pointer_click?.(x, 0.15 + (Math.max(0, Math.min(denom, q0)) / denom) * 0.7, 2.0);
+                        this.engine.pointer_click?.(x, 0.15 + (Math.max(0, Math.min(denom, q1)) / denom) * 0.7, 2.0);
+                    }
+                }
+                this.engine.inject_quantum_pulse?.(Math.min(11.5, 3 + Math.log2(gates.length + 1) * 2.2));
+            }
+
+            loadAlgorithmTrace(traceData) {
+                if (!traceData || !Array.isArray(traceData.steps) || traceData.steps.length === 0) {
+                    this.traceFrames = [];
+                    this.traceCursor = 0;
+                    return;
+                }
+                this.traceFrames = traceData.steps;
+                this.traceCursor = 0;
+                this.traceLastAdvanceTs = 0;
+                this._applyTraceFrame(0);
+                if (this.mode !== 'graphical') this.setMode('graphical');
+            }
+
+            _applyTraceFrame(idx) {
+                if (!this.traceFrames.length) return;
+                const frame = this.traceFrames[idx];
+                if (!frame) return;
+
+                const dim = Math.max(1, 2 ** numQubits);
+                const top = Array.isArray(frame.top_states) ? frame.top_states : [];
+
+                // Build target probabilities from trace frame
+                const newTargets = new Array(dim).fill(null).map(() => ({ prob: 0, phase: 0 }));
+                top.forEach((s) => {
+                    const index = Number(s.index) || 0;
+                    if (index >= 0 && index < dim) {
+                        newTargets[index] = { prob: Number(s.prob) || 0, phase: Number(s.phase) || 0 };
+                    }
+                });
+
+                this.numDisplayStates = dim;
+                this.targetProbs = newTargets;
+                if (this.displayProbs.length !== dim) {
+                    this.displayProbs = new Array(dim).fill(null).map(() => ({ prob: 0, phase: 0 }));
+                }
+                this.hasQuantumData = true;
+
+                // Also pulse wave engine for ASCII
+                const maxProb = Math.max(1e-6, Number(frame.max_probability) || 0);
+                top.forEach((s, rank) => {
+                    const p = Number(s.prob) || 0;
+                    if (p <= 0) return;
+                    const index = Number(s.index) || 0;
+                    const weight = Number(s.weight) || 0;
+                    const xBase = (index + 0.5) / dim;
+                    const yBase = 0.16 + (weight / Math.max(1, numQubits)) * 0.68;
+                    const norm = p / maxProb;
+                    this.engine.pointer_click?.(xBase, yBase, Math.max(1.8, Math.min(11.5, 2.5 + norm * 7.0)));
+                });
+
+                const ent = Number(frame.state_entropy) || 0;
+                const em = Number(frame.entanglement_mean) || 0;
+                const label = frame.gate_label || frame.gate_type || 'step';
+                this.statusEl.textContent = `Step ${frame.step}: ${label} | H=${ent.toFixed(3)} | E=${em.toFixed(3)}`;
+            }
+
+            _advanceTrace(ts) {
+                if (!this.traceFrames.length) return;
+                if (this.traceLastAdvanceTs === 0) { this.traceLastAdvanceTs = ts; return; }
+                if (ts - this.traceLastAdvanceTs < this.tracePlaybackMs) return;
+                this.traceLastAdvanceTs = ts;
+                this.traceCursor = (this.traceCursor + 1) % this.traceFrames.length;
+                this._applyTraceFrame(this.traceCursor);
+            }
+
+            _drawQuantumState() {
+                const ctx = this.ctx;
+                const w = this.displayWidth;
+                const h = this.displayHeight;
+
+                // Lerp display toward target
+                for (let i = 0; i < this.displayProbs.length; i++) {
+                    const t = this.targetProbs[i] || { prob: 0, phase: 0 };
+                    this.displayProbs[i].prob += (t.prob - this.displayProbs[i].prob) * 0.1;
+                    let dp = t.phase - this.displayProbs[i].phase;
+                    if (dp > Math.PI) dp -= 2 * Math.PI;
+                    if (dp < -Math.PI) dp += 2 * Math.PI;
+                    this.displayProbs[i].phase += dp * 0.1;
+                }
+
+                // Background
+                ctx.fillStyle = '#0a0d14';
+                ctx.fillRect(0, 0, w, h);
+
+                const margin = { left: 48, right: 20, top: 40, bottom: 44 };
+                const plotW = w - margin.left - margin.right;
+                const plotH = h - margin.top - margin.bottom;
+                const n = this.displayProbs.length;
+                if (n === 0) return;
+
+                // Grid lines
+                ctx.strokeStyle = '#1a1f2e';
+                ctx.lineWidth = 0.5;
+                ctx.font = '10px -apple-system, sans-serif';
+                ctx.textAlign = 'right';
+                for (let i = 0; i <= 4; i++) {
+                    const frac = i / 4;
+                    const y = margin.top + plotH * (1 - frac);
+                    ctx.beginPath();
+                    ctx.moveTo(margin.left, y);
+                    ctx.lineTo(w - margin.right, y);
+                    ctx.stroke();
+                    ctx.fillStyle = '#3f4756';
+                    ctx.fillText((frac * 100).toFixed(0) + '%', margin.left - 6, y + 3);
+                }
+
+                // Bars
+                const maxBars = Math.min(n, 64);
+                const barW = Math.max(3, Math.min(48, (plotW / maxBars) * 0.72));
+                const totalBarSpace = barW * maxBars;
+                const gapTotal = plotW - totalBarSpace;
+                const gap = gapTotal / (maxBars + 1);
+
+                // Sort by probability to decide which to show if too many
+                let indices = [];
+                for (let i = 0; i < n; i++) indices.push(i);
+                if (n > maxBars) {
+                    indices.sort((a, b) => (this.displayProbs[b]?.prob || 0) - (this.displayProbs[a]?.prob || 0));
+                    indices = indices.slice(0, maxBars);
+                    indices.sort((a, b) => a - b);
+                }
+
+                for (let j = 0; j < indices.length; j++) {
+                    const i = indices[j];
+                    const d = this.displayProbs[i];
+                    if (!d) continue;
+                    const prob = d.prob;
+                    const phase = d.phase;
+
+                    const barH = Math.max(0, prob * plotH);
+                    const x = margin.left + gap + j * (barW + gap);
+                    const y = margin.top + plotH - barH;
+
+                    const hue = ((phase / Math.PI) * 180 + 360) % 360;
+
+                    if (prob >= 0.0005) {
+                        // Glow
+                        ctx.save();
+                        ctx.shadowBlur = Math.max(4, prob * 20);
+                        ctx.shadowColor = `hsla(${hue}, 80%, 55%, ${Math.min(0.5, prob * 0.8)})`;
+
+                        // Bar gradient
+                        const grad = ctx.createLinearGradient(x, y, x, margin.top + plotH);
+                        grad.addColorStop(0, `hsla(${hue}, 82%, 62%, 0.95)`);
+                        grad.addColorStop(0.7, `hsla(${hue}, 70%, 40%, 0.7)`);
+                        grad.addColorStop(1, `hsla(${hue}, 60%, 25%, 0.4)`);
+                        ctx.fillStyle = grad;
+
+                        // Draw bar with rounded top
+                        if (barH > 4) {
+                            const r = Math.min(3, barW / 2);
+                            ctx.beginPath();
+                            ctx.moveTo(x, margin.top + plotH);
+                            ctx.lineTo(x, y + r);
+                            ctx.arcTo(x, y, x + r, y, r);
+                            ctx.arcTo(x + barW, y, x + barW, y + r, r);
+                            ctx.lineTo(x + barW, margin.top + plotH);
+                            ctx.closePath();
+                            ctx.fill();
+                        } else if (barH > 0.5) {
+                            ctx.fillRect(x, y, barW, barH);
+                        }
+                        ctx.restore();
+
+                        // Probability text above bar
+                        if (prob >= 0.01 && barW >= 12) {
+                            ctx.fillStyle = '#e2e8f0';
+                            ctx.font = `${Math.min(11, Math.max(8, barW * 0.28))}px monospace`;
+                            ctx.textAlign = 'center';
+                            ctx.fillText((prob * 100).toFixed(1) + '%', x + barW / 2, y - 5);
+                        }
+                    }
+
+                    // State label
+                    const bits = numQubits || Math.ceil(Math.log2(Math.max(2, n)));
+                    const label = '|' + i.toString(2).padStart(bits, '0') + '\u27E9';
+                    ctx.fillStyle = prob >= 0.01 ? '#94a3b8' : '#2a3242';
+                    ctx.font = `${Math.min(11, Math.max(7, barW * 0.26))}px monospace`;
+                    ctx.textAlign = 'center';
+                    ctx.fillText(label, x + barW / 2, margin.top + plotH + 14);
+                }
+
+                // Title
+                ctx.fillStyle = '#64748b';
+                ctx.font = '11px -apple-system, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('Probability Amplitudes', margin.left, 20);
+
+                // Trace step info overlay
+                if (this.traceFrames.length > 0) {
+                    const frame = this.traceFrames[this.traceCursor];
+                    if (frame) {
+                        const boxW = 200;
+                        const boxH = 56;
+                        const bx = w - margin.right - boxW;
+                        const by = 8;
+                        ctx.fillStyle = 'rgba(15, 17, 23, 0.85)';
+                        ctx.strokeStyle = '#1e293b';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.roundRect(bx, by, boxW, boxH, 6);
+                        ctx.fill();
+                        ctx.stroke();
+
+                        ctx.fillStyle = '#e2e8f0';
+                        ctx.font = '12px -apple-system, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillText(`Step ${(frame.step || 0) + 1} / ${this.traceFrames.length}`, bx + 10, by + 18);
+                        ctx.fillStyle = '#22d3ee';
+                        ctx.fillText(frame.gate_label || frame.gate_type || '', bx + 10, by + 34);
+                        ctx.fillStyle = '#64748b';
+                        ctx.font = '10px monospace';
+                        const ent = (Number(frame.state_entropy) || 0).toFixed(3);
+                        const em = (Number(frame.entanglement_mean) || 0).toFixed(3);
+                        ctx.fillText(`H=${ent}  E=${em}`, bx + 10, by + 48);
+                    }
+                }
+
+                // Phase legend
+                const legendX = margin.left;
+                const legendY = margin.top + plotH + 30;
+                ctx.fillStyle = '#3f4756';
+                ctx.font = '9px -apple-system, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('Phase:', legendX, legendY);
+                const phases = [0, Math.PI/2, Math.PI, 3*Math.PI/2];
+                const phaseLabels = ['0', '\u03C0/2', '\u03C0', '3\u03C0/2'];
+                phases.forEach((p, i) => {
+                    const px = legendX + 40 + i * 52;
+                    const hue = ((p / Math.PI) * 180 + 360) % 360;
+                    ctx.fillStyle = `hsl(${hue}, 80%, 58%)`;
+                    ctx.fillRect(px, legendY - 7, 10, 10);
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText(phaseLabels[i], px + 14, legendY);
+                });
+            }
+
+            _drawIdleState() {
+                const ctx = this.ctx;
+                const w = this.displayWidth;
+                const h = this.displayHeight;
+                this.idleTime += 0.016;
+
+                ctx.fillStyle = '#0a0d14';
+                ctx.fillRect(0, 0, w, h);
+
+                // Subtle floating grid dots
+                const gridSize = 40;
+                for (let gx = gridSize; gx < w; gx += gridSize) {
+                    for (let gy = gridSize; gy < h; gy += gridSize) {
+                        const drift = Math.sin(this.idleTime * 0.3 + gx * 0.01 + gy * 0.013) * 3;
+                        const alpha = 0.08 + Math.sin(this.idleTime * 0.5 + gx * 0.02 - gy * 0.01) * 0.04;
+                        ctx.fillStyle = `rgba(34, 211, 238, ${Math.max(0.02, alpha)})`;
+                        ctx.beginPath();
+                        ctx.arc(gx + drift, gy + drift * 0.7, 1.2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+
+                // Center text
+                ctx.fillStyle = '#2a3242';
+                ctx.font = '14px -apple-system, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('Build a circuit and press Execute to visualize quantum state', w / 2, h / 2);
+            }
+
+            loop(ts) {
+                if (!this.running) return;
+                const dt = this.lastTs > 0 ? Math.min(0.05, (ts - this.lastTs) / 1000) : 0.016;
+                this.lastTs = ts;
+
+                this._advanceTrace(ts);
+
+                if (this.mode === 'ascii') {
+                    // ASCII mode uses the wave engine
+                    this.engine.tick?.(dt);
+                    const frame = this.engine.ascii_frame?.() || '';
+                    if (frame !== this.lastAsciiFrame) {
+                        this.lastAsciiFrame = frame;
+                        this.asciiEl.textContent = frame;
+                    }
+                } else {
+                    // Graphical mode renders quantum state at full resolution
+                    if (this.hasQuantumData) {
+                        this._drawQuantumState();
+                    } else {
+                        this._drawIdleState();
+                    }
+                }
+
+                requestAnimationFrame((nextTs) => this.loop(nextTs));
+            }
+        }
+
+        // ---- JsFallbackWaveEngine (PRESERVED EXACTLY) ----
+        class JsFallbackWaveEngine {
+            constructor(cols, rows) {
+                this.cols = cols;
+                this.rows = rows;
+                this.time = 0;
+                this.dye = new Float32Array(cols * rows);
+                this.dyeNext = new Float32Array(cols * rows);
+                this.rgba = new Uint8ClampedArray(cols * rows * 4);
+                this.ascii = '';
+                this.pointer = { x: -1, y: -1, lx: -1, ly: -1, vx: 0, vy: 0, active: false };
+                this.ripples = [];
+                this.wake = [];
+                this.rippleCooldown = 0;
+            }
+
+            resize(cols, rows) {
+                this.cols = Math.max(32, Math.min(240, Math.floor(cols)));
+                this.rows = Math.max(20, Math.min(140, Math.floor(rows)));
+                this.time = 0;
+                this.dye = new Float32Array(this.cols * this.rows);
+                this.dyeNext = new Float32Array(this.cols * this.rows);
+                this.rgba = new Uint8ClampedArray(this.cols * this.rows * 4);
+                this.ascii = '';
+                this.pointer = { x: -1, y: -1, lx: -1, ly: -1, vx: 0, vy: 0, active: false };
+                this.ripples = [];
+                this.wake = [];
+                this.rippleCooldown = 0;
+            }
+
+            idx(x, y) { return y * this.cols + x; }
+
+            set_pointer(xNorm, yNorm, active) {
+                if (!active) {
+                    this.pointer_leave();
+                    return;
+                }
+                const x = xNorm * (this.cols - 1);
+                const y = yNorm * (this.rows - 1);
+                if (this.pointer.lx >= 0) {
+                    this.pointer.vx = x - this.pointer.lx;
+                    this.pointer.vy = y - this.pointer.ly;
+                }
+                this.pointer.active = true;
+                this.pointer.x = x;
+                this.pointer.y = y;
+                this.pointer.lx = x;
+                this.pointer.ly = y;
+
+                const speed = Math.hypot(this.pointer.vx, this.pointer.vy);
+                this.paintDye(x, y, clamp(speed * 0.24, 0.25, 0.9));
+                if (this.rippleCooldown <= 0 && speed > 0.04) {
+                    this.ripples.push({ cx: x, cy: y, birth: this.time, strength: clamp(speed * 1.4, 2, 5) });
+                    if (this.ripples.length > 48) this.ripples.splice(0, this.ripples.length - 48);
+                    this.rippleCooldown = 0.04;
+                }
+            }
+
+            pointer_leave() {
+                this.pointer.active = false;
+                this.pointer.x = -1;
+                this.pointer.y = -1;
+                this.pointer.lx = -1;
+                this.pointer.ly = -1;
+            }
+
+            pointer_click(xNorm, yNorm, strength) {
+                const x = xNorm * (this.cols - 1);
+                const y = yNorm * (this.rows - 1);
+                this.paintDye(x, y, 0.9);
+                this.ripples.push({ cx: x, cy: y, birth: this.time, strength: clamp(strength, 1, 12) });
+                if (this.ripples.length > 48) this.ripples.splice(0, this.ripples.length - 48);
+            }
+
+            inject_quantum_pulse(strength) {
+                this.pointer_click(0.5, 0.55, clamp(strength, 0.5, 8));
+            }
+
+            tick(dt) {
+                const frameDt = clamp(dt, 0.001, 0.05);
+                this.time += frameDt * 1.3;
+                this.rippleCooldown = Math.max(0, this.rippleCooldown - frameDt);
+
+                this.updateDye();
+                if (this.pointer.active) {
+                    this.paintDye(this.pointer.x, this.pointer.y, 0.14);
+                    this.wake.push({ x: this.pointer.x, y: this.pointer.y, t: this.time });
+                }
+                if (this.wake.length > 24) this.wake.splice(0, this.wake.length - 24);
+                this.wake = this.wake.filter((w) => (this.time - w.t) <= 2.0);
+                this.ripples = this.ripples.filter((r) => (this.time - r.birth) <= 4.0);
+
+                this.render();
+            }
+
+            updateDye() {
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        let sum = 0;
+                        let count = 0;
+                        if (x > 0) { sum += this.dye[this.idx(x - 1, y)]; count++; }
+                        if (x + 1 < this.cols) { sum += this.dye[this.idx(x + 1, y)]; count++; }
+                        if (y > 0) { sum += this.dye[this.idx(x, y - 1)]; count++; }
+                        if (y + 1 < this.rows) { sum += this.dye[this.idx(x, y + 1)]; count++; }
+                        const i = this.idx(x, y);
+                        const avg = count > 0 ? sum / count : 0;
+                        this.dyeNext[i] = (this.dye[i] * 0.96 + avg * 0.04) * 0.985;
+                    }
+                }
+                const tmp = this.dye;
+                this.dye = this.dyeNext;
+                this.dyeNext = tmp;
+            }
+
+            paintDye(gx, gy, strength) {
+                const radius = 4;
+                const x0 = Math.max(0, Math.floor(gx - radius));
+                const y0 = Math.max(0, Math.floor(gy - radius));
+                const x1 = Math.min(this.cols - 1, Math.ceil(gx + radius));
+                const y1 = Math.min(this.rows - 1, Math.ceil(gy + radius));
+                for (let y = y0; y <= y1; y++) {
+                    for (let x = x0; x <= x1; x++) {
+                        const dx = x - gx;
+                        const dy = (y - gy) * 1.8;
+                        const fall = Math.exp(-(dx * dx + dy * dy) * 0.15) * strength;
+                        const i = this.idx(x, y);
+                        this.dye[i] = Math.min(1, this.dye[i] + fall);
+                    }
+                }
+            }
+
+            waveHeight(x, y) {
+                const t = this.time;
+                const cx = Math.sin(t * 0.018) * 0.7 + Math.sin(t * 0.042) * 0.35;
+                const cy = Math.sin(t * 0.025 + 1.3) * 0.6 + Math.sin(t * 0.035 + 2.7) * 0.3;
+                const dx = x + cx * t * 0.35;
+                const dy = y + cy * t * 0.35;
+                const depth = y / this.rows;
+                let v = 0;
+                v += Math.sin(dy * 0.038 - t * 0.10 + x * 0.010) * 1.6;
+                v += Math.sin(dy * 0.065 + t * 0.075 - x * 0.014) * 1.1;
+                v += Math.sin(dx * 0.035 - t * 0.12 + y * 0.020) * 1.3;
+                v += Math.sin(dx * 0.07 + t * 0.16 - y * 0.030) * 0.85;
+                v += Math.sin((dx * 0.6 + dy * 0.8) * 0.042 - t * 0.13) * 0.7;
+                return v * (0.45 + depth * 0.75);
+            }
+
+            rippleAt(x, y) {
+                let v = 0;
+                for (const r of this.ripples) {
+                    const age = this.time - r.birth;
+                    const dx = x - r.cx;
+                    const dy = (y - r.cy) * 2;
+                    const d2 = dx * dx + dy * dy;
+                    const maxR = age * 10 + 8;
+                    if (d2 > maxR * maxR) continue;
+                    const dist = Math.sqrt(d2);
+                    const splash = Math.exp(-dist * dist / ((1 + age * 3) ** 2)) * Math.exp(-age * 3) * r.strength * 1.5;
+                    const ring = Math.exp(-Math.abs(dist - age * 10) * 0.5) * Math.sin(dist * 0.6 - age * 4) * Math.exp(-age * 0.8) * r.strength;
+                    v += splash + ring;
+                }
+                return v;
+            }
+
+            wakeAt(x, y) {
+                let v = 0;
+                for (const w of this.wake) {
+                    const age = this.time - w.t;
+                    if (age > 2) continue;
+                    const dx = x - w.x;
+                    const dy = (y - w.y) * 2;
+                    const d2 = dx * dx + dy * dy;
+                    if (d2 > 80) continue;
+                    v -= Math.exp(-d2 * 0.12) * (1 - age * 0.5) * 1.8;
+                }
+                return v;
+            }
+
+            pointerDent(x, y) {
+                if (!this.pointer.active || this.pointer.x < 0) return 0;
+                const dx = x - this.pointer.x;
+                const dy = (y - this.pointer.y) * 2;
+                const d2 = dx * dx + dy * dy;
+                if (d2 > 100) return 0;
+                return -Math.exp(-d2 * 0.18) * 3 + Math.exp(-((Math.sqrt(d2) - 3) ** 2) * 0.15) * 1.5;
+            }
+
+            render() {
+                const chars = " .,-~:;=+*#^";
+                let out = '';
+                for (let y = 0; y < this.rows; y++) {
+                    for (let x = 0; x < this.cols; x++) {
+                        let wave = this.waveHeight(x, y);
+                        const rip = this.rippleAt(x, y);
+                        const wake = this.wakeAt(x, y);
+                        wave += rip * 2 + wake + this.pointerDent(x, y);
+                        const intensity = clamp(wave * 0.5 + 0.5, 0, 1);
+                        const bright = clamp(intensity * intensity * 1.35 + intensity * 0.18, 0, 1.8);
+                        const dye = this.dye[this.idx(x, y)];
+
+                        let r, b;
+                        if (dye < 0.5) {
+                            const t = dye / 0.5;
+                            r = t * 0.6;
+                            b = 1 - t * 0.15;
+                        } else {
+                            const t = (dye - 0.5) / 0.5;
+                            r = 0.6 + t * 0.4;
+                            b = 0.85 - t * 0.7;
+                        }
+
+                        const p = this.idx(x, y) * 4;
+                        this.rgba[p] = clamp(Math.round(r * bright * 170), 0, 255);
+                        this.rgba[p + 1] = 0;
+                        this.rgba[p + 2] = clamp(Math.round(b * bright * 170), 0, 255);
+                        this.rgba[p + 3] = 255;
+
+                        const ci = Math.min(chars.length - 1, Math.floor(clamp(intensity, 0, 0.999) * chars.length));
+                        out += chars[ci];
+                    }
+                    out += '\n';
+                }
+                this.ascii = out;
+            }
+
+            ascii_frame() { return this.ascii; }
+            rgba_frame() { return this.rgba; }
+        }
+
+        function clamp(v, minV, maxV) {
+            return Math.max(minV, Math.min(maxV, v));
+        }
+
+        function renderCircuit() {
+            const wires = document.getElementById('qubitWires');
+            if (!wires) return;
+            wires.innerHTML = '';
+
+            for (let i = 0; i < numQubits; i++) {
+                const wire = document.createElement('div');
+                wire.className = 'qubit-wire';
+
+                const label = document.createElement('div');
+                label.className = 'qubit-label';
+                label.textContent = `q[${i}]`;
+
+                const wireLine = document.createElement('div');
+                wireLine.className = 'wire';
+
+                const gatesContainer = document.createElement('div');
+                gatesContainer.className = 'gates-container';
+                gatesContainer.dataset.qubit = i;
+                gatesContainer.addEventListener('click', () => placeGate(i));
+
+                wire.appendChild(label);
+                wire.appendChild(wireLine);
+                wire.appendChild(gatesContainer);
+                wires.appendChild(wire);
+            }
+
+            // Render existing gates
+            circuitGates.forEach((gate, idx) => {
+                renderGate(gate, idx);
+            });
+        }
+
+        function renderGate(gate, index) {
+            const containers = document.querySelectorAll('.gates-container');
+            if (!containers.length) return;
+
+            if (gate.type === 'cnot' || gate.type === 'cx' || gate.type === 'cz') {
+                const control = Number.isInteger(gate.control) ? gate.control : -1;
+                const target = Number.isInteger(gate.target) ? gate.target : -1;
+                if (control < 0 || target < 0 || control === target) return;
+                if (!containers[control] || !containers[target]) return;
+
+                const controlEl = document.createElement('div');
+                controlEl.className = 'circuit-gate';
+                controlEl.textContent = '\u25CF';
+                controlEl.style.left = `${index * 50 + 10}px`;
+                controlEl.style.top = '6px';
+                controlEl.style.background = '#1e293b';
+                controlEl.onclick = (e) => { e.stopPropagation(); removeGate(index); };
+
+                const targetEl = document.createElement('div');
+                targetEl.className = 'circuit-gate';
+                targetEl.textContent = (gate.type === 'cnot' || gate.type === 'cx') ? '\u2295' : 'Z';
+                targetEl.style.left = `${index * 50 + 10}px`;
+                targetEl.style.top = '6px';
+                targetEl.style.background = '#1e293b';
+                targetEl.onclick = (e) => { e.stopPropagation(); removeGate(index); };
+
+                containers[control].appendChild(controlEl);
+                containers[target].appendChild(targetEl);
+            } else if (gate.type === 'swap') {
+                const q0 = Number.isInteger(gate.q0) ? gate.q0 : Number.isInteger(gate.control) ? gate.control : -1;
+                const q1 = Number.isInteger(gate.q1) ? gate.q1 : Number.isInteger(gate.target) ? gate.target : -1;
+                if (q0 < 0 || q1 < 0 || q0 === q1) return;
+                if (!containers[q0] || !containers[q1]) return;
+
+                const q0El = document.createElement('div');
+                q0El.className = 'circuit-gate';
+                q0El.textContent = '\u00D7';
+                q0El.style.left = `${index * 50 + 10}px`;
+                q0El.style.top = '6px';
+                q0El.style.background = '#1e293b';
+                q0El.onclick = (e) => { e.stopPropagation(); removeGate(index); };
+
+                const q1El = document.createElement('div');
+                q1El.className = 'circuit-gate';
+                q1El.textContent = '\u00D7';
+                q1El.style.left = `${index * 50 + 10}px`;
+                q1El.style.top = '6px';
+                q1El.style.background = '#1e293b';
+                q1El.onclick = (e) => { e.stopPropagation(); removeGate(index); };
+
+                containers[q0].appendChild(q0El);
+                containers[q1].appendChild(q1El);
+            } else {
+                // Single-qubit gate
+                const el = document.createElement('div');
+                el.className = 'circuit-gate';
+                el.textContent = gate.type.toUpperCase();
+                el.style.left = `${index * 50 + 10}px`;
+                el.style.top = '6px';
+                el.onclick = (e) => { e.stopPropagation(); removeGate(index); };
+
+                if (containers[gate.target]) {
+                    containers[gate.target].appendChild(el);
+                }
+            }
+        }
+
+        function placeGate(qubit) {
+            if (!selectedGate) {
+                showMessage('Select a gate from the palette first', 'error');
+                return;
+            }
+            detachTemplateContext();
+
+            if (selectedGate === 'cnot' || selectedGate === 'cz' || selectedGate === 'swap') {
+                if (!pendingTwoQubit || pendingTwoQubit.type !== selectedGate) {
+                    pendingTwoQubit = { type: selectedGate, firstQubit: qubit };
+                    const role = selectedGate === 'swap' ? 'first SWAP qubit' : 'control qubit';
+                    showMessage(`Selected q[${qubit}] as ${role}. Click the second qubit.`, 'success');
+                    return;
+                }
+
+                if (pendingTwoQubit.firstQubit === qubit) {
+                    showMessage('Choose a different qubit for the second endpoint', 'error');
+                    return;
+                }
+
+                if (selectedGate === 'swap') {
+                    circuitGates.push({
+                        type: 'swap',
+                        q0: pendingTwoQubit.firstQubit,
+                        q1: qubit,
+                    });
+                } else {
+                    circuitGates.push({
+                        type: selectedGate,
+                        control: pendingTwoQubit.firstQubit,
+                        target: qubit,
+                    });
+                }
+                pendingTwoQubit = null;
+            } else {
+                const gate = { type: selectedGate, target: qubit };
+                circuitGates.push(gate);
+            }
+
+            vizController?.pulseCircuit?.([circuitGates[circuitGates.length - 1]], numQubits);
+            renderCircuit();
+            showMessage('', '');
+        }
+
+        function removeGate(index) {
+            detachTemplateContext();
+            circuitGates.splice(index, 1);
+            renderCircuit();
+        }
+
+        function clearCircuit() {
+            circuitGates = [];
+            gateColumn = 0;
+            pendingTwoQubit = null;
+            activeTemplateId = null;
+            const templateSelect = document.getElementById('templateSelect');
+            if (templateSelect) templateSelect.value = '';
+            renderCircuit();
+            clearResults();
+            setTemplateInfo('Load a template to compare expected algorithm behavior against the live trace.');
+            showMessage('Circuit cleared', 'success');
+        }
+
+        async function postJson(url, payload) {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            let data = {};
+            try {
+                data = await response.json();
+            } catch (_err) {
+                // Keep a stable error shape below.
+            }
+            if (!response.ok) {
+                const msg = (data && typeof data.error === 'string')
+                    ? data.error
+                    : `Request failed (${response.status})`;
+                throw new Error(msg);
+            }
+            return data;
+        }
+
+        function formatMs(ms) {
+            const n = Number(ms);
+            return Number.isFinite(n) ? `${n.toFixed(3)}ms` : '-';
+        }
+
+        function clampQubitIndex(q) {
+            const n = Number(q);
+            if (!Number.isFinite(n)) return 0;
+            return Math.max(0, Math.min(numQubits - 1, Math.floor(n)));
+        }
+
+        function showMessage(msg, type) {
+            const el = document.getElementById('circuitMessage');
+            el.textContent = msg;
+            el.className = type;
+        }
+
+        function clearResults() {
+            document.getElementById('probChart').innerHTML = '';
+            document.getElementById('statTime').textContent = '-';
+            document.getElementById('statBackend').textContent = '-';
+            document.getElementById('statGates').textContent = '-';
+            document.getElementById('statFidelity').textContent = '-';
+        }
+
+        async function executeCircuit() {
+            if (circuitGates.length === 0) {
+                showMessage('Add gates to the circuit first', 'error');
+                return;
+            }
+
+            const backend = document.getElementById('backend').value;
+            const gates = convertGatesToRequest();
+            vizController?.pulseCircuit?.(gates, numQubits);
+
+            try {
+                const data = await postJson('/api/circuit/execute', {
+                    num_qubits: numQubits,
+                    gates: gates,
+                    backend: backend
+                });
+                displayResults(data);
+                const gateCount = Number.isFinite(Number(data.num_gates)) ? Number(data.num_gates) : gates.length;
+                const templateValidation = updateTemplateValidation(data);
+                if (templateValidation) {
+                    const label = templateValidation.pass ? 'Template PASS' : 'Template CHECK';
+                    showMessage(
+                        `Executed ${gateCount} gates in ${formatMs(data.time_ms)} | ${label}: ${templateValidation.message}`,
+                        templateValidation.pass ? 'success' : 'error'
+                    );
+                } else {
+                    showMessage(`Executed ${gateCount} gates in ${formatMs(data.time_ms)}`, 'success');
+                }
+                requestAlgorithmTrace(gates, false).catch((err) => {
+                    if (vizController?.statusEl) {
+                        vizController.statusEl.textContent = `Trace unavailable: ${err.message}`;
+                    }
+                });
+            } catch (err) {
+                showMessage(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        async function modelTrace() {
+            if (circuitGates.length === 0) {
+                showMessage('Add gates to the circuit first', 'error');
+                return;
+            }
+            const gates = convertGatesToRequest();
+            try {
+                await requestAlgorithmTrace(gates, true);
+            } catch (err) {
+                showMessage(`Trace error: ${err.message}`, 'error');
+            }
+        }
+
+        async function requestAlgorithmTrace(gates, showUserMessage) {
+            const data = await postJson('/api/circuit/trace', {
+                num_qubits: numQubits,
+                gates,
+                max_steps: 160,
+                top_k: 24,
+            });
+
+            vizController?.loadAlgorithmTrace?.(data);
+            if (showUserMessage) {
+                const trunc = data.truncated ? ' (truncated)' : '';
+                showMessage(
+                    `Loaded algorithm trace: ${data.executed_steps} steps in ${formatMs(data.time_ms)}${trunc}`,
+                    'success'
+                );
+            }
+            return data;
+        }
+
+        function convertGatesToRequest() {
+            const normalizePair = (a, b) => {
+                const first = clampQubitIndex(a);
+                let second = Number.isFinite(Number(b)) ? clampQubitIndex(b) : (first + 1) % Math.max(numQubits, 1);
+                if (second === first && numQubits > 1) {
+                    second = (first + 1) % numQubits;
+                }
+                return [first, second];
+            };
+
+            return circuitGates.map(g => {
+                switch (g.type) {
+                    case 'h': return { type: 'h', target: g.target };
+                    case 'x': return { type: 'x', target: g.target };
+                    case 'y': return { type: 'y', target: g.target };
+                    case 'z': return { type: 'z', target: g.target };
+                    case 's': return { type: 's', target: g.target };
+                    case 't': return { type: 't', target: g.target };
+                    case 'rx': return { type: 'rx', target: g.target, angle: Number.isFinite(Number(g.angle)) ? Number(g.angle) : Math.PI / 4 };
+                    case 'ry': return { type: 'ry', target: g.target, angle: Number.isFinite(Number(g.angle)) ? Number(g.angle) : Math.PI / 4 };
+                    case 'rz': return { type: 'rz', target: g.target, angle: Number.isFinite(Number(g.angle)) ? Number(g.angle) : Math.PI / 4 };
+                    case 'cnot':
+                    case 'cx': {
+                        const [control, target] = normalizePair(g.control, g.target);
+                        return { type: 'cnot', control, target };
+                    }
+                    case 'cz': {
+                        const [control, target] = normalizePair(g.control, g.target);
+                        return { type: 'cz', control, target };
+                    }
+                    case 'swap': {
+                        const [q0, q1] = normalizePair(g.q0 ?? g.control, g.q1 ?? g.target);
+                        return { type: 'swap', q0, q1 };
+                    }
+                    default: return { type: 'h', target: 0 };
+                }
+            });
+        }
+
+        function displayResults(data) {
+            const probs = Array.isArray(data.probabilities) ? data.probabilities : [];
+            const fidelity = Number(data.fidelity);
+            document.getElementById('statTime').textContent = formatMs(data.time_ms);
+            document.getElementById('statBackend').textContent = data.backend_used || '-';
+            document.getElementById('statGates').textContent = Number.isFinite(Number(data.num_gates)) ? data.num_gates : '-';
+            document.getElementById('statFidelity').textContent = Number.isFinite(fidelity) ? fidelity.toFixed(8) : '-';
+
+            const chart = document.getElementById('probChart');
+            chart.innerHTML = '<h3>Probabilities</h3>';
+
+            // Show top 10 probabilities
+            const sorted = probs.map((p, i) => ({ p, i: i.toString(2).padStart(numQubits, '0') }))
+                .sort((a, b) => b.p - a.p)
+                .slice(0, 10);
+
+            sorted.forEach(({ p, i }) => {
+                if (p > 0.001) {
+                    const bar = document.createElement('div');
+                    bar.className = 'prob-bar';
+                    bar.innerHTML = `
+                        <div class="prob-label">${i}</div>
+                        <div class="prob-bar-fill">
+                            <div class="prob-fill" style="width: ${p * 100}%"></div>
+                            <div class="prob-value">${(p * 100).toFixed(2)}%</div>
+                        </div>
+                    `;
+                    chart.appendChild(bar);
+                }
+            });
+
+            vizController?.pushQuantumDistribution?.(probs);
+        }
+
+        async function sampleCircuit() {
+            if (circuitGates.length === 0) {
+                showMessage('Add gates to the circuit first', 'error');
+                return;
+            }
+
+            const gates = convertGatesToRequest();
+
+            try {
+                const data = await postJson('/api/circuit/sample', {
+                    num_qubits: numQubits,
+                    gates: gates,
+                    shots: 1000
+                });
+                displaySampleResults(data);
+                const shots = Number.isFinite(Number(data.shots)) ? data.shots : 1000;
+                showMessage(`Sampled ${shots} shots in ${formatMs(data.time_ms)}`, 'success');
+            } catch (err) {
+                showMessage(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        function displaySampleResults(data) {
+            const shots = Number.isFinite(Number(data.shots)) ? Number(data.shots) : 1;
+            document.getElementById('statTime').textContent = formatMs(data.time_ms);
+            document.getElementById('statBackend').textContent = data.backend_used || '-';
+            document.getElementById('statGates').textContent = '-';
+            document.getElementById('statFidelity').textContent = '-';
+
+            const chart = document.getElementById('probChart');
+            chart.innerHTML = '<h3>Measurement Outcomes</h3>';
+
+            const outcomes = (data && typeof data.outcomes === 'object' && data.outcomes !== null) ? data.outcomes : {};
+            const sorted = Object.entries(outcomes)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10);
+
+            sorted.forEach(([state, count]) => {
+                const prob = count / shots;
+                const bar = document.createElement('div');
+                bar.className = 'prob-bar';
+                bar.innerHTML = `
+                    <div class="prob-label">${state}</div>
+                    <div class="prob-bar-fill">
+                        <div class="prob-fill" style="width: ${prob * 100}%"></div>
+                        <div class="prob-value">${count}</div>
+                    </div>
+                `;
+                chart.appendChild(bar);
+            });
+
+            const probs = Object.values(outcomes).map((count) => count / shots);
+            vizController?.pushQuantumDistribution?.(probs);
+        }
+
+        async function analyzeCircuit() {
+            const gates = convertGatesToRequest();
+
+            try {
+                const data = await postJson('/api/circuit/analyze', {
+                    num_qubits: numQubits,
+                    gates: gates
+                });
+                showMessage(`Analysis: ${data.gate_count} gates, depth ${data.depth}, ${data.is_clifford ? 'Clifford' : 'non-Clifford'}. Recommended: ${data.recommended_backend}`, 'success');
+            } catch (err) {
+                showMessage(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        function showQasmModal() {
+            document.getElementById('qasmModal').classList.add('active');
+        }
+
+        function closeQasmModal() {
+            document.getElementById('qasmModal').classList.remove('active');
+            document.getElementById('qasmMessage').innerHTML = '';
+        }
+
+        async function importQasm() {
+            const qasm = document.getElementById('qasmTextarea').value;
+
+            try {
+                const data = await postJson('/api/qasm/parse', { qasm });
+                circuitGates = [];
+                data.gates.forEach(g => {
+                    if (g.type === 'h') circuitGates.push({ type: 'h', target: g.target });
+                    else if (g.type === 'x') circuitGates.push({ type: 'x', target: g.target });
+                    else if (g.type === 'cnot') circuitGates.push({ type: 'cnot', control: g.control, target: g.target });
+                    // Add more as needed
+                });
+                numQubits = data.num_qubits;
+                document.getElementById('qubitCount').value = numQubits;
+                pendingTwoQubit = null;
+                renderCircuit();
+                closeQasmModal();
+                showMessage(`Imported ${data.gates.length} gates`, 'success');
+            } catch (err) {
+                document.getElementById('qasmMessage').innerHTML = `<div class="error">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function exportQasm() {
+            const gates = convertGatesToRequest();
+
+            try {
+                const data = await postJson('/api/qasm/export', {
+                    num_qubits: numQubits,
+                    gates: gates
+                });
+                document.getElementById('qasmTextarea').value = data.qasm;
+                document.getElementById('qasmMessage').innerHTML = '<div class="success">QASM exported - you can now copy it</div>';
+            } catch (err) {
+                document.getElementById('qasmMessage').innerHTML = `<div class="error">Error: ${err.message}</div>`;
+            }
+        }
+
+        async function loadBenchmark() {
+            try {
+                const data = await postJson('/api/benchmark/run', {});
+                displayBenchmarkResults(data);
+                const totalMs = Number(data.total_time_ms);
+                const totalLabel = Number.isFinite(totalMs) ? `${totalMs.toFixed(1)}ms` : '-';
+                showMessage(`Benchmark completed in ${totalLabel}`, 'success');
+            } catch (err) {
+                showMessage(`Error: ${err.message}`, 'error');
+            }
+        }
+
+        function displayBenchmarkResults(data) {
+            const chart = document.getElementById('probChart');
+            chart.innerHTML = '<h3>Benchmark Results</h3>';
+
+            data.results.forEach(r => {
+                const cpuMs = Number(r.cpu_ms);
+                const fusedMs = Number(r.fused_ms);
+                const speedup = Number(r.speedup);
+                const row = document.createElement('div');
+                row.style.padding = '4px 0';
+                row.style.borderBottom = '1px solid #162032';
+                row.style.fontSize = '11px';
+                row.innerHTML = `
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: #e2e8f0;">${r.name}</span>
+                        <span style="color: #22d3ee; font-family: monospace;">CPU: ${Number.isFinite(cpuMs) ? cpuMs.toFixed(2) : '-'}ms | Fused: ${Number.isFinite(fusedMs) ? fusedMs.toFixed(2) : '-'}ms (${Number.isFinite(speedup) ? speedup.toFixed(2) : '-'}x)</span>
+                    </div>
+                `;
+                chart.appendChild(row);
+            });
+        }
+
+        // Keyboard Escape handler
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                selectedGate = null;
+                pendingTwoQubit = null;
+                document.querySelectorAll('.gate-btn').forEach(b => b.classList.remove('selected'));
+            }
+        });
+    </script>
+</body>
+</html>
