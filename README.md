@@ -1,4 +1,4 @@
-# nQPU - Neuromorphic Quantum Processing Unit
+# nQPU - Neural Quantum Processing Unit
 
 <div align="center">
 
