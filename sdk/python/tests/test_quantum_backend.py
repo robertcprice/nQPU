@@ -1,7 +1,7 @@
 """
 Tests for Quantum Backend with PennyLane Integration
 
-Run with: pytest test_quantum_backend.py -v
+Run with: pytest sdk/python/tests/test_quantum_backend.py -v
 
 Tests include:
 1. H2 molecule VQE ground state energy (should be ~-1.1 Ha)
@@ -14,7 +14,7 @@ import pytest
 import numpy as np
 
 # Import module
-from quantum_backend import (
+from nqpu.core import (
     HAS_PENNYLANE,
     VQEMolecule,
     QuantumFingerprint,

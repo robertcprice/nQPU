@@ -470,7 +470,11 @@ class VQEMolecule:
                 return qml.expval(H)
 
         # Initialize parameters
-        params = np.random.uniform(0, 2*np.pi, num_params)
+        raw_params = np.random.uniform(0, 2 * np.pi, num_params)
+        if pnp is not None:
+            params = pnp.array(raw_params, requires_grad=True)
+        else:
+            params = raw_params
 
         # Select optimizer
         if optimizer == 'Adam':
@@ -694,7 +698,7 @@ class QuantumFingerprint:
             # SWAP test circuit (works on hardware)
             # Need 2n+1 qubits: n for state1, n for state2, 1 auxiliary
             total_wires = 2 * self.num_qubits + 1
-            dev_swap = qml.device(self.backend, wires=total_wires, shots=1024)
+            dev_swap = qml.device(self.backend, wires=total_wires)
 
             @qml.qnode(dev_swap)
             def swap_circuit():
@@ -717,6 +721,8 @@ class QuantumFingerprint:
                 qml.Hadamard(wires=aux_wire)
 
                 return qml.expval(qml.PauliZ(aux_wire))
+
+            swap_circuit = qml.set_shots(swap_circuit, shots=1024)
 
             # Fidelity from SWAP test: F = (1 + <Z>) / 2
             z_expectation = swap_circuit()

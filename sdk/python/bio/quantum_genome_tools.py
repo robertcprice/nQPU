@@ -16,8 +16,8 @@ from dataclasses import dataclass, field
 import random
 from collections import defaultdict
 
-from dna_rna_organism import DNA, Gene
-from quantum_organism import QuantumDNA
+from chem.dna_rna_organism import DNA, Gene
+from bio.quantum_organism import QuantumDNA
 
 
 # ============================================================================

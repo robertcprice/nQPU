@@ -24,11 +24,11 @@ import numpy as np
 import random
 
 # Import our classical DNA/RNA module
-from dna_rna_organism import DNA, RNA, Protein, Organism, Gene, OrganismType, CODON_TABLE
+from chem.dna_rna_organism import DNA, RNA, Protein, Organism, Gene, OrganismType, CODON_TABLE
 
 # Try to import quantum backend
 try:
-    from quantum_backend import (
+    from core.quantum_backend import (
         QuantumKernel, QuantumFingerprint,
         check_quantum_backend, HAS_PENNYLANE
     )

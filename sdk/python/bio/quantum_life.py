@@ -31,8 +31,8 @@ from collections import defaultdict
 import colorsys
 
 # Import our quantum DNA
-from quantum_organism import QuantumDNA
-from dna_rna_organism import DNA, Protein, CODON_TABLE
+from bio.quantum_organism import QuantumDNA
+from chem.dna_rna_organism import DNA, Protein, CODON_TABLE
 
 
 # ============================================================================
