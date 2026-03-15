@@ -76,7 +76,10 @@ fn run_batching_verification() {
         match benchmark_fixed_gpu_gates_batched(num_qubits, num_gates) {
             Ok(time) => {
                 let us_per_gate = time * 1e6 / num_gates as f64;
-                println!("  n={:2}: {:.6}s total ({:.3} μs/gate)", num_qubits, time, us_per_gate);
+                println!(
+                    "  n={:2}: {:.6}s total ({:.3} μs/gate)",
+                    num_qubits, time, us_per_gate
+                );
             }
             Err(e) => println!("  n={:2}: Error - {}", num_qubits, e),
         }
@@ -139,11 +142,14 @@ fn run_cpu_gpu_comparison() {
             println!("    CPU:  {:.6}s ({:.3} μs/gate)", cpu_elapsed, cpu_us);
             println!("    GPU:  {:.6}s ({:.3} μs/gate)", gpu_time, gpu_us);
             println!();
-            println!("    🏆 Winner: {}", if speedup > 1.0 {
-                format!("GPU by {:.1}× ✅", speedup)
-            } else {
-                format!("CPU by {:.1}× ⚠️", 1.0 / speedup)
-            });
+            println!(
+                "    🏆 Winner: {}",
+                if speedup > 1.0 {
+                    format!("GPU by {:.1}× ✅", speedup)
+                } else {
+                    format!("CPU by {:.1}× ⚠️", 1.0 / speedup)
+                }
+            );
             println!();
         }
         Err(e) => println!("  GPU error: {}", e),
@@ -163,7 +169,10 @@ fn run_ultra_large_scale() {
         let memory_mb = (state_size * 16) / (1024 * 1024);
         let memory_gb = memory_mb as f64 / 1024.0;
 
-        println!("  Testing n={} qubits ({} states, {:.2} GB)...", num_qubits, state_size, memory_gb);
+        println!(
+            "  Testing n={} qubits ({} states, {:.2} GB)...",
+            num_qubits, state_size, memory_gb
+        );
 
         match benchmark_fixed_gpu_large_scale(num_qubits, num_gates) {
             Ok(time) => {

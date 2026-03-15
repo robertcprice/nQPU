@@ -357,6 +357,9 @@ same refinement controls used by adaptive phase-diagram sweeps, so scans can
 insert new parameter points around strong cusp-strength gradients, target
 crossings in candidate times, or other DQPT summary traces while remaining
 checkpointable and resumable after grid expansion.
+`ModelQPU.adaptive_dqpt_diagnostics(...)` does the same thing in time, refining
+the Loschmidt/DQPT time grid around sharp return-rate features before a
+parameter scan is even necessary.
 
 ### Drug Discovery
 

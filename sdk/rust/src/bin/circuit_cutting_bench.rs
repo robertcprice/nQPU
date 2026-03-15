@@ -17,7 +17,13 @@ enum CircuitPattern {
 
 fn arg_value(args: &[String], key: &str, default: &str) -> String {
     args.windows(2)
-        .find_map(|w| if w[0] == key { Some(w[1].clone()) } else { None })
+        .find_map(|w| {
+            if w[0] == key {
+                Some(w[1].clone())
+            } else {
+                None
+            }
+        })
         .unwrap_or_else(|| default.to_string())
 }
 
@@ -160,9 +166,21 @@ fn main() {
     } else {
         full_time_s / iters as f64
     };
-    let gate_avg = if iters == 0 { 0.0 } else { gate_time_s / iters as f64 };
-    let wire_avg = if iters == 0 { 0.0 } else { wire_time_s / iters as f64 };
-    let gate_vs_wire = if wire_avg > 0.0 { gate_avg / wire_avg } else { 0.0 };
+    let gate_avg = if iters == 0 {
+        0.0
+    } else {
+        gate_time_s / iters as f64
+    };
+    let wire_avg = if iters == 0 {
+        0.0
+    } else {
+        wire_time_s / iters as f64
+    };
+    let gate_vs_wire = if wire_avg > 0.0 {
+        gate_avg / wire_avg
+    } else {
+        0.0
+    };
     let full_vs_wire = if !skip_full && wire_avg > 0.0 {
         full_avg / wire_avg
     } else {

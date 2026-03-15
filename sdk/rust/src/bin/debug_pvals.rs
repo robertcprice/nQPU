@@ -2,31 +2,47 @@ use std::fs::File;
 use std::io::Read;
 
 fn gamma_ln(x: f64) -> f64 {
-    if x <= 0.0 { return f64::INFINITY; }
+    if x <= 0.0 {
+        return f64::INFINITY;
+    }
     if (x - x.round()).abs() < 1e-10 && x <= 171.0 {
         let n = x.round() as i64;
         if n >= 1 && n <= 171 {
             let mut fact: f64 = 1.0;
-            for i in 2..n { fact *= i as f64; }
+            for i in 2..n {
+                fact *= i as f64;
+            }
             return fact.ln();
         }
     }
     let g = 7;
     let c: [f64; 9] = [
-        0.99999999999980993, 676.5203681218851, -1259.1392167224028,
-        771.32342877765313, -176.61502916214059, 12.507343278686905,
-        -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7,
+        0.99999999999980993,
+        676.5203681218851,
+        -1259.1392167224028,
+        771.32342877765313,
+        -176.61502916214059,
+        12.507343278686905,
+        -0.13857109526572012,
+        9.9843695780195716e-6,
+        1.5056327351493116e-7,
     ];
     let z = x - 1.0;
     let mut sum = c[0];
-    for i in 1..g + 2 { sum += c[i] / (z + i as f64); }
+    for i in 1..g + 2 {
+        sum += c[i] / (z + i as f64);
+    }
     let t = z + g as f64 + 0.5;
     0.9189385332046727 + (t + 0.5).ln() * (z + 0.5) - t + sum.ln()
 }
 
 fn igamc(a: f64, x: f64) -> f64 {
-    if x < 0.0 || a <= 0.0 { return 0.0; }
-    if x == 0.0 { return 1.0; }
+    if x < 0.0 || a <= 0.0 {
+        return 0.0;
+    }
+    if x == 0.0 {
+        return 1.0;
+    }
     if x < a + 1.0 {
         let max_iterations = 500;
         let eps = 1e-14_f64;
@@ -35,7 +51,9 @@ fn igamc(a: f64, x: f64) -> f64 {
         for n in 1..max_iterations {
             term *= x / (a + n as f64);
             sum += term;
-            if term.abs() < eps * sum.abs() { break; }
+            if term.abs() < eps * sum.abs() {
+                break;
+            }
         }
         let log_gamma_a = gamma_ln(a);
         let log_p = a * x.ln() - x - log_gamma_a + sum.ln();
@@ -52,13 +70,19 @@ fn igamc(a: f64, x: f64) -> f64 {
             let an = -i as f64 * (i as f64 - a);
             b += 2.0;
             d = an * d + b;
-            if d.abs() < fpmin { d = fpmin; }
+            if d.abs() < fpmin {
+                d = fpmin;
+            }
             c = b + an / c;
-            if c.abs() < fpmin { c = fpmin; }
+            if c.abs() < fpmin {
+                c = fpmin;
+            }
             d = 1.0 / d;
             let del = d * c;
             h *= del;
-            if (del - 1.0).abs() < eps { break; }
+            if (del - 1.0).abs() < eps {
+                break;
+            }
         }
         let log_gamma_a = gamma_ln(a);
         let log_q = -x + a * x.ln() + h.ln() - log_gamma_a;
@@ -71,7 +95,8 @@ fn main() {
     let mut bytes = vec![0u8; 100_000];
     file.read_exact(&mut bytes).unwrap();
 
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -82,7 +107,10 @@ fn main() {
     let template: Vec<u8> = vec![1; m];
 
     println!("Overlapping Template Test:");
-    println!("  m = {}, block_size = {}, num_blocks = {}", m, block_size, num_blocks);
+    println!(
+        "  m = {}, block_size = {}, num_blocks = {}",
+        m, block_size, num_blocks
+    );
 
     let mut counts = Vec::new();
     for i in 0..num_blocks {
@@ -113,15 +141,22 @@ fn main() {
     let mut factorial = 1.0;
 
     for u in 0..(k - 1) {
-        if u > 0 { factorial *= u as f64; }
+        if u > 0 {
+            factorial *= u as f64;
+        }
         pi[u] = eta.powi(u as i32) * exp_neg_eta / factorial;
     }
-    let sum_pi: f64 = pi[..k-1].iter().sum();
+    let sum_pi: f64 = pi[..k - 1].iter().sum();
     pi[k - 1] = 1.0 - sum_pi;
 
     println!("\n  Theoretical probabilities (Poisson):");
     for i in 0..k {
-        println!("    π[{}] = {:.6} (expected {} blocks)", i, pi[i], (pi[i] * num_blocks as f64) as i64);
+        println!(
+            "    π[{}] = {:.6} (expected {} blocks)",
+            i,
+            pi[i],
+            (pi[i] * num_blocks as f64) as i64
+        );
     }
 
     // Chi-squared
@@ -132,8 +167,13 @@ fn main() {
         if expected > 0.0 {
             chi_sq += (observed - expected).powi(2) / expected;
         }
-        println!("    i={}: observed={}, expected={:.1}, contribution={:.4}", 
-                 i, observed, expected, (observed - expected).powi(2) / expected);
+        println!(
+            "    i={}: observed={}, expected={:.1}, contribution={:.4}",
+            i,
+            observed,
+            expected,
+            (observed - expected).powi(2) / expected
+        );
     }
 
     let df = (k - 1) as f64;

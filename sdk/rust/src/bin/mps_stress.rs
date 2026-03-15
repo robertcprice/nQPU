@@ -2,9 +2,9 @@ use std::env;
 use std::time::Instant;
 
 use nqpu_metal::adaptive_mps::{AdaptiveConfig, AdaptiveMPS};
-use nqpu_metal::tensor_network::MPSSimulator;
 #[cfg(all(feature = "metal", target_os = "macos"))]
 use nqpu_metal::metal_mps::MetalMPSimulator;
+use nqpu_metal::tensor_network::MPSSimulator;
 
 fn apply_layers_mps(sim: &mut MPSSimulator, qubits: usize, layers: usize) {
     // Initial superposition
@@ -67,7 +67,11 @@ fn apply_layers_adaptive(sim: &mut AdaptiveMPS, qubits: usize, layers: usize) {
 }
 
 #[cfg(all(feature = "metal", target_os = "macos"))]
-fn apply_layers_metal(sim: &mut MetalMPSimulator, qubits: usize, layers: usize) -> Result<(), String> {
+fn apply_layers_metal(
+    sim: &mut MetalMPSimulator,
+    qubits: usize,
+    layers: usize,
+) -> Result<(), String> {
     for q in 0..qubits {
         sim.h(q)?;
     }

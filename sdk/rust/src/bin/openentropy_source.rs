@@ -23,9 +23,9 @@
 //!   (thermal noise from electron motion), only Bell inequality tests can
 //!   CERTIFY quantum randomness - and those require entangled photon pairs.
 
-use std::process::Command;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 
 const SAMPLES: usize = 50000;
@@ -47,12 +47,11 @@ fn main() {
     println!();
 
     // Check if OpenEntropy is available
-    let openentropy_path = std::env::var("OPENENTROPY_BIN").unwrap_or_else(|_| "openentropy".to_string());
+    let openentropy_path =
+        std::env::var("OPENENTROPY_BIN").unwrap_or_else(|_| "openentropy".to_string());
 
     println!("Checking OpenEntropy availability...");
-    let check = Command::new(&openentropy_path)
-        .arg("--version")
-        .output();
+    let check = Command::new(&openentropy_path).arg("--version").output();
 
     if check.is_err() {
         println!("❌ OpenEntropy not found at: {}", &openentropy_path);
@@ -76,9 +75,12 @@ fn main() {
     let output = Command::new(&openentropy_path)
         .args([
             "stream",
-            "--format", "raw",
-            "--bytes", &format!("{}", SAMPLES / 8),  // Convert bits to bytes
-            "--conditioning", conditioning,
+            "--format",
+            "raw",
+            "--bytes",
+            &format!("{}", SAMPLES / 8), // Convert bits to bytes
+            "--conditioning",
+            conditioning,
         ])
         .output()
         .expect("Failed to run OpenEntropy");
@@ -87,10 +89,14 @@ fn main() {
     let bytes = output.stdout;
 
     println!("Collected {} bytes in {:?}", bytes.len(), elapsed);
-    println!("Throughput: {:.1} KB/s", bytes.len() as f64 / elapsed.as_secs_f64() / 1024.0);
+    println!(
+        "Throughput: {:.1} KB/s",
+        bytes.len() as f64 / elapsed.as_secs_f64() / 1024.0
+    );
 
     // Convert to bits for analysis
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -111,7 +117,7 @@ fn main() {
     let n = bits.len();
     let p = ones as f64 / n as f64;
     let shannon = if p > 0.0 && p < 1.0 {
-        -(p * p.log2() + (1.0-p) * (1.0-p).log2())
+        -(p * p.log2() + (1.0 - p) * (1.0 - p).log2())
     } else {
         0.0
     };
@@ -159,12 +165,19 @@ fn main() {
         println!();
         println!("   SHA-256 is a DETERMINISTIC cryptographic function.");
         println!("   It makes ANY input (quantum or classical) look uniformly random.");
-        println!("   The {:.1}% score reflects hash quality, not quantumness.", score);
+        println!(
+            "   The {:.1}% score reflects hash quality, not quantumness.",
+            score
+        );
     }
 
     // Save output
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
-    let filename = format!("/tmp/openentropy_{}_{}.bin",
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let filename = format!(
+        "/tmp/openentropy_{}_{}.bin",
         if raw_mode { "raw" } else { "conditioned" },
         timestamp
     );
@@ -194,7 +207,9 @@ fn main() {
 }
 
 fn measure_quantum_score(bits: &[u8]) -> f64 {
-    if bits.is_empty() { return 0.0; }
+    if bits.is_empty() {
+        return 0.0;
+    }
 
     let mut scores = Vec::new();
 
@@ -203,7 +218,7 @@ fn measure_quantum_score(bits: &[u8]) -> f64 {
     let n = bits.len();
     let p = ones as f64 / n as f64;
     if p > 0.0 && p < 1.0 {
-        let entropy = -(p * p.log2() + (1.0-p) * (1.0-p).log2());
+        let entropy = -(p * p.log2() + (1.0 - p) * (1.0 - p).log2());
         scores.push(entropy);
     }
 
@@ -227,7 +242,9 @@ fn measure_quantum_score(bits: &[u8]) -> f64 {
     if bits.len() > 50 {
         let mut runs = 1;
         for i in 1..bits.len() {
-            if bits[i] != bits[i-1] { runs += 1; }
+            if bits[i] != bits[i - 1] {
+                runs += 1;
+            }
         }
         let expected_runs = (bits.len() as f64 + 1.0) / 2.0;
         let runs_score = 1.0 - ((runs as f64 - expected_runs).abs() / expected_runs).min(1.0);
@@ -243,7 +260,8 @@ fn measure_quantum_score(bits: &[u8]) -> f64 {
         }
         let total = transitions.iter().sum::<usize>() as f64;
         let expected = total / 4.0;
-        let chi_sq: f64 = transitions.iter()
+        let chi_sq: f64 = transitions
+            .iter()
             .map(|&c| (c as f64 - expected).powi(2) / expected)
             .sum();
         scores.push(1.0 - (chi_sq / 10.0).min(1.0));
@@ -268,29 +286,41 @@ fn run_mini_nist(bits: &[u8]) {
     let ones = bits.iter().filter(|&&b| b == 1).count();
     let s = (2.0 * ones as f64 - n as f64) / n as f64;
     let p_freq = erfc(s.abs() / 2.0_f64.sqrt());
-    println!("║  Frequency:     p={:.4} {:>6}                              ║",
-        p_freq, if p_freq >= alpha { "✅" } else { "❌" });
+    println!(
+        "║  Frequency:     p={:.4} {:>6}                              ║",
+        p_freq,
+        if p_freq >= alpha { "✅" } else { "❌" }
+    );
 
     // Runs test
     let mut runs = 1;
     for i in 1..bits.len() {
-        if bits[i] != bits[i-1] { runs += 1; }
+        if bits[i] != bits[i - 1] {
+            runs += 1;
+        }
     }
     let expected = (bits.len() as f64 + 1.0) / 2.0;
     let p_runs = erfc(((runs as f64 - expected).abs() - 0.5) / (bits.len() as f64).sqrt());
-    println!("║  Runs:          p={:.4} {:>6}                              ║",
-        p_runs, if p_runs >= alpha { "✅" } else { "❌" });
+    println!(
+        "║  Runs:          p={:.4} {:>6}                              ║",
+        p_runs,
+        if p_runs >= alpha { "✅" } else { "❌" }
+    );
 
     // Serial test (bit pairs)
     let mut pairs = [0usize; 4];
     for i in 0..(bits.len() - 1) {
-        pairs[(bits[i] as usize) << 1 | bits[i+1] as usize] += 1;
+        pairs[(bits[i] as usize) << 1 | bits[i + 1] as usize] += 1;
     }
     let total = pairs.iter().sum::<usize>() as f64;
-    let chi_sq: f64 = pairs.iter()
-        .map(|&c| (c as f64 - total/4.0).powi(2) / (total/4.0))
+    let chi_sq: f64 = pairs
+        .iter()
+        .map(|&c| (c as f64 - total / 4.0).powi(2) / (total / 4.0))
         .sum();
-    println!("║  Serial (pairs): χ²={:.2}                                  ║", chi_sq);
+    println!(
+        "║  Serial (pairs): χ²={:.2}                                  ║",
+        chi_sq
+    );
 
     println!("╚══════════════════════════════════════════════════════════════╝");
 }

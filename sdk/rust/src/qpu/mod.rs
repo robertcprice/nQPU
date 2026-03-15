@@ -58,34 +58,50 @@
 //! # }
 //! ```
 
-pub mod error;
-pub mod job;
+// Shared auth, validation, job, and provider infrastructure.
+#[path = "support/auth.rs"]
 pub mod auth;
+#[path = "support/error.rs"]
+pub mod error;
+#[path = "support/job.rs"]
+pub mod job;
+#[path = "support/provider.rs"]
 pub mod provider;
+#[path = "support/validation.rs"]
 pub mod validation;
+
+// Concrete hardware and cloud-provider integrations.
+#[path = "providers/mock.rs"]
 pub mod mock;
 
 #[cfg(feature = "qpu-ibm")]
+#[path = "providers/ibm.rs"]
 pub mod ibm;
 
 #[cfg(feature = "qpu-braket")]
+#[path = "providers/braket.rs"]
 pub mod braket;
 
 #[cfg(feature = "qpu-azure")]
+#[path = "providers/azure.rs"]
 pub mod azure;
 
 #[cfg(feature = "qpu-ionq")]
+#[path = "providers/ionq.rs"]
 pub mod ionq;
 
 #[cfg(feature = "qpu-google")]
+#[path = "providers/google.rs"]
 pub mod google;
 
 // Re-exports
-pub use error::{QPUError, ValidationError};
-pub use job::{BackendInfo, BackendStatus, CostEstimate, JobConfig, JobResult, JobStatus, ValidationReport};
 pub use auth::AuthConfig;
-pub use provider::{QPUProvider, QPUJob};
+pub use error::{QPUError, ValidationError};
+pub use job::{
+    BackendInfo, BackendStatus, CostEstimate, JobConfig, JobResult, JobStatus, ValidationReport,
+};
 pub use mock::MockProvider;
+pub use provider::{QPUJob, QPUProvider};
 
 #[cfg(feature = "qpu-ibm")]
 pub use ibm::IBMProvider;
@@ -313,7 +329,12 @@ impl QPUCircuit {
         let mut qubit_depth = vec![0usize; self.num_qubits];
         for gate in &self.gates {
             let qs = gate.qubits();
-            let max_depth = qs.iter().filter_map(|&q| qubit_depth.get(q)).max().copied().unwrap_or(0);
+            let max_depth = qs
+                .iter()
+                .filter_map(|&q| qubit_depth.get(q))
+                .max()
+                .copied()
+                .unwrap_or(0);
             for &q in &qs {
                 if q < qubit_depth.len() {
                     qubit_depth[q] = max_depth + 1;
@@ -373,7 +394,10 @@ impl QPUCircuit {
                 // Native gates — decompose to standard gates for QASM 2.0
                 QPUGate::GPI(q, phi) => {
                     // GPI = Rz(-phi) * X * Rz(phi) approximately
-                    qasm.push_str(&format!("u3(3.14159265358979,{},{}) q[{}];\n", phi, -phi, q));
+                    qasm.push_str(&format!(
+                        "u3(3.14159265358979,{},{}) q[{}];\n",
+                        phi, -phi, q
+                    ));
                 }
                 QPUGate::GPI2(q, phi) => {
                     qasm.push_str(&format!(
@@ -461,13 +485,23 @@ impl QPUCircuit {
                         QPUGate::GPI(q, phi) => {
                             qasm.push_str(&format!(
                                 "rz({}) q[{}];\nrx({}) q[{}];\nrz({}) q[{}];\n",
-                                phi, q, std::f64::consts::PI, q, -phi, q
+                                phi,
+                                q,
+                                std::f64::consts::PI,
+                                q,
+                                -phi,
+                                q
                             ));
                         }
                         QPUGate::GPI2(q, phi) => {
                             qasm.push_str(&format!(
                                 "rz({}) q[{}];\nrx({}) q[{}];\nrz({}) q[{}];\n",
-                                phi, q, std::f64::consts::FRAC_PI_2, q, -phi, q
+                                phi,
+                                q,
+                                std::f64::consts::FRAC_PI_2,
+                                q,
+                                -phi,
+                                q
                             ));
                         }
                         QPUGate::MS(a, b, _, _) => {

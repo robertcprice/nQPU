@@ -21,16 +21,29 @@ fn collect_ssd(n: usize) -> Vec<u64> {
 
     // Warm-up
     for _ in 0..50 {
-        if let Ok(mut f) = OpenOptions::new().write(true).create(true).truncate(true).open(test_file) {
+        if let Ok(mut f) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(test_file)
+        {
             let _ = f.write_all(&data);
         }
     }
 
     for _ in 0..n {
         let start = Instant::now();
-        if let Ok(mut f) = OpenOptions::new().write(true).create(true).truncate(false).open(test_file) {
+        if let Ok(mut f) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .open(test_file)
+        {
             let _ = f.write_all(&data);
-            #[cfg(unix)] { let _ = f.sync_all(); }
+            #[cfg(unix)]
+            {
+                let _ = f.sync_all();
+            }
         }
         timings.push(start.elapsed().as_nanos() as u64);
     }
@@ -40,32 +53,48 @@ fn collect_ssd(n: usize) -> Vec<u64> {
 }
 
 fn collect_cpu(n: usize) -> Vec<u64> {
-    (0..n).map(|_| {
-        let start = Instant::now();
-        let mut s: u64 = 0;
-        for j in 0..200 { s = s.wrapping_add(j as u64); }
-        std::hint::black_box(s);
-        start.elapsed().as_nanos() as u64
-    }).collect()
+    (0..n)
+        .map(|_| {
+            let start = Instant::now();
+            let mut s: u64 = 0;
+            for j in 0..200 {
+                s = s.wrapping_add(j as u64);
+            }
+            std::hint::black_box(s);
+            start.elapsed().as_nanos() as u64
+        })
+        .collect()
 }
 
 fn lsb(v: &[u64], n: usize) -> Vec<u8> {
-    v.iter().flat_map(|&x| (0..n).map(move |i| ((x >> i) & 1) as u8)).collect()
+    v.iter()
+        .flat_map(|&x| (0..n).map(move |i| ((x >> i) & 1) as u8))
+        .collect()
 }
 
 fn diff(v: &[u64]) -> Vec<u8> {
-    (1..v.len()).flat_map(|i| {
-        let d = v[i].wrapping_sub(v[i-1]);
-        (4..12).map(move |j| ((d >> j) & 1) as u8)
-    }).collect()
+    (1..v.len())
+        .flat_map(|i| {
+            let d = v[i].wrapping_sub(v[i - 1]);
+            (4..12).map(move |j| ((d >> j) & 1) as u8)
+        })
+        .collect()
 }
 
 fn vn(bits: &[u8]) -> Vec<u8> {
-    bits.chunks(2).filter_map(|c| {
-        if c.len() == 2 {
-            match (c[0], c[1]) { (0, 1) => Some(0), (1, 0) => Some(1), _ => None }
-        } else { None }
-    }).collect()
+    bits.chunks(2)
+        .filter_map(|c| {
+            if c.len() == 2 {
+                match (c[0], c[1]) {
+                    (0, 1) => Some(0),
+                    (1, 0) => Some(1),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
@@ -76,9 +105,13 @@ fn sha256_cond(bits: &[u8]) -> Vec<u8> {
     let mut out = Vec::new();
     for chunk in bits.chunks(512) {
         let mut hasher = DefaultHasher::new();
-        for &b in chunk { b.hash(&mut hasher); }
+        for &b in chunk {
+            b.hash(&mut hasher);
+        }
         let h = hasher.finish();
-        for i in 0..64 { out.push(((h >> i) & 1) as u8); }
+        for i in 0..64 {
+            out.push(((h >> i) & 1) as u8);
+        }
     }
     out
 }
@@ -89,16 +122,31 @@ fn triple_sha256(bits: &[u8]) -> Vec<u8> {
 }
 
 fn test(name: &str, bits: &[u8]) -> usize {
-    if bits.len() < 1000 { return 0; }
+    if bits.len() < 1000 {
+        return 0;
+    }
 
     let suite = NistTestSuite::new();
     let r = suite.run_all_tests(bits);
 
-    let failed: Vec<_> = r.tests.iter().filter(|t| !t.passed).map(|t| t.test_name.as_str()).collect();
+    let failed: Vec<_> = r
+        .tests
+        .iter()
+        .filter(|t| !t.passed)
+        .map(|t| t.test_name.as_str())
+        .collect();
 
-    println!("  {}: {}/15 | ent={:.4} | fails: {:?}",
-        name, r.passed_count, r.min_entropy,
-        if failed.is_empty() { vec!["none"] } else { failed });
+    println!(
+        "  {}: {}/15 | ent={:.4} | fails: {:?}",
+        name,
+        r.passed_count,
+        r.min_entropy,
+        if failed.is_empty() {
+            vec!["none"]
+        } else {
+            failed
+        }
+    );
 
     r.passed_count
 }
@@ -130,41 +178,57 @@ fn main() {
     // Method 1: SSD + triple SHA-256
     let bits = triple_sha256(&ssd_lsb);
     let p = test("SSD→3xSHA256", &bits);
-    if p > best.1 { best = ("SSD→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("SSD→3xSHA256".into(), p);
+    }
 
     // Method 2: SSD + VN + triple SHA-256
     let bits = triple_sha256(&vn(&ssd_lsb));
     let p = test("SSD→VN→3xSHA256", &bits);
-    if p > best.1 { best = ("SSD→VN→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("SSD→VN→3xSHA256".into(), p);
+    }
 
     // Method 3: Diff + triple SHA-256
     let bits = triple_sha256(&ssd_diff);
     let p = test("Diff→3xSHA256", &bits);
-    if p > best.1 { best = ("Diff→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("Diff→3xSHA256".into(), p);
+    }
 
     // Method 4: SSD XOR CPU + triple SHA-256
     let min_len = ssd_lsb.len().min(cpu_lsb.len());
     let xor_bits: Vec<u8> = (0..min_len).map(|i| ssd_lsb[i] ^ cpu_lsb[i]).collect();
     let bits = triple_sha256(&xor_bits);
     let p = test("(SSD⊕CPU)→3xSHA256", &bits);
-    if p > best.1 { best = ("(SSD⊕CPU)→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("(SSD⊕CPU)→3xSHA256".into(), p);
+    }
 
     // Method 5: (SSD XOR CPU) + VN + triple SHA-256
     let bits = triple_sha256(&vn(&xor_bits));
     let p = test("(SSD⊕CPU)→VN→3xSHA256", &bits);
-    if p > best.1 { best = ("(SSD⊕CPU)→VN→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("(SSD⊕CPU)→VN→3xSHA256".into(), p);
+    }
 
     // Method 6: All three sources XOR'd + triple SHA-256
     let min_len = ssd_lsb.len().min(cpu_lsb.len()).min(ssd_diff.len());
-    let triple: Vec<u8> = (0..min_len).map(|i| ssd_lsb[i] ^ cpu_lsb[i] ^ ssd_diff[i]).collect();
+    let triple: Vec<u8> = (0..min_len)
+        .map(|i| ssd_lsb[i] ^ cpu_lsb[i] ^ ssd_diff[i])
+        .collect();
     let bits = triple_sha256(&triple);
     let p = test("(SSD⊕CPU⊕Diff)→3xSHA256", &bits);
-    if p > best.1 { best = ("(SSD⊕CPU⊕Diff)→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("(SSD⊕CPU⊕Diff)→3xSHA256".into(), p);
+    }
 
     // Method 7: Triple XOR + VN + triple SHA-256
     let bits = triple_sha256(&vn(&triple));
     let p = test("(SSD⊕CPU⊕Diff)→VN→3xSHA256", &bits);
-    if p > best.1 { best = ("(SSD⊕CPU⊕Diff)→VN→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("(SSD⊕CPU⊕Diff)→VN→3xSHA256".into(), p);
+    }
 
     // Method 8: Concatenate all sources, then hash
     let mut all_bits = Vec::new();
@@ -173,7 +237,9 @@ fn main() {
     all_bits.extend_from_slice(&ssd_diff[..min_len]);
     let bits = triple_sha256(&all_bits);
     let p = test("Concat→3xSHA256", &bits);
-    if p > best.1 { best = ("Concat→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("Concat→3xSHA256".into(), p);
+    }
 
     // Method 9: Interleaved XOR
     let mut inter = Vec::new();
@@ -184,18 +250,22 @@ fn main() {
     }
     let bits = triple_sha256(&inter);
     let p = test("Interleaved→3xSHA256", &bits);
-    if p > best.1 { best = ("Interleaved→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("Interleaved→3xSHA256".into(), p);
+    }
 
     // Method 10: XOR-folded hash
     let mut xfold = Vec::new();
     for i in (0..ssd_lsb.len()).step_by(2) {
         if i + 1 < ssd_lsb.len() {
-            xfold.push(ssd_lsb[i] ^ ssd_lsb[i+1]);
+            xfold.push(ssd_lsb[i] ^ ssd_lsb[i + 1]);
         }
     }
     let bits = triple_sha256(&xfold);
     let p = test("XOR-fold→3xSHA256", &bits);
-    if p > best.1 { best = ("XOR-fold→3xSHA256".into(), p); }
+    if p > best.1 {
+        best = ("XOR-fold→3xSHA256".into(), p);
+    }
 
     println!();
     println!("╔════════════════════════════════════════════════════════════════════════╗");
@@ -203,10 +273,15 @@ fn main() {
     println!("╠════════════════════════════════════════════════════════════════════════╣");
 
     let pct = best.1 as f64 / 15.0 * 100.0;
-    let rating = if best.1 >= 14 { "🏆 EXCELLENT - Near perfect!" }
-    else if best.1 >= 12 { "✅ GOOD - Above 80%" }
-    else if best.1 >= 10 { "⚠️ ACCEPTABLE - Above 65%" }
-    else { "❌ NEEDS IMPROVEMENT" };
+    let rating = if best.1 >= 14 {
+        "🏆 EXCELLENT - Near perfect!"
+    } else if best.1 >= 12 {
+        "✅ GOOD - Above 80%"
+    } else if best.1 >= 10 {
+        "⚠️ ACCEPTABLE - Above 65%"
+    } else {
+        "❌ NEEDS IMPROVEMENT"
+    };
 
     println!("║  Best Method: {:<53}║", best.0);
     println!("║  NIST Pass: {}/15 ({:.0}%){:>42}║", best.1, pct, "");

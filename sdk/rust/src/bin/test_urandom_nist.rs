@@ -6,9 +6,10 @@ fn main() {
     let mut bytes = vec![0u8; 100_000];
     file.read_exact(&mut bytes).unwrap();
 
-    let bits: Vec<u8> = bytes.iter().flat_map(|&b| {
-        (0..8).map(move |i| ((b >> i) & 1) as u8)
-    }).collect();
+    let bits: Vec<u8> = bytes
+        .iter()
+        .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
+        .collect();
 
     println!("Testing {} bits from /dev/urandom...", bits.len());
 
@@ -17,7 +18,12 @@ fn main() {
 
     println!("\nNIST Results for /dev/urandom:");
     for t in &result.tests {
-        println!("  {} - p={:.4} {}", t.test_name, t.p_value, if t.passed { "✅" } else { "❌" });
+        println!(
+            "  {} - p={:.4} {}",
+            t.test_name,
+            t.p_value,
+            if t.passed { "✅" } else { "❌" }
+        );
     }
 
     println!("\nPassed: {}/{}", result.passed_count, result.tests.len());

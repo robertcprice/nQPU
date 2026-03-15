@@ -40,12 +40,20 @@ fn collect_ssd_desync(n_samples: usize) -> Vec<u64> {
 
     // Warm-up
     for _ in 0..20 {
-        if let Ok(mut file) = OpenOptions::new().write(true).create(true).truncate(true).open(test_file) {
+        if let Ok(mut file) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(test_file)
+        {
             let _ = file.write_all(&data);
         }
     }
 
-    println!("  Collecting {} SSD samples (de-synchronized)...", n_samples);
+    println!(
+        "  Collecting {} SSD samples (de-synchronized)...",
+        n_samples
+    );
 
     for _ in 0..n_samples {
         // Random delay to break periodic patterns
@@ -55,7 +63,12 @@ fn collect_ssd_desync(n_samples: usize) -> Vec<u64> {
         }
 
         let start = Instant::now();
-        if let Ok(mut file) = OpenOptions::new().write(true).create(true).truncate(false).open(test_file) {
+        if let Ok(mut file) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .open(test_file)
+        {
             let _ = file.write_all(&data);
             #[cfg(unix)]
             {
@@ -82,7 +95,10 @@ fn collect_cpu_desync(n_samples: usize) -> Vec<u64> {
         *state
     };
 
-    println!("  Collecting {} CPU jitter samples (de-synchronized)...", n_samples);
+    println!(
+        "  Collecting {} CPU jitter samples (de-synchronized)...",
+        n_samples
+    );
 
     for _ in 0..n_samples {
         let delay_ns = xorshift(&mut rng_state) % 500_000;
@@ -92,7 +108,9 @@ fn collect_cpu_desync(n_samples: usize) -> Vec<u64> {
 
         let start = Instant::now();
         let mut sum: u64 = 0;
-        for j in 0..100 { sum = sum.wrapping_add(j as u64); }
+        for j in 0..100 {
+            sum = sum.wrapping_add(j as u64);
+        }
         std::hint::black_box(sum);
         timings.push(start.elapsed().as_nanos() as u64);
     }
@@ -163,9 +181,13 @@ fn hash_condition(bits: &[u8]) -> Vec<u8> {
 
 /// XOR combine multiple sources
 fn xor_combine(sources: &[&[u8]]) -> Vec<u8> {
-    if sources.is_empty() { return Vec::new(); }
+    if sources.is_empty() {
+        return Vec::new();
+    }
     let min_len = sources.iter().map(|s| s.len()).min().unwrap_or(0);
-    (0..min_len).map(|i| sources.iter().fold(0u8, |acc, s| acc ^ s[i])).collect()
+    (0..min_len)
+        .map(|i| sources.iter().fold(0u8, |acc, s| acc ^ s[i]))
+        .collect()
 }
 
 /// Differential extraction (removes slow drift)
@@ -194,15 +216,24 @@ fn run_nist(name: &str, bits: &[u8]) -> (usize, f64) {
     let suite = NistTestSuite::new();
     let result = suite.run_all_tests(bits);
 
-    let status = if result.passed_count >= 14 { "🏆" }
-    else if result.passed_count >= 12 { "✅" }
-    else if result.passed_count >= 10 { "⚠️" }
-    else { "❌" };
+    let status = if result.passed_count >= 14 {
+        "🏆"
+    } else if result.passed_count >= 12 {
+        "✅"
+    } else if result.passed_count >= 10 {
+        "⚠️"
+    } else {
+        "❌"
+    };
 
-    println!("  {} {}: {}/15 NIST ({:.0}%) min-ent={:.4}",
-        status, name, result.passed_count,
+    println!(
+        "  {} {}: {}/15 NIST ({:.0}%) min-ent={:.4}",
+        status,
+        name,
+        result.passed_count,
         result.passed_count as f64 / 15.0 * 100.0,
-        result.min_entropy);
+        result.min_entropy
+    );
 
     (result.passed_count, result.min_entropy)
 }
@@ -229,7 +260,11 @@ fn main() {
     println!("▶ PHASE 1: DATA COLLECTION ({} samples)", n_samples);
     let ssd = collect_ssd_desync(n_samples);
     let cpu = collect_cpu_desync(n_samples);
-    println!("  ✅ SSD: {} samples, CPU: {} samples", ssd.len(), cpu.len());
+    println!(
+        "  ✅ SSD: {} samples, CPU: {} samples",
+        ssd.len(),
+        cpu.len()
+    );
     println!();
 
     let mut results: Vec<(&str, usize, f64)> = Vec::new();
@@ -301,7 +336,9 @@ fn main() {
     let cpu_bits = extract_middle_bits(&cpu);
     let diff = differential(&ssd);
     let min_len = ssd_bits.len().min(cpu_bits.len()).min(diff.len());
-    bits = (0..min_len).map(|i| ssd_bits[i] ^ cpu_bits[i] ^ diff[i]).collect();
+    bits = (0..min_len)
+        .map(|i| ssd_bits[i] ^ cpu_bits[i] ^ diff[i])
+        .collect();
     let (p, m) = run_nist("Triple XOR raw", &bits);
     results.push(("Triple XOR raw", p, m));
     bits = von_neumann(&bits);
@@ -314,7 +351,9 @@ fn main() {
     let cpu_bits = extract_middle_bits(&cpu);
     let diff = differential(&ssd);
     let min_len = ssd_bits.len().min(cpu_bits.len()).min(diff.len());
-    let triple: Vec<u8> = (0..min_len).map(|i| ssd_bits[i] ^ cpu_bits[i] ^ diff[i]).collect();
+    let triple: Vec<u8> = (0..min_len)
+        .map(|i| ssd_bits[i] ^ cpu_bits[i] ^ diff[i])
+        .collect();
     bits = hash_condition(&triple);
     let (p, m) = run_nist("Triple→Hash", &bits);
     results.push(("Triple→Hash", p, m));
@@ -334,21 +373,33 @@ fn main() {
 
     for (name, pass, min_ent) in &results {
         let pct = *pass as f64 / 15.0 * 100.0;
-        let rating = if *pass >= 15 { "🏆 PERFECT" }
-        else if *pass >= 14 { "✅ EXCELLENT" }
-        else if *pass >= 12 { "⚠️ GOOD" }
-        else if *pass >= 10 { "❌ OK" }
-        else { "💀 POOR" };
+        let rating = if *pass >= 15 {
+            "🏆 PERFECT"
+        } else if *pass >= 14 {
+            "✅ EXCELLENT"
+        } else if *pass >= 12 {
+            "⚠️ GOOD"
+        } else if *pass >= 10 {
+            "❌ OK"
+        } else {
+            "💀 POOR"
+        };
 
-        println!("║ {:<21} │ {:>2}/15 │ {:>5.0}% │ {:>7.4} │ {:<15} ║",
-            name, pass, pct, min_ent, rating);
+        println!(
+            "║ {:<21} │ {:>2}/15 │ {:>5.0}% │ {:>7.4} │ {:<15} ║",
+            name, pass, pct, min_ent, rating
+        );
     }
 
     println!("╚════════════════════════════════════════════════════════════════════╝");
 
     if let Some(best) = results.first() {
-        println!("\n🏆 BEST: {} with {}/15 NIST passes ({:.0}%)",
-            best.0, best.1, best.1 as f64 / 15.0 * 100.0);
+        println!(
+            "\n🏆 BEST: {} with {}/15 NIST passes ({:.0}%)",
+            best.0,
+            best.1,
+            best.1 as f64 / 15.0 * 100.0
+        );
 
         if best.1 >= 14 {
             println!("\n✅ SUCCESS! We achieved near-100% NIST pass rate!");

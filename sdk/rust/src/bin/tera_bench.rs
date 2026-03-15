@@ -10,7 +10,7 @@ use std::time::Instant;
 
 #[cfg(target_os = "macos")]
 use nqpu_metal::metal_state::MetalQuantumState;
-use nqpu_metal::{C64, QuantumState, GateOperations};
+use nqpu_metal::{GateOperations, QuantumState, C64};
 
 fn main() {
     println!("╔═══════════════════════════════════════════════════════════════╗");
@@ -21,7 +21,10 @@ fn main() {
     let qubits = 20;
     let iterations = 100;
 
-    println!("Configuration: {} qubits, {} iterations", qubits, iterations);
+    println!(
+        "Configuration: {} qubits, {} iterations",
+        qubits, iterations
+    );
     println!();
 
     // Benchmark 1: Original CPU state vector
@@ -40,7 +43,11 @@ fn main() {
         GateOperations::u(&mut state_cpu, 1, &h_matrix);
     }
     let cpu_time = start.elapsed();
-    println!("Time: {:.2} ms ({:.3} ms/iter)", cpu_time.as_millis(), cpu_time.as_millis() as f64 / iterations as f64);
+    println!(
+        "Time: {:.2} ms ({:.3} ms/iter)",
+        cpu_time.as_millis(),
+        cpu_time.as_millis() as f64 / iterations as f64
+    );
 
     // Benchmark 2: GPU-First (T1)
     #[cfg(target_os = "macos")]
@@ -63,8 +70,15 @@ fn main() {
             }
             let t1_time = start.elapsed();
 
-            println!("Time: {:.2} ms ({:.3} ms/iter)", t1_time.as_millis(), t1_time.as_millis() as f64 / iterations as f64);
-            println!("Speedup vs CPU: {:.2}x", cpu_time.as_secs_f64() / t1_time.as_secs_f64());
+            println!(
+                "Time: {:.2} ms ({:.3} ms/iter)",
+                t1_time.as_millis(),
+                t1_time.as_millis() as f64 / iterations as f64
+            );
+            println!(
+                "Speedup vs CPU: {:.2}x",
+                cpu_time.as_secs_f64() / t1_time.as_secs_f64()
+            );
         }
     }
 
@@ -83,7 +97,10 @@ fn main() {
     println!("═══════════════════════════════════════════════════════════════");
     println!("│ Method              │ Time (ms) │ Speedup │ Status            │");
     println!("├─────────────────────┼───────────┼─────────┼───────────────────┤");
-    println!("│ CPU (baseline)      │ {:.1}     │ 1.0x    │ ✅ Implemented    │", cpu_time.as_millis());
+    println!(
+        "│ CPU (baseline)      │ {:.1}     │ 1.0x    │ ✅ Implemented    │",
+        cpu_time.as_millis()
+    );
     #[cfg(target_os = "macos")]
     {
         if let Ok(mut state_gpu) = MetalQuantumState::new(qubits) {
@@ -99,11 +116,27 @@ fn main() {
             }
             let t1_time = start.elapsed();
             let speedup = cpu_time.as_secs_f64() / t1_time.as_secs_f64();
-            println!("│ GPU-First (T1)      │ {:.1}     │ {:.1}x    │ ✅ Implemented    │", t1_time.as_millis(), speedup);
+            println!(
+                "│ GPU-First (T1)      │ {:.1}     │ {:.1}x    │ ✅ Implemented    │",
+                t1_time.as_millis(),
+                speedup
+            );
         }
     }
-    println!("│ Tensor Cores (T2)   │ ~{:.1}-{:.1} │ {:.0}-{:.0}x  | 🔨 In Progress     │", cpu_time.as_millis() as f64 / 20.0, cpu_time.as_millis() as f64 / 200.0, 20.0, 200.0);
-    println!("│ T1 + T2 Combined    │ ~{:.1}-{:.1} │ {:.0}-{:.0}x  | 🎯 Target         │", cpu_time.as_millis() as f64 / 40.0, cpu_time.as_millis() as f64 / 400.0, 40.0, 400.0);
+    println!(
+        "│ Tensor Cores (T2)   │ ~{:.1}-{:.1} │ {:.0}-{:.0}x  | 🔨 In Progress     │",
+        cpu_time.as_millis() as f64 / 20.0,
+        cpu_time.as_millis() as f64 / 200.0,
+        20.0,
+        200.0
+    );
+    println!(
+        "│ T1 + T2 Combined    │ ~{:.1}-{:.1} │ {:.0}-{:.0}x  | 🎯 Target         │",
+        cpu_time.as_millis() as f64 / 40.0,
+        cpu_time.as_millis() as f64 / 400.0,
+        40.0,
+        400.0
+    );
     println!("└─────────────────────┴───────────┴─────────┴───────────────────┘");
     println!();
 

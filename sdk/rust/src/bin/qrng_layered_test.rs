@@ -20,7 +20,12 @@ fn collect_ssd_timings(n_samples: usize) -> Vec<u64> {
 
     // Warm-up
     for _ in 0..20 {
-        if let Ok(mut file) = OpenOptions::new().write(true).create(true).truncate(true).open(test_file) {
+        if let Ok(mut file) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(true)
+            .open(test_file)
+        {
             let _ = file.write_all(&data);
         }
     }
@@ -29,7 +34,12 @@ fn collect_ssd_timings(n_samples: usize) -> Vec<u64> {
 
     for _ in 0..n_samples {
         let start = Instant::now();
-        if let Ok(mut file) = OpenOptions::new().write(true).create(true).truncate(false).open(test_file) {
+        if let Ok(mut file) = OpenOptions::new()
+            .write(true)
+            .create(true)
+            .truncate(false)
+            .open(test_file)
+        {
             let _ = file.write_all(&data);
             #[cfg(unix)]
             {
@@ -51,7 +61,9 @@ fn collect_cpu_jitter(n_samples: usize) -> Vec<u64> {
     for _ in 0..n_samples {
         let start = Instant::now();
         let mut sum: u64 = 0;
-        for j in 0..100 { sum = sum.wrapping_add(j as u64); }
+        for j in 0..100 {
+            sum = sum.wrapping_add(j as u64);
+        }
         std::hint::black_box(sum);
         timings.push(start.elapsed().as_nanos() as u64);
     }
@@ -62,7 +74,9 @@ fn collect_cpu_jitter(n_samples: usize) -> Vec<u64> {
 fn lsb_bits(values: &[u64], count: usize) -> Vec<u8> {
     let mut bits = Vec::new();
     for &v in values {
-        for i in 0..count { bits.push(((v >> i) & 1) as u8); }
+        for i in 0..count {
+            bits.push(((v >> i) & 1) as u8);
+        }
     }
     bits
 }
@@ -70,17 +84,25 @@ fn lsb_bits(values: &[u64], count: usize) -> Vec<u8> {
 fn diff_bits(values: &[u64]) -> Vec<u8> {
     let mut bits = Vec::new();
     for i in 1..values.len() {
-        let d = values[i].wrapping_sub(values[i-1]);
-        for j in 4..12 { bits.push(((d >> j) & 1) as u8); }
+        let d = values[i].wrapping_sub(values[i - 1]);
+        for j in 4..12 {
+            bits.push(((d >> j) & 1) as u8);
+        }
     }
     bits
 }
 
 fn xor_fold(values: &[u64]) -> Vec<u8> {
-    values.iter().map(|&v| {
-        let folded = (v ^ (v >> 32)) as u32;
-        (0..8).map(|i| ((folded >> i) & 1) as u8).collect::<Vec<_>>()
-    }).flatten().collect()
+    values
+        .iter()
+        .map(|&v| {
+            let folded = (v ^ (v >> 32)) as u32;
+            (0..8)
+                .map(|i| ((folded >> i) & 1) as u8)
+                .collect::<Vec<_>>()
+        })
+        .flatten()
+        .collect()
 }
 
 fn von_neumann(bits: &[u8]) -> Vec<u8> {
@@ -103,7 +125,9 @@ fn hash_condition(values: &[u64]) -> Vec<u8> {
         let mut hasher = DefaultHasher::new();
         v.hash(&mut hasher);
         let h = hasher.finish();
-        for i in 0..8 { bits.push(((h >> i) & 1) as u8); }
+        for i in 0..8 {
+            bits.push(((h >> i) & 1) as u8);
+        }
     }
     bits
 }
@@ -118,7 +142,9 @@ fn shannon_entropy(bits: &[u8]) -> f64 {
     let p1 = ones / n;
     let p0 = 1.0 - p1;
 
-    if p1 == 0.0 || p0 == 0.0 { return 0.0; }
+    if p1 == 0.0 || p0 == 0.0 {
+        return 0.0;
+    }
     -(p0 * p0.log2() + p1 * p1.log2())
 }
 
@@ -132,8 +158,14 @@ fn test_method(name: &str, bits: &[u8]) -> (usize, f64, f64) {
     let result = suite.run_all_tests(bits);
     let se = shannon_entropy(bits);
 
-    println!("  {}: {} bits, {}/15 NIST, min-ent={:.4}, Shannon={:.4}",
-        name, bits.len(), result.passed_count, result.min_entropy, se);
+    println!(
+        "  {}: {} bits, {}/15 NIST, min-ent={:.4}, Shannon={:.4}",
+        name,
+        bits.len(),
+        result.passed_count,
+        result.min_entropy,
+        se
+    );
 
     (result.passed_count, result.min_entropy, se)
 }
@@ -187,9 +219,9 @@ fn main() {
     println!("\n▶ TWO-LAYER COMBINATIONS:");
     // Diff → Hash
     bits = diff_bits(&ssd);
-    let timings_for_hash: Vec<u64> = (0..bits.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((bits[i*8+j] as u64) << j))
-    }).collect();
+    let timings_for_hash: Vec<u64> = (0..bits.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((bits[i * 8 + j] as u64) << j)))
+        .collect();
     bits = hash_condition(&timings_for_hash);
     let (p, m, s) = test_method("Diff→Hash", &bits);
     results.push(("Diff→Hash", p, m, s));
@@ -201,9 +233,9 @@ fn main() {
 
     // XOR-fold → Hash
     bits = xor_fold(&ssd);
-    let timings_for_hash: Vec<u64> = (0..bits.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((bits[i*8+j] as u64) << j))
-    }).collect();
+    let timings_for_hash: Vec<u64> = (0..bits.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((bits[i * 8 + j] as u64) << j)))
+        .collect();
     bits = hash_condition(&timings_for_hash);
     let (p, m, s) = test_method("XOR→Hash", &bits);
     results.push(("XOR→Hash", p, m, s));
@@ -215,9 +247,9 @@ fn main() {
 
     // LSB → Hash → VN
     bits = lsb_bits(&ssd, 8);
-    let timings_for_hash: Vec<u64> = (0..bits.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((bits[i*8+j] as u64) << j))
-    }).collect();
+    let timings_for_hash: Vec<u64> = (0..bits.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((bits[i * 8 + j] as u64) << j)))
+        .collect();
     bits = von_neumann(&hash_condition(&timings_for_hash));
     let (p, m, s) = test_method("LSB→Hash→VN", &bits);
     results.push(("LSB→Hash→VN", p, m, s));
@@ -238,7 +270,9 @@ fn main() {
     let cpu_bits = lsb_bits(&cpu, 4);
     let diff = diff_bits(&ssd);
     let min_len = ssd_bits.len().min(cpu_bits.len()).min(diff.len());
-    bits = (0..min_len).map(|i| ssd_bits[i] ^ cpu_bits[i] ^ diff[i]).collect();
+    bits = (0..min_len)
+        .map(|i| ssd_bits[i] ^ cpu_bits[i] ^ diff[i])
+        .collect();
     let (p, m, s) = test_method("Triple XOR raw", &bits);
     results.push(("Triple XOR raw", p, m, s));
     bits = von_neumann(&bits);
@@ -249,9 +283,9 @@ fn main() {
     let ssd_bits = lsb_bits(&ssd, 4);
     let cpu_bits = lsb_bits(&cpu, 4);
     bits = xor_combine(&ssd_bits, &cpu_bits);
-    let timings_for_hash: Vec<u64> = (0..bits.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((bits[i*8+j] as u64) << j))
-    }).collect();
+    let timings_for_hash: Vec<u64> = (0..bits.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((bits[i * 8 + j] as u64) << j)))
+        .collect();
     bits = hash_condition(&timings_for_hash);
     let (p, m, s) = test_method("SSD⊕CPU→Hash", &bits);
     results.push(("SSD⊕CPU→Hash", p, m, s));
@@ -259,27 +293,27 @@ fn main() {
     println!("\n▶ TRIPLE-LAYER COMBINATIONS:");
     // Diff → Hash → VN
     let d = diff_bits(&ssd);
-    let t: Vec<u64> = (0..d.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((d[i*8+j] as u64) << j))
-    }).collect();
+    let t: Vec<u64> = (0..d.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((d[i * 8 + j] as u64) << j)))
+        .collect();
     bits = von_neumann(&hash_condition(&t));
     let (p, m, s) = test_method("Diff→Hash→VN", &bits);
     results.push(("Diff→Hash→VN", p, m, s));
 
     // (SSD⊕CPU) → Hash → VN
     let xor_bits = xor_combine(&lsb_bits(&ssd, 4), &lsb_bits(&cpu, 4));
-    let t: Vec<u64> = (0..xor_bits.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((xor_bits[i*8+j] as u64) << j))
-    }).collect();
+    let t: Vec<u64> = (0..xor_bits.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((xor_bits[i * 8 + j] as u64) << j)))
+        .collect();
     bits = von_neumann(&hash_condition(&t));
     let (p, m, s) = test_method("SSD⊕CPU→Hash→VN", &bits);
     results.push(("SSD⊕CPU→Hash→VN", p, m, s));
 
     // XOR-fold → Hash → VN
     let xf = xor_fold(&ssd);
-    let t: Vec<u64> = (0..xf.len()/8).map(|i| {
-        (0..8).fold(0u64, |acc, j| acc | ((xf[i*8+j] as u64) << j))
-    }).collect();
+    let t: Vec<u64> = (0..xf.len() / 8)
+        .map(|i| (0..8).fold(0u64, |acc, j| acc | ((xf[i * 8 + j] as u64) << j)))
+        .collect();
     bits = von_neumann(&hash_condition(&t));
     let (p, m, s) = test_method("XOR→Hash→VN", &bits);
     results.push(("XOR→Hash→VN", p, m, s));
@@ -295,14 +329,22 @@ fn main() {
     results.sort_by(|a, b| b.1.cmp(&a.1));
 
     for (name, pass, min_ent, shannon) in &results {
-        let rating = if *pass >= 14 { "🏆 BEST" }
-        else if *pass >= 12 { "✅ GOOD" }
-        else if *pass >= 10 { "⚠️ OK" }
-        else if *pass >= 8 { "❌ POOR" }
-        else { "💀 BAD" };
+        let rating = if *pass >= 14 {
+            "🏆 BEST"
+        } else if *pass >= 12 {
+            "✅ GOOD"
+        } else if *pass >= 10 {
+            "⚠️ OK"
+        } else if *pass >= 8 {
+            "❌ POOR"
+        } else {
+            "💀 BAD"
+        };
 
-        println!("║ {:<19} │ {:>2}/15 │ {:>7.4} │ {:>7.4} │ {:<16} ║",
-            name, pass, min_ent, shannon, rating);
+        println!(
+            "║ {:<19} │ {:>2}/15 │ {:>7.4} │ {:>7.4} │ {:<16} ║",
+            name, pass, min_ent, shannon, rating
+        );
     }
 
     println!("╚════════════════════════════════════════════════════════════════════╝");

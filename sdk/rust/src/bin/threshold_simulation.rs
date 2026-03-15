@@ -21,9 +21,7 @@ use std::time::Instant;
 use rand::rngs::StdRng;
 use rand::{Rng, SeedableRng};
 
-use nqpu_metal::sliding_window_decoder::{
-    SlidingWindowDecoder, SyndromeRound, WindowInnerDecoder,
-};
+use nqpu_metal::sliding_window_decoder::{SlidingWindowDecoder, SyndromeRound, WindowInnerDecoder};
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -162,7 +160,9 @@ fn check_logical_failure(
     data_errors: &[Vec<bool>],
     num_rounds_to_check: usize,
 ) -> bool {
-    let rounds_to_check = num_rounds_to_check.min(committed_corrections.len()).min(data_errors.len());
+    let rounds_to_check = num_rounds_to_check
+        .min(committed_corrections.len())
+        .min(data_errors.len());
 
     if rounds_to_check == 0 {
         return false;
@@ -231,7 +231,10 @@ fn main() {
     eprintln!("  QEC Threshold Simulation — Sliding Window Decoder (UnionFind)");
     eprintln!("================================================================");
     eprintln!("  Distances:      {:?}", DISTANCES);
-    eprintln!("  Error rates:    {} points in [{:.1e}, {:.1e}]", NUM_ERROR_POINTS, P_MIN, P_MAX);
+    eprintln!(
+        "  Error rates:    {} points in [{:.1e}, {:.1e}]",
+        NUM_ERROR_POINTS, P_MIN, P_MAX
+    );
     eprintln!("  Trials per pt:  {}", NUM_TRIALS);
     eprintln!("  Total jobs:     {}", total_jobs);
     eprintln!("  RNG seed base:  0x{:X}", RNG_SEED_BASE);
@@ -364,13 +367,10 @@ fn main() {
         for j in 1..n {
             let diff_prev =
                 curve_high[j - 1].logical_error_rate - curve_low[j - 1].logical_error_rate;
-            let diff_curr =
-                curve_high[j].logical_error_rate - curve_low[j].logical_error_rate;
+            let diff_curr = curve_high[j].logical_error_rate - curve_low[j].logical_error_rate;
 
             // Sign change indicates a crossing.
-            if (diff_prev < 0.0 && diff_curr > 0.0)
-                || (diff_prev > 0.0 && diff_curr < 0.0)
-            {
+            if (diff_prev < 0.0 && diff_curr > 0.0) || (diff_prev > 0.0 && diff_curr < 0.0) {
                 crossing_found = true;
                 crossing_p_low = error_rates[j - 1];
                 crossing_p_high = error_rates[j];

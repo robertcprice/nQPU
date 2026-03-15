@@ -112,14 +112,7 @@ impl DecoderBenchResult {
     fn header_error_sweep() {
         println!(
             "{:>8} {:>8} {:>10} {:>10} {:>8} {:>12} {:>14} {:>14}",
-            "p",
-            "decoder",
-            "windows",
-            "defects",
-            "matches",
-            "avg_win_us",
-            "total_us",
-            "rounds/sec"
+            "p", "decoder", "windows", "defects", "matches", "avg_win_us", "total_us", "rounds/sec"
         );
         println!("{}", "-".repeat(98));
     }
@@ -224,10 +217,7 @@ fn bench_decoder(
         0.0
     };
 
-    let committed_rounds: usize = best_results
-        .iter()
-        .map(|w| w.committed_rounds.len())
-        .sum();
+    let committed_rounds: usize = best_results.iter().map(|w| w.committed_rounds.len()).sum();
     let throughput = if best_total_us > 0.0 {
         committed_rounds as f64 / (best_total_us / 1_000_000.0)
     } else {
@@ -285,7 +275,8 @@ fn main() {
     for &d in DISTANCES {
         let num_detectors = d * d - 1;
         let mut rng = StdRng::seed_from_u64(RNG_SEED);
-        let rounds = generate_syndrome_data(num_detectors, NUM_ROUNDS, DEFAULT_ERROR_RATE, &mut rng);
+        let rounds =
+            generate_syndrome_data(num_detectors, NUM_ROUNDS, DEFAULT_ERROR_RATE, &mut rng);
 
         for decoder_type in &[WindowInnerDecoder::Greedy, WindowInnerDecoder::UnionFind] {
             let result = bench_decoder(d, *decoder_type, &rounds, DEFAULT_ERROR_RATE);
@@ -298,7 +289,10 @@ fn main() {
 
     // Print speedup comparison
     println!("Distance Sweep — UnionFind vs Greedy Speedup:");
-    println!("{:>4} {:>14} {:>14} {:>10}", "d", "Greedy r/s", "UFind r/s", "Speedup");
+    println!(
+        "{:>4} {:>14} {:>14} {:>10}",
+        "d", "Greedy r/s", "UFind r/s", "Speedup"
+    );
     println!("{}", "-".repeat(48));
 
     for chunk in all_results.chunks(2) {

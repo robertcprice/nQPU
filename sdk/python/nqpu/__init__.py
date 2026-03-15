@@ -22,6 +22,7 @@ from .core import (
     VQEMolecule,
 )
 from .physics import (
+    AdaptiveDQPTDiagnosticsResult,
     AutoSolver,
     CorrelationMatrixResult,
     DQPTCandidate,
@@ -81,6 +82,7 @@ __version__ = "0.1.0"
 __all__ = [
     "Backend",
     "BackendType",
+    "AdaptiveDQPTDiagnosticsResult",
     "AutoSolver",
     "CorrelationMatrixResult",
     "DQPTCandidate",

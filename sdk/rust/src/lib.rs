@@ -1,5 +1,5 @@
 #![allow(dead_code, unused_variables, unused_imports, unused_assignments)]
-#![cfg_attr(feature = "metal", allow(unexpected_cfgs))]
+#![cfg_attr(target_os = "macos", allow(unexpected_cfgs))]
 //! nQPU-Metal: High-Performance Quantum Simulator
 //!
 //! CPU implementation with optional Metal GPU acceleration
@@ -99,1050 +99,86 @@ pub fn c32_scale(c: C32, factor: f32) -> C32 {
 // No need for pub use - functions are already visible
 
 // ============================================================
-// SHARED INFRASTRUCTURE (Phase 0)
+// DOMAIN MODULES
 // ============================================================
+// Organized into 14 quantum computing domains.
+// Each domain re-exports its modules for backward API compatibility.
 
-// Unified trait hierarchy for all backends
-pub mod traits;
+/// Core quantum primitives: state vectors, gates, stabilizers, channels
+pub mod core;
+pub use core::*;
 
-// Universal sparse Pauli string representation
-pub mod pauli_algebra;
+/// Tensor network methods: MPS, PEPS, MERA, TTN, DMRG, contraction
+pub mod tensor_networks;
+pub use tensor_networks::*;
 
-// Heisenberg-picture Pauli propagation simulator
-pub mod pauli_propagation;
+/// Quantum error correction: codes, decoders, magic states
+pub mod error_correction;
+pub use error_correction::*;
 
-// GPU-accelerated Pauli propagation (Rayon-parallel Heisenberg picture)
-pub mod pauli_propagation_gpu;
-
-// Metal GPU-accelerated Pauli propagation with PNA error mitigation
-pub mod gpu_pauli_propagation;
-
-// Pauli twirling / randomized compiling for noise tailoring
-pub mod pauli_twirling;
-
-// Quantum channel abstraction (Kraus, Choi)
-pub mod quantum_channel;
-
-// Differentiable density matrix dynamics (Lindblad master equation, adjoint-method AD)
-pub mod differentiable_dynamics;
-
-// Metal GPU modules (macOS only)
-#[cfg(target_os = "macos")]
-mod metal_gpu_full;
-#[cfg(target_os = "macos")]
-pub use metal_gpu_full::*;
-
-// Removed: metal_gpu_simple, metal_gpu_optimized, metal_gpu_advanced, metal_gpu_correct
-// These were development iterations consolidated into metal_gpu_fixed (canonical)
-
-#[cfg(target_os = "macos")]
-pub mod metal_gpu_fixed;
-#[cfg(target_os = "macos")]
-pub use metal_gpu_fixed::*;
-
-// Parallel quantum operations with Metal GPU acceleration
-#[cfg(target_os = "macos")]
-pub mod metal_parallel_quantum;
-
-// CUDA GPU backend
-#[cfg(feature = "cuda")]
-pub mod cuda_backend;
-#[cfg(target_os = "macos")]
-pub use metal_parallel_quantum::*;
-
-// T-Era: GPU-First Quantum State (unified memory, no CPU-GPU transfers)
-#[cfg(target_os = "macos")]
-pub mod metal_state;
-
-// T-Era: Tensor Core Operations (matrix multiply acceleration)
-#[cfg(target_os = "macos")]
-pub mod tensor_ops;
-
-// Apple Accelerate (AMX) tensor contractions for MPS inner loops (macOS only)
-#[cfg(target_os = "macos")]
-pub mod amx_tensor;
-
-// T-Era: Schrödinger-Feynman hybrid simulation
-pub mod schrodinger_feynman;
-
-// T-Era: Auto-tuning backend selection
-pub mod auto_tuning;
-
-// T-Era: T1+T2 Integrated GPU-First + Tensor Cores
-#[cfg(target_os = "macos")]
-pub mod t1t2_integrated;
-
-// Post T-Era: M4 Pro GPU Kernel Optimization
-#[cfg(target_os = "macos")]
-pub mod m4_pro_optimization;
-
-// Metal 4 Backend: Tensor Operations + Inline ML Inference
-#[cfg(target_os = "macos")]
-pub mod metal4_backend;
-
-// Post T-Era: Cache Blocking CPU Optimization
-pub mod cache_blocking;
-
-// Post T-Era: Advanced Tensor Networks (PEPS, TTN, MERA)
-pub mod advanced_tensor_networks;
-
-// Post T-Era: GPU-Accelerated MPS
-#[cfg(target_os = "macos")]
-pub mod gpu_mps;
-#[cfg(target_os = "macos")]
-pub mod metal_mps;
-
-// Post T-Era: F32 Backend Integration
-pub mod f32_backend;
-
-// Post T-Era: Distributed MPI Support
-pub mod distributed_metal_mpi;
-pub mod distributed_mpi;
-
-// Post T-Era: Real MPI Integration
-#[cfg(feature = "mpi")]
-pub mod real_mpi;
-
-// Comprehensive: Quantum Gates Library
-pub mod comprehensive_gates;
-
-// Comprehensive: Quantum Algorithms Library
-pub mod comprehensive_algorithms;
-
-// Comprehensive: Noise Models and Error Simulation
-pub mod noise_models;
-
-// Comprehensive: Quantum Error Correction
-pub mod quantum_error_correction;
-
-// Quantum Decision Diagram (BDD/ZDD) state compression
-pub mod decision_diagram;
-
-// Near-Clifford (CH-form) simulation for circuits with few T-gates
-pub mod near_clifford;
-
-// Quantum Chemistry: fermion-to-qubit mappings, molecular Hamiltonians, UCCSD
-pub mod quantum_chemistry;
-
-// Molecular integrals: FCIDUMP parser, fermion-to-qubit mappings (JW, BK, Parity), active space
-pub mod molecular_integrals;
-
-// Comprehensive: Bayesian & Tree PEPS
-pub mod bayesian_treepes;
-
-// Comprehensive: Benchmark Suite
-pub mod comprehensive_benchmarks;
-
-// Noise simulation module
+/// Noise models, error mitigation, open quantum systems
 pub mod noise;
+pub use noise::*;
 
-// Tensor network module
-pub mod entanglement_scheduler;
-pub mod entanglement;
-pub mod tensor_network;
-
-// Quantum algorithms module
+/// Quantum algorithms: VQE, QAOA, QPE, Grover, Shor, QSP/QSVT
 pub mod algorithms;
+pub use algorithms::*;
 
-// 2D quantum algorithms module
-pub mod algorithms_2d;
-
-// Utilities module
-pub mod utilities;
-
-// Error mitigation module
-pub mod classical_shadows;
-pub mod camps;
-pub mod clifford_t;
-pub mod error_mitigation;
-pub mod time_evolution;
-pub mod improved_trotter;
-
-// Digital-Analog Quantum Computation module
-pub mod digital_analog;
-
-// QASM import/export module
-pub mod qasm;
-
-// OpenQASM 3.0 parser module
-pub mod qasm3;
-
-// QASM Language Server Protocol support
-#[cfg(feature = "lsp")]
-pub mod qasm_lsp;
-
-// QIR (Quantum Intermediate Representation) import/export for Azure QDK
-pub mod qir;
-
-// Stim QEC circuit format import
-pub mod stim_import;
-
-// Density matrix simulation module
-pub mod density_matrix;
-
-// Quantum machine learning module
+/// Quantum machine learning: kernels, neural nets, transformers, NQS
 pub mod quantum_ml;
-pub mod quantum_ml_mps;
-pub mod quantum_kernels;
+pub use quantum_ml::*;
 
-// Neural Quantum States: RBM/autoregressive ansatze with VMC and stochastic reconfiguration
-pub mod neural_quantum_states;
+/// Quantum chemistry: molecular simulation, drug design, materials
+pub mod chemistry;
+pub use chemistry::*;
 
-// QKMM: O(N² log N) Quantum Kernel-based Matrix Multiplication (arXiv:2602.05541)
-pub mod qkmm;
+/// Hardware backends: Metal, CUDA, ROCm, pulse control, hardware providers
+pub mod backends;
+pub use backends::*;
 
-// Low-Depth UCC: Efficient quantum chemistry ansatz (arXiv:2602.14999)
-pub mod low_depth_ucc;
+/// Circuit tools: optimizer, transpiler, QASM/QIR, DSL, visualization
+pub mod circuits;
+pub use circuits::*;
 
-// Tucker State Preparation: Iterative state synthesis (arXiv:2602.09909)
-pub mod tucker_state_prep;
+/// Quantum networking: QKD, QRNG, entropy, PQC assessment
+pub mod networking;
+pub use networking::*;
 
-// RASCqL: Architecture for qLDPC Logic (arXiv:2602.14273)
-pub mod rascql;
+/// Quantum physics: walks, thermodynamics, topology, consciousness
+pub mod physics;
+pub use physics::*;
 
-// Quantum attention module
-pub mod quantum_attention;
+/// Domain applications: finance, logistics, games, NLP, art
+pub mod applications;
+pub use applications::*;
 
-// Massive parallelization module
-pub mod parallel_quantum;
+/// Quantum measurement: tomography, QCVV, shadows, verification
+pub mod measurement;
+pub use measurement::*;
 
-// Fully quantum transformer module
-pub mod full_quantum_transformer;
+/// Infrastructure: traits, utilities, benchmarks, FFI, distributed
+pub mod infra;
+pub use infra::*;
 
-// Gate definitions module
-pub mod gates;
-
-// Circuit optimization module
-pub mod circuit_optimizer;
-
-// Circuit compilation cache (gate batching, memoization, wraps circuit_optimizer)
-pub mod circuit_cache;
-/// Backward-compatible alias for the renamed `circuit_cache` module.
-pub use circuit_cache as jit_compiler;
-
-// Differentiable QEC pipeline (H10: backprop through encode-noise-decode)
-pub mod differentiable_qec;
-
-// Metal-accelerated neural network QEC decoder (H9: fuse decoder with stabilizer sim)
-pub mod metal_neural_decoder;
-
-// Tree Tensor Network backend (H8: hierarchical tensor simulation)
-pub mod tree_tensor_network;
-
-// Randomized QSVT (H6: single-ancilla, block-encoding-free)
-pub mod randomized_qsvt;
-
-// Mamba-based QEC decoder (H7: O(d²) SSM decoder)
-pub mod mamba_qec_decoder;
-
-// CAMPS-DMRG for Quantum Chemistry (H5: Clifford-Augmented MPS)
-pub mod camps_dmrg;
-
-// AlphaQubit-style Transformer QEC Decoder (Novel: Attention-based decoding)
-pub mod transformer_qec_decoder;
-
-// Real-Time Adaptive QEC Decoder (Novel: Continuous learning from error patterns)
-pub mod adaptive_realtime_decoder;
-
-// Decoder-Aware Circuit Optimization (Novel: Co-optimizes layout with decoder)
-pub mod decoder_aware_transpiler;
-
-// Tensor network contraction path optimizer (Cotengra-equivalent)
-pub mod contraction_optimizer;
-
-// Circuit DSL: fluent API and macro for building quantum circuits
-pub mod circuit_macro;
-
-// Circuit equivalence verification
-pub mod circuit_equivalence;
-
-// Circuit serialization/deserialization (JSON, binary, OpenQASM 3.0)
-pub mod circuit_serde;
-
-// Circuit visualization export (LaTeX quantikz, SVG, ASCII)
-pub mod circuit_export;
-
-// Gate fusion engine
-pub mod gate_fusion;
-
-// SIMD-accelerated operations
-pub mod simd_ops;
-
-// Automatic backend selection
-pub mod auto_simulator;
-
-// Intelligent backend selection and circuit analysis
-pub mod auto_backend;
-
-// Mid-circuit measurement and classical control
-pub mod mid_circuit;
-
-// Measurement-Based Quantum Computation (MBQC)
-pub mod mbqc;
-
-// Benchmark suite
-pub mod benchmark_suite;
-
-// Float32 quantum state and operations
-pub mod f32_fusion;
-pub mod quantum_f32;
-
-// Metal GPU backend (properly wired)
-pub mod metal_backend;
-
-// Thermal-aware GPU scheduling
-pub mod thermal_scheduler;
-
-// UMA Gate-Level CPU/GPU Dispatch (Apple Silicon unified memory)
-pub mod uma_dispatch;
-
-// Concurrent CPU+GPU execution on disjoint qubit partitions (UMA)
-pub mod concurrent_uma;
-
-// Dynamic f32/f64 precision routing for hybrid CPU/GPU execution
-pub mod mixed_precision;
-
-// 2D Grid Support: Snake mapping for 2D circuits
-pub mod snake_mapping;
-
-// Lattice-aware MPS for 2D/3D grids
-pub mod lattice_mps;
-
-// 4D Lattice MPS for hypercubic geometry
-pub mod lattice_mps_4d;
-
-// TEBD (Time-Evolving Block Decimation) for MPS-based time evolution
-pub mod tebd;
-
-// Lindblad Master Equation solver for open quantum systems
-pub mod lindblad;
-
-// Lindblad Classical Shadows: tomography for open quantum systems (arXiv:2602.14694)
-// Combines classical shadows with Lindblad dynamics for efficient channel estimation
-pub mod lindblad_shadows;
-
-// Adaptive MPS with automatic bond dimension management
-pub mod adaptive_mps;
-
-// PEPS (Projected Entangled Pair States) for 2D quantum systems
-pub mod peps;
-
-// PEPO (Projected Entangled Pair Operators) for 2D density matrices and thermal states
-pub mod pepo;
-
-// PEPS Gate Operations with SVD Compression
-pub mod peps_gates;
-
-// Comprehensive PEPS Simulator (2D, 3D, 4D tensor networks)
-pub mod peps_simulator;
-
-// Arbitrary-geometry tensor networks with Cotengra-style contraction optimization
-pub mod arbitrary_tn;
-
-// 2D: Corner Transfer Matrix (CTM) Contraction
-pub mod ctm_contraction;
-
-// 2D: Quantum Fourier Transform
-pub mod qft_2d;
-
-// Optimistic QFT: log-depth in-place QFT (arXiv:2505.00701)
-// Applications: efficient QFT approximation, quantum phase estimation, Shor's algorithm
-pub mod optimistic_qft;
-
-// 3D: Quantum Simulation (Hilbert Curve + PEPSON)
-pub mod simulation_3d;
-
-// Adaptive batching module
-pub mod adaptive_batching;
-
-// Advanced quantum ML module
-pub mod advanced_quantum_ml;
-
-// Robust error handling module - TEMPORARILY DISABLED due to compilation errors
-// pub mod error_handling;
-
-// GPU memory pool for efficient resource management
-pub mod gpu_memory_pool;
-
-// Quantum circuit synthesis
-pub mod quantum_synthesis;
-
-// Parametric Circuits for Variational Algorithms (VQE, QAOA, etc.)
-pub mod parametric_circuits;
-
-// Variational Quantum Eigensolver (VQE)
-pub mod vqe;
-
-// Quantum Approximate Optimization Algorithm (QAO)
-pub mod qao;
-
-// Quantum Phase Estimation (QPE)
-pub mod heisenberg_qpe;
-pub mod qpe;
-
-// (qram declared in Phase 5 section below)
-
-// Quantum Signal Processing (QSP) and Quantum Singular Value Transformation (QSVT)
-// Grand unifying framework: subsumes Grover, QPE, Hamiltonian simulation, matrix inversion
-pub mod qsp_qsvt;
-
-// Spectrum Amplification: generalises Grover to arbitrary eigenvalue transformations
-// Includes fixed-point (Yoder-Low-Chuang), oblivious, and spectral filtering variants
-pub mod spectrum_amplification;
-
-// Simple Working Gates - always available
-pub mod simple_gates;
-
-// Quantum Annealing
-pub mod annealing;
-
-// Simulated Quantum Annealing (SQA) — path-integral Monte Carlo, exact statevector, problem library
-pub mod quantum_annealing;
-
-// Quantum state tomography
-pub mod state_tomography;
-
-// Error correction decoding
+// Pre-existing directory modules (unchanged)
 pub mod decoding;
 
-// Advanced caching system
-pub mod advanced_cache;
-
-// Stabilizer simulation for Clifford circuits
-pub mod stabilizer;
-
-// Inverse stabilizer tableau for O(n) measurement
-pub mod inverse_tableau;
-
-// SIMD-friendly stabilizer simulation with packed bitstring operations
-pub mod simd_stabilizer;
-
-// Cache-optimized stabilizer with transposed memory layout (faster)
-pub mod optimized_stabilizer;
-
-// Metal GPU-accelerated stabilizer simulation (targets Stim-level performance)
-pub mod metal_stabilizer;
-
-// Unified high-performance stabilizer (targets 50M gates/sec - Stim-competitive)
-pub mod fast_stabilizer;
-
-// Auto-routing stabilizer (picks optimal CPU/GPU backend)
-pub mod stabilizer_router;
-
-// AVX-512 SIMD stabilizer for x86 platforms
-pub mod avx512_stabilizer;
-
-// IBM Quantum backend (real hardware access)
-pub mod ibm_quantum;
-
-// Meta-learning VQE (LSTM-based parameter initialization)
-pub mod meta_vqe;
-
-// Terminal User Interface (TUI) with 3D visualizations
-pub mod tui;
-
-// JAX integration for automatic differentiation
-pub mod jax_bridge;
-
-// Google Quantum AI hardware backend
-pub mod google_quantum;
-
-// Pulse-level control for microwave manipulation
-pub mod pulse_control;
-
-// GPU-accelerated MWPM decoder
-pub mod gpu_mwpm;
-
-// Local hardware quantum interface (entropy, QRNG, real pulse calibration)
-pub mod hardware_calibration;
-
-// TRUE quantum randomness with Bell test verification
-pub mod quantum_randomness;
-
-// REAL hardware quantum randomness extraction (camera, audio, CPU jitter)
-pub mod hardware_quantum;
-
-// Camera-based quantum RNG (Randonautica-style shot noise extraction)
-pub mod camera_quantum;
-
-// CERTIFIED quantum randomness via cloud Bell tests (IBM, Google)
-pub mod certified_quantum;
-
-// Wireless quantum entropy extraction (WiFi + Bluetooth + Network timing)
-pub mod wireless_quantum;
-
-// Creative quantum detection methods (cosmic rays, multi-receiver, SSD tunneling, etc.)
-// Experimental/research — requires --features experimental
-#[cfg(feature = "experimental")]
-pub mod creative_quantum;
-
-// Quantum verification tests (antibunching, Leggett-Garg)
-pub mod quantum_verification;
-
-// Experimental quantum tests on consumer hardware (SSD, cosmic rays)
-pub mod quantum_ssd_tests;
-
-// REAL quantum probing - actual hardware measurements (no simulation)
-pub mod real_quantum_probe;
-
-// NIST SP 800-22 Statistical Test Suite (for QRNG verification)
-pub mod nist_tests;
-
-// QRNG Experiment Runner (complete experiments with reporting)
-pub mod qrng_experiment;
-
-// QRNG Phase 2 - Proper methodology (bits from SSD timing, not /dev/urandom)
-pub mod qrng_phase2;
-
-// QRNG Source Comparison - Test each entropy source separately
-pub mod qrng_source_comparison;
-
-// QRNG Extraction Methods - Different ways to extract and condition bits
-pub mod qrng_extraction_methods;
-
-// Reference frame sampling (Stim-style 1000x speedup for QEC)
-pub mod reference_frame;
-
-// Quantum Fisher Information (quantum metrology/sensing)
-pub mod quantum_fisher;
-
-// Stim circuit format import/export (interoperability)
-pub mod stim_format;
-
-// Closed Timelike Curve simulation (time travel physics)
-pub mod ctc_simulation;
-
-// Quantum Contextuality Engine (Kochen-Specker, Peres-Mermin, magic states)
-pub mod contextuality;
-
-// Process Tensor Framework (non-Markovian quantum computing)
-pub mod process_tensor;
-
-// XZZX Surface Code with biased noise (18% threshold)
-pub mod xzzx_surface;
-
-// Hybrid stabilizer + tensor network simulator (magic-aware)
-pub mod stabilizer_tensor_net;
-
-// MAST: Magic-injected Stabilizer Tensor Networks (arXiv:2411.12482)
-pub mod mast;
-
-// Surface Codes (Topological quantum error correction)
-pub mod surface_codes;
-
-// Lattice Surgery for Surface Codes (merge/split operations, logical gate compilation)
-pub mod lattice_surgery;
-
-// Yoked Surface Codes (1/3 qubit overhead QEC -- Nature Communications 2025)
-pub mod yoked_surface_codes;
-
-// Floquet Codes (Dynamical quantum error correction -- Hastings-Haah honeycomb, X3Z3)
-pub mod floquet_codes;
-
-// Hyperbolic Floquet Codes (QEC on negatively-curved surfaces -- world-first Rust impl)
-pub mod hyperbolic_floquet;
-
-// MERA (Multiscale Entanglement Renormalization Ansatz)
-pub mod mera_happy;
-
-// Maximum Qubit Benchmarks
-pub mod max_qubit_benchmark;
-
-// Advanced noise models
-pub mod advanced_noise;
-pub mod enhanced_zne;
-pub mod advanced_error_mitigation;
-pub mod pec;
-pub mod compilation_informed_pec;
-pub mod non_markovian;
-pub mod device_noise;
-pub mod bayesian_noise;
-pub mod live_calibration;
-
-// Leakage simulation: qutrit-based transmon leakage modeling
-pub mod leakage_simulation;
-
-// Automatic differentiation for VQAs
-pub mod adjoint_diff;
-pub mod autodiff;
-pub mod differentiable_mps;
-pub mod dmrg_tdvp;
-pub mod gpu_dmrg;
-#[cfg(target_os = "macos")]
-pub mod dmrg_metal;
-pub mod imps_ipeps;
-pub mod distributed_adjoint;
-
-// Tensor Jump Method: MPS + Monte Carlo Wave Function for open quantum systems (Lindblad)
-pub mod tensor_jump;
-
-// Enhanced barren plateau analysis with empirical sampling
-pub mod enhanced_barren_plateau;
-
-// Continuous-variable Gaussian simulation
-pub mod cv_quantum;
-
-// Bosonic quantum error correction codes (cat, GKP, binomial) in truncated Fock space
-pub mod bosonic_codes;
-
-// Concatenated bosonic cat qubit simulation (Nature Feb 2025)
-pub mod cat_qubit_concatenation;
-
-// Approximate dynamical QEC with temporal recovery maps and code optimization
-pub mod approximate_dynamical_qec;
-
-// Holographic quantum error correcting codes (AdS/CFT, HaPPY code, Ryu-Takayanagi)
-pub mod holographic_codes;
-
-// Circuit cutting for beyond-memory simulation
-pub mod circuit_cutting;
-
-// Topological/Fibonacci anyon simulation
-pub mod topological_quantum;
-
-// Expanded topological: Ising anyons, Majorana chains, braid compilation
-pub mod topological_expanded;
-
-// Majorana-1 topological quantum processor: topoconductor physics, braiding, Kitaev chain
-pub mod majorana_model;
-
-// Dynamic surface code + RL decoder
-pub mod dynamic_surface_code;
-
-// QEC interop helpers (Stim-like detector model export)
-pub mod qec_interop;
-
-// Neural QEC decoders (GNN-style message-passing)
-pub mod neural_decoder;
-
-// Unified neural QEC decoder across all code families (AlphaQubit-inspired)
-pub mod unified_neural_decoder;
-
-// Quantum Low-Density Parity-Check (qLDPC) codes
-// Hypergraph product, bivariate bicycle, BP decoding
-pub mod qldpc;
-
-// Bivariate Bicycle (Gross) codes and Ambiguity Clustering decoder
-// [[144,12,12]] IBM Nature 2024 code, 27x faster than BP-OSD
-pub mod bivariate_bicycle;
-
-// Trivariate Tricycle (TT) codes -- generalized bivariate bicycle with
-// third cyclic dimension and meta-check measurement error diagnosis
-pub mod trivariate_codes;
-
-// Pulse-level Hamiltonian simulation and optimization
-pub mod pulse_level;
-
-// AC4c: Differentiable pulse-level simulation with transmon modeling,
-// RK4/Lindblad dynamics, and gradient-based pulse optimization
-pub mod pulse_simulation;
-
-// Dynamical Decoupling (DD) circuit transformation passes
-// Insert identity-equivalent pulse sequences on idling qubits to suppress decoherence
-pub mod dynamical_decoupling;
-
-// Quantum Cellular Automata (QCA) with Margolus partitioning
-// Applications: many-body dynamics, scrambling, entanglement spreading
-pub mod quantum_cellular_automata;
-
-// Quantum Networking: channels, entanglement distribution, repeaters, purification
-#[allow(dead_code)]
-pub mod quantum_networking;
-
-// QKD Protocols: BB84, E91, BBM92, B92, Six-State key distribution simulation
-// with eavesdropper models, CASCADE error correction, and privacy amplification
-pub mod qkd_protocols;
-
-// Metropolitan QKD Network: multi-node QKD network simulation with trusted relays,
-// entanglement-based links, realistic fiber loss, and pre-built topologies (BearlinQ, Tokyo, etc.)
-pub mod metro_qkd_network;
-
-// QRNG Integration: Quantum Random Number Generator sources for measurement randomness
-// Supports ANU QRNG API, hardware device files, CSPRNG fallback, and hybrid composition
-pub mod qrng_integration;
-
-// Certified QRNG: Bell-test certified quantum randomness with CHSH verification
-// and Twine-style SHA-256 hash chain for tamper-evident certificate provenance
-pub mod certified_qrng;
-
-// Quantum Entropy Extraction: Bridge quantum simulations to LLM entropy seeding
-// Extracts randomness from measurements, CTC dynamics, contextuality, and process tensors
-pub mod quantum_entropy_extraction;
-
-// ============================================================
-// PHASE 5: RESEARCH FRONTIER (2026-02-15)
-// ============================================================
-
-// (hyperbolic_floquet, tensor_jump, cat_qubit_concatenation declared above)
-
-// QRAM: Quantum Random Access Memory circuits (bucket-brigade, SelectOnly, fan-out)
-// Closes PennyLane v0.44 parity gap — essential for quantum database algorithms
-pub mod qram;
-
-// Fault-Tolerant Compilation: Litinski transformation + Ross-Selinger/gridsynth
-// Closes Qiskit v2.3 parity gap — Clifford+Rz → Clifford+T + Pauli-based computation
-pub mod ft_compilation;
-
-// ============================================================
-// PHASE 6: ADVANCED PLATFORMS & PROTOCOLS (2026-02-15)
-// ============================================================
-
-// QNodeOS: Quantum network operating system — distributed quantum computing protocol stack
-// WORLD FIRST: No other simulator has a network OS for entanglement scheduling
-pub mod quantum_network_os;
-
-// Rydberg Reservoir Computing: quantum-enhanced ML via Rydberg atom dynamics
-// WORLD FIRST: Rydberg atom reservoir computing in a general quantum simulator
-pub mod rydberg_reservoir;
-
-// Pinnacle Architecture: Google's next-gen quantum processor simulation
-// WORLD FIRST: Heterogeneous zone-based processor modeling (data/ancilla/magic-state zones)
-pub mod pinnacle_architecture;
-
-// Neutral Atom Array: Reconfigurable neutral atom quantum computing with atom shuttling
-// WORLD FIRST: Full atom rearrangement dynamics + Rydberg blockade physics
-pub mod neutral_atom_array;
-
-// Photonic Advantage: Gaussian Boson Sampling + Linear Optical QC + Photonic Ising Machine
-// WORLD FIRST: Unified photonic quantum advantage framework in a general simulator
-pub mod photonic_advantage;
-
-// ============================================================
-// PHASE 7: APPLICATION NICHES & ERROR MITIGATION (2026-02-15)
-// ============================================================
-
-// Quantum Logistics: CVRP, job-shop scheduling, TSP via QAOA
-pub mod quantum_logistics;
-
-// Quantum Climate: lattice Boltzmann CFD, atmospheric chemistry, carbon cycle, energy balance
-pub mod quantum_climate;
-
-// Quantum Materials: battery screening, superconductor Tc, band structure, Hubbard model
-pub mod quantum_materials;
-
-// Propagated Noise Absorption (PNA): Qiskit 2.3 technique for Clifford noise propagation
-pub mod pna;
-
-// (qir declared above with QASM parsers)
-
-// ============================================================
-// BLEEDING-EDGE MODULES (unique to nQPU-Metal)
-// ============================================================
-
-// Quantum Random Walks on Graphs (discrete + continuous time)
-// Applications: quantum search, PageRank, transport simulation
-pub mod quantum_random_walk;
-
-// Quantum Walk Simulation (CTQW + DTQW with eigendecomposition/Lanczos)
-// Applications: search algorithms, transport, graph problems
-// References: Kempe (2003), Childs PRL 102 (2009)
-pub mod quantum_walk;
-
-// Quantum Reservoir Computing (quantum-enhanced ML)
-// Applications: time series prediction, nonlinear function approximation
-pub mod quantum_reservoir;
-
-// (rydberg_reservoir declared above in Phase 6)
-
-// Quantum Thermodynamics: engines, batteries, fluctuation theorems
-// WORLD FIRST: Built-in quantum thermodynamic simulation
-pub mod quantum_thermodynamics;
-
-// Quantum Battery Simulation: entanglement-enhanced energy storage
-// Models collective/Dicke/all-to-all charging, ergotropy, scaling analysis
-pub mod quantum_battery;
-
-// Approximate Quantum Cloning Machines
-// Applications: QKD security analysis, quantum information theory
-pub mod quantum_cloning;
-
-// Symmetry-Exploiting Simulation
-// Applications: particle number / Sz conservation, Hilbert space reduction for physics
-pub mod symmetry_simulation;
-
-// Circuit Complexity Analysis & Resource Estimation
-// Applications: fault-tolerance planning, barren plateau detection, quantum volume
-pub mod circuit_complexity;
-
-// Fault-Tolerant Resource Estimation (Azure QRE-style)
-// Applications: physical qubit counting, T-factory planning, code distance optimization
-pub mod resource_estimation;
-
-// Quantum State Checkpointing & Time-Travel Debugging
-// Applications: debugging, state diff analysis, execution forking
-pub mod state_checkpoint;
-
-// Interactive stateful simulator API (step/undo/fork) built on checkpoints
-pub mod interactive_sim;
-
-// Quantum Game Theory (Eisert-Wilkens-Lewenstein framework)
-// Applications: quantum cryptography, mechanism design, educational
-pub mod quantum_game;
-
-// Quantum Cognition (quantum probability for human decision-making)
-// Applications: order effects, conjunction fallacy, sure-thing violations, survey simulation
-pub mod quantum_cognition;
-
-// Quantum Integrated Information Theory (Tononi's Phi)
-// Applications: consciousness metrics, integrated information, system partitioning
-pub mod quantum_iit;
-
-// Orchestrated Objective Reduction (Penrose-Hameroff Orch-OR)
-// Experimental/research — requires --features experimental
-#[cfg(feature = "experimental")]
-pub mod orch_or;
-
-// Anharmonic Oscillations for Microtubules
-// CRITICAL: Non-harmonic vibrations essential for consciousness (Hameroff: "like Indian music")
-pub mod anharmonic;
-
-// Microtubule Quantum Reservoir for Transformer Augmentation
-// Experimental/research — requires --features experimental (depends on orch_or)
-#[cfg(feature = "experimental")]
-pub mod mt_reservoir;
-
-// Microtubule-inspired feature modulation for transformer-style pipelines
-// Experimental/research — requires --features experimental (depends on orch_or)
-#[cfg(feature = "experimental")]
-pub mod microtubule_augmentor;
-
-// Z2-graded (fermionic) tensor networks with anti-commutation sign tracking
-// Applications: strongly correlated fermions, Hubbard models, quantum chemistry
-pub mod fermionic_tensor_net;
-
-// Magic State Distillation Factory Simulation
-// Full distillation pipeline: 15-to-1, 20-to-4, Reed-Muller, Litinski compact
-// Tracks resource costs: physical qubits, surface code cycles, space-time volume
-pub mod magic_state_factory;
-
-// BP-OSD Decoder: Belief Propagation + Ordered Statistics Decoding for qLDPC codes
-// State-of-art decoder for bivariate bicycle, lifted product codes (arXiv:2104.13659)
-pub mod bp_osd;
-
-// ADAPT-VQE: Adaptive Derivative-Assembled Pseudo-Trotter VQE
-// Dynamically builds ansatz by selecting highest-gradient operators (arXiv:1812.11173)
-pub mod adapt_vqe;
-
-// Sliding Window QEC Decoder: Real-time incremental syndrome decoding
-// Critical for fault-tolerant quantum computing with streaming syndromes
-pub mod sliding_window_decoder;
-
-// TDVP: Time-Dependent Variational Principle for MPS time evolution
-// 1-site (fixed bond dim) and 2-site (adaptive) variants (PRL 107, 070601)
-// pub mod tdvp; // TODO: create tdvp.rs
-
-// (quantum_walk module declared above near quantum_random_walk)
-
-// Matchgate / Free-Fermion Circuit Simulation
-// Applications: fermionic linear optics, free-fermion simulability boundary, hopping models
-pub mod matchgate_simulation;
-
-// Fermionic Gaussian State Simulation
-// Applications: non-interacting fermion systems, covariance matrix formalism, O(n^3) free-fermion simulation
-pub mod fermionic_gaussian;
-
-// Cluster-TEBD: Entanglement-aware time-evolving block decimation
-// Applications: large-scale quantum simulation, structured Hamiltonians, entanglement clustering
-pub mod cluster_tebd;
-
-// Quantum Chaos & Information Scrambling Diagnostics
-// Applications: spectral statistics, ETH verification, entanglement growth, Loschmidt echo
-pub mod quantum_chaos;
-
-// Many-Worlds Branching Simulation (Everett Interpretation)
-// WORLD FIRST: Full branching structure tracking, decoherent histories, branch statistics
-pub mod many_worlds;
-
-// CUDA backend for NVIDIA GPUs (optional, behind "cuda" feature)
-#[cfg(feature = "cuda")]
-pub mod cuda_backend;
-
-// ROCm backend for AMD GPUs (optional, behind "rocm" feature)
-#[cfg(feature = "rocm")]
-pub mod rocm_backend;
-
-// Real QPU hardware connectivity (optional, behind "qpu" feature)
 #[cfg(feature = "qpu")]
 pub mod qpu;
 
-// Python bindings (optional, behind "python" feature)
-// Also include during `cargo test` so #[cfg(test)] unit tests in python.rs compile
-// (follows the same pattern as python_api_v2 below).
-#[cfg(any(feature = "python", test))]
-pub mod python;
-
-// Note: python_api_v2.rs is not compatible with PyO3 0.28 API yet
-// The main python.rs module provides full Python 3.14 support
-// Include python_api_v2 for tests (PyO3 items are cfg-gated inside the file)
-#[cfg(any(feature = "python", test))]
-pub mod python_api_v2;
-
-// ASCII visualization (always available, no feature gate)
-pub mod ascii_viz;
-
-// Visualization tools (optional, behind "visualization" feature)
-#[cfg(feature = "visualization")]
-pub mod visualization;
-
-// Distributed memory support (optional, behind "distributed" feature)
-#[cfg(feature = "distributed")]
-pub mod distributed;
-
-// Web GUI (optional, behind "web" feature)
 #[cfg(feature = "web")]
 pub mod web;
 
-// WebAssembly backend (optional, behind "wasm" feature)
-#[cfg(feature = "wasm")]
-pub mod wasm_backend;
+/// Backward-compatible alias for the renamed `circuit_cache` module.
+pub use circuits::circuit_cache as jit_compiler;
 
-// WebAssembly bindings (optional, behind "wasm" feature)
-#[cfg(feature = "wasm")]
-pub mod wasm_bindings;
-
-// Quantum Characterization, Verification, and Validation (XEB + Randomized Benchmarking)
-pub mod qcvv;
-
-// Property-Based Testing: random circuit generation, quantum property assertions, statistical tests
-pub mod property_testing;
-
-// Layer Fidelity Benchmarking (IBM 2024: scalable layer-level characterization)
-pub mod layer_fidelity;
-
-// Quantum Approximate Multi-Objective Optimization (QAMOO)
-pub mod qamoo;
-
-// Quantum Natural Gradient optimizer with Fubini-Study metric tensor
-pub mod quantum_natural_gradient;
-
-// Sinter-like QEC Statistical Sampling (Monte Carlo threshold studies)
-pub mod qec_sampling;
-
-// (sliding_window_decoder declared above)
-
-// Bulk QEC Sampling via Error-Diffing (Stim-inspired high-throughput sampling)
-pub mod bulk_qec_sampling;
-
-// Sampler/Estimator Primitives (Qiskit V2-style Sampler and Estimator abstractions)
-pub mod primitives;
-
-// Hardware-aware quantum circuit transpiler (SABRE routing, gate decomposition, pass pipeline)
-pub mod transpiler;
-
-// AI-assisted quantum circuit transpiler (RL routing, KAK decomposition, Solovay-Kitaev synthesis)
-pub mod ai_transpiler;
-
-// ZX-calculus rewriting engine for circuit optimization (spider fusion, phase gadgets, T-count reduction)
-pub mod zx_calculus;
-
-// QUBO/Ising encoder for combinatorial optimization (Max-Cut, TSP, Graph Coloring, Portfolio, etc.)
-pub mod qubo_encoder;
-
-// Shor's Algorithm & Crypto Attack Toolkit
-pub mod shor;
-
-// Classical-Quantum Hybrid Arithmetic (Draper QFT adder, Cuccaro ripple-carry, modular arithmetic)
-pub mod cq_adder;
-
-// Warm-Start QAOA: parameter transfer across problem sizes
-pub mod warm_start_qaoa;
-
-// qSWIFT: High-order randomized Hamiltonian simulation (qDRIFT + high-order product formulas)
-pub mod qswift;
-
-// Quantum Echoes / OTOC (Out-of-Time-Order Correlators)
-// Inspired by Google's Nature Oct 2025 paper: 13,000x quantum advantage
-
-
-// ZNE + QEC Integration: Zero-Noise Extrapolation for Quantum Error Correction
-// Nature Communications 2025: distance-3 + ZNE ≈ unmitigated distance-5, 40-64% fewer qubits
-pub mod zne_qec;
-// Greedy Gradient-free Adaptive VQE (Nature Scientific Reports 2025)
-pub mod gga_vqe;
-pub mod quantum_echoes;
-// Relay Belief Propagation decoder: enhanced BP with relay nodes for trapping set escape + OSD fallback
-pub mod relay_bp;
-
-// Declarative experiment configuration and runner
-pub mod experiment_config;
-
-// Quantum Finance: portfolio optimization, option pricing, VaR/CVaR, credit scoring
-// Applications: QAOA portfolio optimization, QAE Monte Carlo, quantum kernel SVM
-pub mod quantum_finance;
-
-// Quantum Drug Design: molecular simulation, virtual screening, docking, ADMET, lead optimization
-// Applications: quantum-enhanced drug discovery pipeline, binding affinity, generative molecular design
-pub mod quantum_drug_design;
-
-// Hayden-Preskill Protocol: black hole information scrambling and recovery
-// Applications: Page curve, quantum information recovery, firewall paradox, evaporation
-pub mod hayden_preskill;
-
-// Quantum Biology: quantum effects in living systems
-// WORLD FIRST: FMO photosynthesis, enzyme tunneling, avian compass, DNA mutations, quantum nose
-pub mod quantum_biology;
-
-// Quantum Chess: playable quantum chess with superposition, entanglement, measurement
-// WORLD FIRST: Full quantum chess engine inside a quantum simulator
-pub mod quantum_chess;
-
-// Quantum Poker: quantum card games with entangled hands and quantum bluffing
-// WORLD FIRST: Quantum poker with partial measurement and CHSH advantage
-pub mod quantum_poker;
-
-// Quantum Natural Language Processing: DisCoCat/DisCoCirc framework
-// WORLD FIRST: Sentence meaning as quantum circuits, word embeddings as quantum states
-pub mod quantum_nlp;
-
-// Quantum Generative Art: paintings, fractals, interference patterns from quantum mechanics
-// WORLD FIRST: Every pixel determined by actual quantum simulation
-pub mod quantum_art;
-
-// Quantum Darwinism: Zurek's framework for emergence of classical reality
-// WORLD FIRST: Environment-induced superselection, pointer states, redundancy plateau detection
-pub mod quantum_darwinism;
-
-// ArXiv research monitoring engine for quantum computing papers
-pub mod arxiv_monitor;
-
-// PyTorch/JAX bridge: differentiable quantum circuits for ML training loops
-pub mod pytorch_bridge;
-
-// C Foreign Function Interface: stable C ABI for HPC integration
-// Exposes core quantum simulation to C/C++/Fortran/Julia callers
-pub mod c_ffi;
-
-// Post-Quantum Cryptography assessment: NIST PQC standards, quantum attack
-// resource estimation, threat timeline projection, and migration planning
-pub mod pqc_assessment;
-
-// Shaded Lightcone (SLC) circuit pre-processing: causal lightcone analysis
-// to remove qubits and gates that cannot affect measurement outcomes
-pub mod shaded_lightcones;
-
-// Willow Benchmark: Reproducing Google's below-threshold QEC (Nature 2025)
-pub mod willow_benchmark;
-
-// Sample-based Quantum Diagonalization (SQD): IBM's utility-scale quantum chemistry
-pub mod sqd;
-
-// (zx_calculus declared above)
-
-// (unified_neural_decoder declared above)
-
-// Error-diffing bulk QEC sampling: Stim-style frame simulation with bit-packed
-// Pauli frames, batch syndrome sampling, detector error models
-pub mod error_diffing_qec;
-
-// Tree-decomposition based circuit optimization (treespilation)
-pub mod treespilation;
-
-// MBBP-LD: Matching-Based Boundary Pairing with Local Decoding for heavy-hex topologies
-pub mod mbbp_ld_decoder;
-
-// (pinnacle_architecture, neutral_atom_array, photonic_advantage declared above in Phase 6)
-
-// (quantum_finance already declared above)
+// Metal GPU glob re-exports (macOS only)
+#[cfg(target_os = "macos")]
+pub use backends::metal_gpu_fixed::*;
+#[cfg(target_os = "macos")]
+pub use backends::metal_gpu_full::*;
+#[cfg(target_os = "macos")]
+pub use backends::metal_parallel_quantum::*;
 
 // pub use error_handling::{QuantumError, Result, Validator, CircuitValidator, SafeQuantumExecutor};
 pub use adjoint_diff::{AdjointCircuit, AdjointOp, Observable};
@@ -1174,9 +210,14 @@ pub use heisenberg_qpe::{
     estimate_phase_heisenberg, HeisenbergQpeConfig, HeisenbergQpeResult, IdealPhaseOracle,
     PhaseOracle,
 };
+pub use metal_stabilizer::{MetalStabilizerSimulator, StabilizerBenchmarkResult, StabilizerGate};
 pub use pulse_level::{
     state_fidelity, GrapeConfig, Pulse, PulseHamiltonian, PulseShape, PulseSimulator,
 };
+pub use dispersive_readout::{
+    DiscriminationReport, ReadoutConfig, ReadoutResult, ReadoutSimulator,
+};
+pub use cr_calibration::{CRCalibrationResult, CRCalibrator, CRConfig};
 pub use qec_interop::{
     build_matching_graph, build_stim_like_from_dynamic_code, build_stim_like_surface_code_model,
     parse_stim_like_detector_model, DetectorModelConfig, DetectorNode, ErrorTerm, MatchingGraph,
@@ -1184,43 +225,34 @@ pub use qec_interop::{
 };
 pub use quantum_synthesis::{CircuitSynthesizer, SolovayKitaevDecomposer};
 pub use stabilizer::{StabilizerSimulator, StabilizerState};
-pub use metal_stabilizer::{MetalStabilizerSimulator, StabilizerGate, StabilizerBenchmarkResult};
 pub use state_tomography::{
     DensityMatrix, MeasurementBasis, ProcessTomography, StateTomography, TomographySettings,
 };
 pub use topological_quantum::{FibonacciAnyonState, StringNetPlaquette};
 
 // Bleeding-edge re-exports
+pub use circuit_complexity::{
+    AnalysisCircuit, BarrenPlateauRisk, CircuitComplexityAnalyzer, ComplexityReport,
+    QuantumVolumeCalculator, QuantumVolumeEstimate, RiskLevel,
+};
+pub use enhanced_barren_plateau::{
+    BarrenPlateauReport, CostLandscapeVisualization, EmpiricalBarrenPlateauAnalysis,
+    EntanglementCapability, ExpressibilityAnalysis,
+};
+pub use quantum_cloning::{CloningConfig, CloningResult, CloningType, QuantumCloningMachine};
+pub use quantum_game::{GameResult, QuantumGame, QuantumStrategy, QuantumTournament};
 pub use quantum_random_walk::{
-    ContinuousQuantumWalk, ContinuousWalkConfig, DiscreteQuantumWalk, DiscreteWalkConfig,
-    Graph, QuantumPageRank, QuantumWalkSearch, WalkResult,
+    ContinuousQuantumWalk, ContinuousWalkConfig, DiscreteQuantumWalk, DiscreteWalkConfig, Graph,
+    QuantumPageRank, QuantumWalkSearch, WalkResult,
 };
 pub use quantum_reservoir::{
     InputEncoding, QuantumEchoStateNetwork, QuantumReservoir, ReservoirConfig, ReservoirOutput,
     TrainedReservoir,
 };
-pub use quantum_cloning::{CloningConfig, CloningResult, CloningType, QuantumCloningMachine};
-pub use circuit_complexity::{
-    AnalysisCircuit, BarrenPlateauRisk, CircuitComplexityAnalyzer, ComplexityReport,
-    QuantumVolumeCalculator, QuantumVolumeEstimate, RiskLevel,
-};
-pub use state_checkpoint::{
-    AmplitudeChange, CheckpointManager, StateDiff, StateCheckpoint,
-};
-pub use quantum_game::{
-    GameResult, QuantumGame, QuantumStrategy, QuantumTournament,
-};
+pub use state_checkpoint::{AmplitudeChange, CheckpointManager, StateCheckpoint, StateDiff};
 pub use vqe::{hamiltonians, Hamiltonian, PauliOperator, PauliTerm, VQEResult, VQESolver};
-pub use enhanced_barren_plateau::{
-    BarrenPlateauReport, CostLandscapeVisualization, EmpiricalBarrenPlateauAnalysis,
-    EntanglementCapability, ExpressibilityAnalysis,
-};
 
 // Phase 0 re-exports
-pub use traits::{
-    BackendError, BackendResult, ErrorModel, FermionMapping, NalgebraTensorContractor,
-    QuantumBackend, StateVectorBackend, TensorContractor,
-};
 pub use pauli_algebra::{
     CliffordConjugationTable, PauliPropagator, PauliString, PauliSum, WeightedPauliString,
 };
@@ -1228,6 +260,10 @@ pub use pauli_propagation::{
     PauliFrame, PauliPropagationSimulator, PropagationStats, TruncationPolicy,
 };
 pub use quantum_channel::{ChoiMatrix, KrausChannel, QuantumChannel};
+pub use traits::{
+    BackendError, BackendResult, ErrorModel, FermionMapping, NalgebraTensorContractor,
+    QuantumBackend, StateVectorBackend, TensorContractor,
+};
 
 // Re-export new modules when features are enabled
 #[cfg(feature = "cuda")]
@@ -3221,10 +2257,7 @@ fn run_simple_gpu_test() -> std::result::Result<(), String> {
         let state_size = 1usize << num_qubits;
         match benchmark_fixed_gpu_large_scale(num_qubits, 10) {
             Ok(time) => {
-                println!(
-                    "  n={:2} ({} states): {:.6}s",
-                    num_qubits, state_size, time
-                );
+                println!("  n={:2} ({} states): {:.6}s", num_qubits, state_size, time);
             }
             Err(e) => {
                 println!("  n={:2}: Error - {}", num_qubits, e);
@@ -3258,7 +2291,10 @@ fn run_simple_gpu_test() -> std::result::Result<(), String> {
             Ok(time) => {
                 println!(
                     "  n={:2} ({} gates): {:.6}s ({:.3} μs/gate)",
-                    num_qubits, num_gates, time, time * 1e6 / num_gates as f64
+                    num_qubits,
+                    num_gates,
+                    time,
+                    time * 1e6 / num_gates as f64
                 );
             }
             Err(e) => {
@@ -3301,7 +2337,9 @@ fn run_advanced_gpu_test() -> std::result::Result<(), String> {
             Ok(time) => {
                 println!(
                     "  n={:2}: {:.6}s ({:.3} us/gate)",
-                    num_qubits, time, time * 1e6 / num_gates as f64
+                    num_qubits,
+                    time,
+                    time * 1e6 / num_gates as f64
                 );
             }
             Err(e) => println!("  n={:2}: Error - {}", num_qubits, e),
@@ -3353,9 +2391,25 @@ fn run_advanced_gpu_test() -> std::result::Result<(), String> {
     match benchmark_fixed_gpu_large_scale(num_qubits, num_gates) {
         Ok(gpu_time) => {
             let speedup = cpu_time / gpu_time;
-            println!("  CPU: {:.6}s ({:.3} us/gate)", cpu_time, cpu_time * 1e6 / num_gates as f64);
-            println!("  GPU: {:.6}s ({:.3} us/gate)", gpu_time, gpu_time * 1e6 / num_gates as f64);
-            println!("  Speedup: {:.1}x {}", speedup, if speedup > 1.0 { "GPU wins!" } else { "CPU wins" });
+            println!(
+                "  CPU: {:.6}s ({:.3} us/gate)",
+                cpu_time,
+                cpu_time * 1e6 / num_gates as f64
+            );
+            println!(
+                "  GPU: {:.6}s ({:.3} us/gate)",
+                gpu_time,
+                gpu_time * 1e6 / num_gates as f64
+            );
+            println!(
+                "  Speedup: {:.1}x {}",
+                speedup,
+                if speedup > 1.0 {
+                    "GPU wins!"
+                } else {
+                    "CPU wins"
+                }
+            );
         }
         Err(e) => println!("  GPU error: {}", e),
     }
@@ -3403,7 +2457,9 @@ fn run_fixed_gpu_test() -> std::result::Result<(), String> {
             Ok(time) => {
                 println!(
                     "  n={:2}: {:.6}s ({:.3} us/gate)",
-                    num_qubits, time, time * 1e6 / num_gates as f64
+                    num_qubits,
+                    time,
+                    time * 1e6 / num_gates as f64
                 );
             }
             Err(e) => println!("  n={:2}: Error - {}", num_qubits, e),
@@ -3632,15 +2688,10 @@ mod tests {
         use crate::circuit_optimizer::OptimizationLevel;
         use crate::gates::Gate;
 
-        let mut sim = QuantumSimulator::new(2)
-            .with_optimization(OptimizationLevel::Basic);
+        let mut sim = QuantumSimulator::new(2).with_optimization(OptimizationLevel::Basic);
 
         // H-H should cancel, leaving only CNOT
-        let gates = vec![
-            Gate::h(0),
-            Gate::h(0),
-            Gate::cnot(0, 1),
-        ];
+        let gates = vec![Gate::h(0), Gate::h(0), Gate::cnot(0, 1)];
 
         let executed = sim.apply_circuit(&gates);
         assert!(
@@ -3671,8 +2722,7 @@ mod tests {
         let probs_no_opt = sim_no_opt.state.probabilities();
 
         // With optimization
-        let mut sim_opt = QuantumSimulator::new(2)
-            .with_optimization(OptimizationLevel::Aggressive);
+        let mut sim_opt = QuantumSimulator::new(2).with_optimization(OptimizationLevel::Aggressive);
         sim_opt.apply_circuit(&gates);
         let probs_opt = sim_opt.state.probabilities();
 
@@ -3680,7 +2730,9 @@ mod tests {
             assert!(
                 (a - b).abs() < 1e-10,
                 "probability mismatch at index {}: {} vs {}",
-                i, a, b
+                i,
+                a,
+                b
             );
         }
     }
@@ -3713,13 +2765,12 @@ mod tests {
         // Bell state: H(0) then CNOT(0,1) -> should get 50/50 on |00> and |11>
         let gates = vec![Gate::h(0), Gate::cnot(0, 1)];
 
-        let mut sim = QuantumSimulator::new(2)
-            .with_optimization(OptimizationLevel::Moderate);
+        let mut sim = QuantumSimulator::new(2).with_optimization(OptimizationLevel::Moderate);
         let probs = sim.run_circuit(&gates);
         assert_eq!(probs.len(), 4);
         assert!((probs[0] - 0.5).abs() < 1e-10); // |00>
-        assert!(probs[1].abs() < 1e-10);          // |01>
-        assert!(probs[2].abs() < 1e-10);          // |10>
+        assert!(probs[1].abs() < 1e-10); // |01>
+        assert!(probs[2].abs() < 1e-10); // |10>
         assert!((probs[3] - 0.5).abs() < 1e-10); // |11>
     }
 
@@ -3735,8 +2786,7 @@ mod tests {
         ];
 
         // With optimizer: should return stats
-        let mut sim = QuantumSimulator::new(2)
-            .with_optimization(OptimizationLevel::Basic);
+        let mut sim = QuantumSimulator::new(2).with_optimization(OptimizationLevel::Basic);
         let (executed, stats) = sim.apply_circuit_with_stats(&gates);
         assert!(stats.is_some());
         let stats = stats.unwrap();
@@ -3760,5 +2810,4 @@ mod tests {
             .without_optimization();
         assert!(sim.optimizer.is_none());
     }
-
 }

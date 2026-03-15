@@ -6,7 +6,7 @@
 use std::time::Instant;
 
 #[cfg(target_os = "macos")]
-use nqpu_metal::{benchmark_ultra_batched, benchmark_gates};
+use nqpu_metal::{benchmark_gates, benchmark_ultra_batched};
 
 fn main() {
     println!("╔═══════════════════════════════════════════════════════════════╗");
@@ -21,7 +21,11 @@ fn main() {
 
         for &num_qubits in &test_qubits {
             println!("═══════════════════════════════════════════════════════════════");
-            println!("Testing at n={} qubits ({} states)", num_qubits, 1usize << num_qubits);
+            println!(
+                "Testing at n={} qubits ({} states)",
+                num_qubits,
+                1usize << num_qubits
+            );
             println!("═══════════════════════════════════════════════════════════════\n");
 
             // Test different batch sizes
@@ -36,8 +40,10 @@ fn main() {
                         let us_per_gate = time * 1e6 / batch_size as f64;
                         let gates_per_sec = batch_size as f64 / time;
 
-                        println!("  {:7} gates: {:.6}s ({:.3} μs/gate, {:.0} gates/sec)",
-                            batch_size, time, us_per_gate, gates_per_sec);
+                        println!(
+                            "  {:7} gates: {:.6}s ({:.3} μs/gate, {:.0} gates/sec)",
+                            batch_size, time, us_per_gate, gates_per_sec
+                        );
                     }
                     Err(e) => println!("  {:7} gates: ERROR - {}", batch_size, e),
                 }
@@ -63,10 +69,17 @@ fn main() {
                     println!("  CPU:  {:.6}s ({:.3} μs/gate)", cpu_elapsed, cpu_us);
                     println!("  GPU:  {:.6}s ({:.3} μs/gate)", gpu_time, gpu_us);
                     println!();
-                    println!("  🏆 SPEEDUP: {:.1}× {}", speedup,
-                        if speedup >= 100.0 { "✅ (TARGET MET!)" }
-                        else if speedup >= 63.0 { "⚠️ (Above previous best)" }
-                        else { "❌ (Below target)" });
+                    println!(
+                        "  🏆 SPEEDUP: {:.1}× {}",
+                        speedup,
+                        if speedup >= 100.0 {
+                            "✅ (TARGET MET!)"
+                        } else if speedup >= 63.0 {
+                            "⚠️ (Above previous best)"
+                        } else {
+                            "❌ (Below target)"
+                        }
+                    );
                 }
                 Err(e) => println!("  GPU error: {}", e),
             }

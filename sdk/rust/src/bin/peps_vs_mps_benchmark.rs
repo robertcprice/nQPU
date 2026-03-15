@@ -34,12 +34,7 @@ fn swap_gate() -> [[Complex64; 4]; 4] {
 fn cnot_gate_lr() -> [[Complex64; 4]; 4] {
     let z = Complex64::new(0.0, 0.0);
     let o = Complex64::new(1.0, 0.0);
-    [
-        [o, z, z, z],
-        [z, o, z, z],
-        [z, z, z, o],
-        [z, z, o, z],
-    ]
+    [[o, z, z, z], [z, o, z, z], [z, z, z, o], [z, z, o, z]]
 }
 
 // ── helpers ──────────────────────────────────────────────────────────────
@@ -108,12 +103,7 @@ fn mps_long_range_cnot(sim: &mut MPSSimulator, control: usize, target: usize) {
         // CNOT(ctrl=right, tgt=left): |00>->|00>, |01>->|11>, |10>->|10>, |11>->|01>
         let z = Complex64::new(0.0, 0.0);
         let o = Complex64::new(1.0, 0.0);
-        let cnot_rl: [[Complex64; 4]; 4] = [
-            [o, z, z, z],
-            [z, z, z, o],
-            [z, z, o, z],
-            [z, o, z, z],
-        ];
+        let cnot_rl: [[Complex64; 4]; 4] = [[o, z, z, z], [z, z, z, o], [z, z, o, z], [z, o, z, z]];
         sim.apply_two_qubit_gate_matrix(control - 1, control, &cnot_rl);
         // SWAP back
         if control > target + 1 {
@@ -129,11 +119,7 @@ fn mps_long_range_cnot(sim: &mut MPSSimulator, control: usize, target: usize) {
 /// Fidelity |<psi|phi>|^2 between two normalised amplitude vectors.
 fn fidelity(a: &[Complex64], b: &[Complex64]) -> f64 {
     assert_eq!(a.len(), b.len());
-    let inner: Complex64 = a
-        .iter()
-        .zip(b.iter())
-        .map(|(ai, bi)| ai.conj() * bi)
-        .sum();
+    let inner: Complex64 = a.iter().zip(b.iter()).map(|(ai, bi)| ai.conj() * bi).sum();
     inner.norm_sqr()
 }
 
@@ -363,7 +349,15 @@ fn print_summary(results: &[BenchResult]) {
     println!("=== Summary Table ===\n");
     println!(
         "{:<16} {:>6} {:>6} {:>12} {:>12} {:>8} {:>8} {:>10} {:>10}",
-        "Lattice", "Qubits", "Layers", "PEPS (ms)", "MPS (ms)", "PBond", "MBond", "Fidelity", "Faster"
+        "Lattice",
+        "Qubits",
+        "Layers",
+        "PEPS (ms)",
+        "MPS (ms)",
+        "PBond",
+        "MBond",
+        "Fidelity",
+        "Faster"
     );
     println!("{}", "-".repeat(100));
     for r in results {

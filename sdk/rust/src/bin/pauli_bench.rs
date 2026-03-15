@@ -114,8 +114,7 @@ fn random_clifford_t_circuit(n: usize, depth: usize, rng: &mut StdRng) -> Vec<Cl
 fn bench_propagator(n_qubits: usize, depth: usize, rng: &mut StdRng) -> BenchResult {
     let circuit = random_clifford_t_circuit(n_qubits, depth, rng);
     let observable = WeightedPackedPauli::unit(PackedPauliString::single_z(n_qubits, 0));
-    let config = GpuPropConfig::default()
-        .with_max_terms(50_000);
+    let config = GpuPropConfig::default().with_max_terms(50_000);
 
     measure(|| {
         let mut prop = PauliPropagator::new(
@@ -210,8 +209,10 @@ fn main() {
 
     // --- Section 1: Clifford+T propagation at various qubit counts ---
     println!("--- Clifford+T Propagation (100 gates, ~5 T-gates) ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>14}",
-        "qubits", "mean_us", "min_us", "max_us", "gates/sec");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>14}",
+        "qubits", "mean_us", "min_us", "max_us", "gates/sec"
+    );
     println!("{}", "-".repeat(62));
 
     let depth = 100;
@@ -222,14 +223,18 @@ fn main() {
         } else {
             0.0
         };
-        println!("{:>8} {:>12.1} {:>12.1} {:>12.1} {:>14.0}",
-            n, r.mean_us, r.min_us, r.max_us, gates_per_sec);
+        println!(
+            "{:>8} {:>12.1} {:>12.1} {:>12.1} {:>14.0}",
+            n, r.mean_us, r.min_us, r.max_us, gates_per_sec
+        );
     }
 
     // --- Section 2: Purely Clifford propagation (no T-gates, no explosion) ---
     println!("\n--- Pure Clifford Propagation (1000 gates, no T) ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>14}",
-        "qubits", "mean_us", "min_us", "max_us", "gates/sec");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>14}",
+        "qubits", "mean_us", "min_us", "max_us", "gates/sec"
+    );
     println!("{}", "-".repeat(62));
 
     let cliff_depth = 1000;
@@ -240,14 +245,18 @@ fn main() {
         } else {
             0.0
         };
-        println!("{:>8} {:>12.1} {:>12.1} {:>12.1} {:>14.0}",
-            n, r.mean_us, r.min_us, r.max_us, gates_per_sec);
+        println!(
+            "{:>8} {:>12.1} {:>12.1} {:>12.1} {:>14.0}",
+            n, r.mean_us, r.min_us, r.max_us, gates_per_sec
+        );
     }
 
     // --- Section 3: AutoDispatch batch propagation ---
     println!("\n--- AutoDispatch Batch Propagation (single H gate) ---");
-    println!("{:>8} {:>10} {:>12} {:>12} {:>12} {:>16}",
-        "qubits", "n_strings", "mean_us", "min_us", "max_us", "strings/sec");
+    println!(
+        "{:>8} {:>10} {:>12} {:>12} {:>12} {:>16}",
+        "qubits", "n_strings", "mean_us", "min_us", "max_us", "strings/sec"
+    );
     println!("{}", "-".repeat(78));
 
     for &n in &[10, 20, 50] {
@@ -258,15 +267,19 @@ fn main() {
             } else {
                 0.0
             };
-            println!("{:>8} {:>10} {:>12.1} {:>12.1} {:>12.1} {:>16.0}",
-                n, ns, r.mean_us, r.min_us, r.max_us, strings_per_sec);
+            println!(
+                "{:>8} {:>10} {:>12.1} {:>12.1} {:>12.1} {:>16.0}",
+                n, ns, r.mean_us, r.min_us, r.max_us, strings_per_sec
+            );
         }
     }
 
     // --- Section 4: Scaling comparison (CPU propagator at increasing depth) ---
     println!("\n--- Depth Scaling (20 qubits, Clifford+T) ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>14}",
-        "depth", "mean_us", "min_us", "max_us", "gates/sec");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>14}",
+        "depth", "mean_us", "min_us", "max_us", "gates/sec"
+    );
     println!("{}", "-".repeat(62));
 
     for &d in &[50, 100, 200, 500] {
@@ -276,8 +289,10 @@ fn main() {
         } else {
             0.0
         };
-        println!("{:>8} {:>12.1} {:>12.1} {:>12.1} {:>14.0}",
-            d, r.mean_us, r.min_us, r.max_us, gates_per_sec);
+        println!(
+            "{:>8} {:>12.1} {:>12.1} {:>12.1} {:>14.0}",
+            d, r.mean_us, r.min_us, r.max_us, gates_per_sec
+        );
     }
 
     println!("\n[done]");

@@ -22,12 +22,18 @@ fn main() {
         output_dir: PathBuf::from("experiments"),
     };
 
-    println!("Running QRNG source comparison with {} samples per source...", n_samples);
+    println!(
+        "Running QRNG source comparison with {} samples per source...",
+        n_samples
+    );
     println!();
 
     match run_source_comparison(config) {
         Ok(results) => {
-            println!("\n✅ Comparison complete with {} sources tested", results.len());
+            println!(
+                "\n✅ Comparison complete with {} sources tested",
+                results.len()
+            );
         }
         Err(e) => {
             eprintln!("❌ Error: {}", e);

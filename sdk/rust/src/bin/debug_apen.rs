@@ -6,7 +6,8 @@ fn main() {
     let mut bytes = vec![0u8; 100_000];
     file.read_exact(&mut bytes).unwrap();
 
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -23,7 +24,8 @@ fn main() {
         let mut counts = vec![0usize; num_patterns];
 
         // Extend sequence by wrapping
-        let extended: Vec<u8> = bits.iter()
+        let extended: Vec<u8> = bits
+            .iter()
             .chain(bits[..pattern_len - 1].iter())
             .copied()
             .collect();
@@ -63,7 +65,10 @@ fn main() {
     let chi_sq_code = 2.0 * n as f64 * ((2.0_f64.powi(m as i32) as f64).ln() - ap_en);
     let chi_sq_nist = 2.0 * n as f64 * (2.0_f64.ln() - ap_en);
 
-    println!("\nCode formula: χ² = 2n * [ln(2^m) - ApEn] = {}", chi_sq_code);
+    println!(
+        "\nCode formula: χ² = 2n * [ln(2^m) - ApEn] = {}",
+        chi_sq_code
+    );
     println!("NIST formula: χ² = 2n * [ln(2) - ApEn] = {}", chi_sq_nist);
 
     // Expected: ApEn(m) should be close to ln(2) = 0.693 for random data

@@ -12,7 +12,7 @@ use std::time::Instant;
 
 #[cfg(target_os = "macos")]
 use nqpu_metal::metal_state::MetalQuantumState;
-use nqpu_metal::{C64, QuantumState, GateOperations};
+use nqpu_metal::{GateOperations, QuantumState, C64};
 
 fn main() {
     println!("╔═══════════════════════════════════════════════════════════════╗");
@@ -29,7 +29,10 @@ fn main() {
 
     for (num_qubits, num_gates, description) in test_configs {
         println!("═══════════════════════════════════════════════════════════════");
-        println!("Test: {} qubits, {} gates - {}", num_qubits, num_gates, description);
+        println!(
+            "Test: {} qubits, {} gates - {}",
+            num_qubits, num_gates, description
+        );
         println!("═══════════════════════════════════════════════════════════════");
 
         run_comprehensive_benchmark(num_qubits, num_gates);
@@ -86,26 +89,50 @@ fn run_comprehensive_benchmark(num_qubits: usize, num_gates: usize) {
     println!("│ Backend              │ Time (ms) │ Speedup │");
     println!("├─────────────────────┼───────────┼─────────┤");
 
-    println!("│ CPU (baseline)        │ {:.1}     │ 1.0x    │", cpu_time * 1000.0);
+    println!(
+        "│ CPU (baseline)        │ {:.1}     │ 1.0x    │",
+        cpu_time * 1000.0
+    );
 
     #[cfg(target_os = "macos")]
     {
-        println!("│ GPU-First (T1)        │ {:.1}     │ {:.1}x    │", t1_time * 1000.0, t1_speedup);
+        println!(
+            "│ GPU-First (T1)        │ {:.1}     │ {:.1}x    │",
+            t1_time * 1000.0,
+            t1_speedup
+        );
     }
 
-    println!("│ Tensor Cores (T2)     │ ~{:.1}-{:.1} │ 2-5x    │",
-             cpu_time * 1000.0 / 2.0, cpu_time * 1000.0 / 5.0);
-    println!("│ T1+T2 Combined        │ ~{:.1}-{:.1} │ 10-50x  │",
-             cpu_time * 1000.0 / 10.0, cpu_time * 1000.0 / 50.0);
-    println!("│ Tensor Network (T3)  │ ~{:.1}-{:.1} │ 5-20x   │",
-             cpu_time * 1000.0 / 5.0, cpu_time * 1000.0 / 20.0);
-    println!("│ Schrödinger-Feynman  │ ~{:.1}-{:.1} │ 20-100x │",
-             cpu_time * 1000.0 / 20.0, cpu_time * 1000.0 / 100.0);
+    println!(
+        "│ Tensor Cores (T2)     │ ~{:.1}-{:.1} │ 2-5x    │",
+        cpu_time * 1000.0 / 2.0,
+        cpu_time * 1000.0 / 5.0
+    );
+    println!(
+        "│ T1+T2 Combined        │ ~{:.1}-{:.1} │ 10-50x  │",
+        cpu_time * 1000.0 / 10.0,
+        cpu_time * 1000.0 / 50.0
+    );
+    println!(
+        "│ Tensor Network (T3)  │ ~{:.1}-{:.1} │ 5-20x   │",
+        cpu_time * 1000.0 / 5.0,
+        cpu_time * 1000.0 / 20.0
+    );
+    println!(
+        "│ Schrödinger-Feynman  │ ~{:.1}-{:.1} │ 20-100x │",
+        cpu_time * 1000.0 / 20.0,
+        cpu_time * 1000.0 / 100.0
+    );
 
     println!("└─────────────────────┴───────────┴─────────┘");
 }
 
-fn benchmark_cpu(num_qubits: usize, gates_per_iter: usize, iterations: usize, h_matrix: &[[C64; 2]; 2]) -> f64 {
+fn benchmark_cpu(
+    num_qubits: usize,
+    gates_per_iter: usize,
+    iterations: usize,
+    h_matrix: &[[C64; 2]; 2],
+) -> f64 {
     let start = Instant::now();
 
     for _ in 0..iterations {

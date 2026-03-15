@@ -1,24 +1,24 @@
 use std::env;
 use std::time::Instant;
 
-use nqpu_metal::QuantumSimulator;
-use nqpu_metal::density_matrix::DensityMatrixSimulator;
 use nqpu_metal::adaptive_mps::{AdaptiveConfig, AdaptiveMPS};
-use nqpu_metal::tensor_network::MPSSimulator;
-use nqpu_metal::peps::PEPSimulator;
-use nqpu_metal::qft_2d::QFT2D;
-use nqpu_metal::simulation_3d::Simulator3D;
 use nqpu_metal::advanced_noise::{NoiseModel, NoisySimulator};
-use nqpu_metal::gates::Gate;
-use nqpu_metal::state_tomography::{
-    StateTomography, ProcessTomography, TomographySettings, TomographyMeasurement, MeasurementBasis,
-};
-use nqpu_metal::vqe::{VQESolver, hamiltonians};
-use nqpu_metal::qao::{QAOSolver, CostFunction, Mixer};
-use nqpu_metal::qpe::QPESolver;
 use nqpu_metal::annealing::{AnnealingConfig, QuantumAnnealing};
+use nqpu_metal::density_matrix::DensityMatrixSimulator;
+use nqpu_metal::gates::Gate;
 #[cfg(all(feature = "metal", target_os = "macos"))]
 use nqpu_metal::metal_mps::MetalMPSimulator;
+use nqpu_metal::peps::PEPSimulator;
+use nqpu_metal::qao::{CostFunction, Mixer, QAOSolver};
+use nqpu_metal::qft_2d::QFT2D;
+use nqpu_metal::qpe::QPESolver;
+use nqpu_metal::simulation_3d::Simulator3D;
+use nqpu_metal::state_tomography::{
+    MeasurementBasis, ProcessTomography, StateTomography, TomographyMeasurement, TomographySettings,
+};
+use nqpu_metal::tensor_network::MPSSimulator;
+use nqpu_metal::vqe::{hamiltonians, VQESolver};
+use nqpu_metal::QuantumSimulator;
 
 use ndarray::Array2;
 use num_complex::Complex64;
@@ -121,13 +121,15 @@ fn op_adaptive_mps(qubits: usize, bond: usize) -> Result<String, String> {
     let current = sim.current_bond_dim();
     let expansions = sim.expansion_count();
     let _ = sim.measure();
-    Ok(format!("current_bond={} expansions={}", current, expansions))
+    Ok(format!(
+        "current_bond={} expansions={}",
+        current, expansions
+    ))
 }
 
 #[cfg(all(feature = "metal", target_os = "macos"))]
 fn op_metal_mps(qubits: usize, bond: usize) -> Result<String, String> {
-    let mut sim = MetalMPSimulator::new(qubits, bond)
-        .map_err(|e| e.to_string())?;
+    let mut sim = MetalMPSimulator::new(qubits, bond).map_err(|e| e.to_string())?;
     for i in 0..qubits {
         sim.h(i)?;
     }
@@ -216,7 +218,10 @@ fn op_vqe(qubits: usize, steps: usize) -> Result<String, String> {
     let mut solver = VQESolver::new(qubits, 1, h, 0.05);
     solver.max_iterations = steps.max(1).min(50);
     let res = solver.find_ground_state();
-    Ok(format!("iters={} energy={}", res.iterations, res.ground_state_energy))
+    Ok(format!(
+        "iters={} energy={}",
+        res.iterations, res.ground_state_energy
+    ))
 }
 
 fn op_qao(qubits: usize, steps: usize) -> Result<String, String> {
@@ -224,11 +229,17 @@ fn op_qao(qubits: usize, steps: usize) -> Result<String, String> {
     for i in 0..qubits {
         mat[[i, i]] = 1.0;
     }
-    let cost = CostFunction::QUBO { matrix: mat, num_variables: qubits };
+    let cost = CostFunction::QUBO {
+        matrix: mat,
+        num_variables: qubits,
+    };
     let mut solver = QAOSolver::new(cost, 1, Mixer::Classical { angle: 0.5 });
     solver.max_iterations = steps.max(1).min(50);
     let res = solver.optimize();
-    Ok(format!("iters={} best_cost={}", res.iterations, res.best_cost))
+    Ok(format!(
+        "iters={} best_cost={}",
+        res.iterations, res.best_cost
+    ))
 }
 
 fn op_qpe(precision_qubits: usize) -> Result<String, String> {
@@ -236,7 +247,10 @@ fn op_qpe(precision_qubits: usize) -> Result<String, String> {
     let eigenphase = std::f64::consts::FRAC_PI_4;
     let solver = QPESolver::new(eigenphase, precision_qubits);
     let res = solver.estimate_phase();
-    Ok(format!("phase={} confidence={}", res.phase_estimate, res.confidence))
+    Ok(format!(
+        "phase={} confidence={}",
+        res.phase_estimate, res.confidence
+    ))
 }
 
 fn op_annealing(vars: usize, steps: usize) -> Result<String, String> {
@@ -250,13 +264,15 @@ fn op_annealing(vars: usize, steps: usize) -> Result<String, String> {
     cfg.max_iterations = steps.max(10).min(200);
     let mut annealer = QuantumAnnealing::new(cfg);
     let res = annealer.anneal();
-    Ok(format!("iters={} best_cost={}", res.iterations, res.best_cost))
+    Ok(format!(
+        "iters={} best_cost={}",
+        res.iterations, res.best_cost
+    ))
 }
 
 #[cfg(all(feature = "metal", target_os = "macos"))]
 fn op_metal_backend(qubits: usize) -> Result<String, String> {
-    let sim = nqpu_metal::metal_backend::MetalSimulator::new(qubits)
-        .map_err(|e| e.to_string())?;
+    let sim = nqpu_metal::metal_backend::MetalSimulator::new(qubits).map_err(|e| e.to_string())?;
     let mut gates = vec![Gate::h(0)];
     if qubits > 1 {
         gates.push(Gate::cnot(0, 1));
@@ -302,9 +318,13 @@ fn main() {
         "adaptive_mps" => op_adaptive_mps(qubits, bond),
         "metal_mps" => {
             #[cfg(all(feature = "metal", target_os = "macos"))]
-            { op_metal_mps(qubits, bond) }
+            {
+                op_metal_mps(qubits, bond)
+            }
             #[cfg(not(all(feature = "metal", target_os = "macos")))]
-            { Err("metal mps not available".to_string()) }
+            {
+                Err("metal mps not available".to_string())
+            }
         }
         "peps" => op_peps(size),
         "qft_2d" => op_qft_2d(size),
@@ -318,21 +338,33 @@ fn main() {
         "annealing" => op_annealing(qubits, steps),
         "metal_backend" => {
             #[cfg(all(feature = "metal", target_os = "macos"))]
-            { op_metal_backend(qubits) }
+            {
+                op_metal_backend(qubits)
+            }
             #[cfg(not(all(feature = "metal", target_os = "macos")))]
-            { Err("metal backend not available".to_string()) }
+            {
+                Err("metal backend not available".to_string())
+            }
         }
         "cuda_backend" => {
             #[cfg(feature = "cuda")]
-            { op_cuda_backend(qubits) }
+            {
+                op_cuda_backend(qubits)
+            }
             #[cfg(not(feature = "cuda"))]
-            { Err("cuda backend not available".to_string()) }
+            {
+                Err("cuda backend not available".to_string())
+            }
         }
         "rocm_backend" => {
             #[cfg(feature = "rocm")]
-            { op_rocm_backend(qubits) }
+            {
+                op_rocm_backend(qubits)
+            }
             #[cfg(not(feature = "rocm"))]
-            { Err("rocm backend not available".to_string()) }
+            {
+                Err("rocm backend not available".to_string())
+            }
         }
         _ => Err(format!("unsupported op: {}", op)),
     };
@@ -342,7 +374,10 @@ fn main() {
             print_result(&op, qubits, size, bond, steps, elapsed, &detail);
         }
         Err(e) => {
-            eprintln!("ERROR op={} qubits={} size={} bond={} steps={} err={}", op, qubits, size, bond, steps, e);
+            eprintln!(
+                "ERROR op={} qubits={} size={} bond={} steps={} err={}",
+                op, qubits, size, bond, steps, e
+            );
             std::process::exit(1);
         }
     }

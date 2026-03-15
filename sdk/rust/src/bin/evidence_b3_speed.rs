@@ -1,7 +1,7 @@
+use nqpu_metal::gates::Gate;
 use nqpu_metal::mixed_precision::{
     F32ExecutionBackend, GateContext, MixedPrecisionSimulator, PrecisionPolicy,
 };
-use nqpu_metal::gates::Gate;
 use std::env;
 use std::hint::black_box;
 use std::time::Instant;
@@ -22,7 +22,13 @@ fn build_circuit(num_qubits: usize, depth: usize) -> Vec<Gate> {
 
 fn arg_value(args: &[String], key: &str, default: &str) -> String {
     args.windows(2)
-        .find_map(|w| if w[0] == key { Some(w[1].clone()) } else { None })
+        .find_map(|w| {
+            if w[0] == key {
+                Some(w[1].clone())
+            } else {
+                None
+            }
+        })
         .unwrap_or_else(|| default.to_string())
 }
 

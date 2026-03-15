@@ -18,7 +18,7 @@
 
 #[cfg(feature = "lsp")]
 fn main() {
-    use nqpu_metal::qasm_lsp::{QasmLanguageServer, DiagnosticSeverity};
+    use nqpu_metal::qasm_lsp::{DiagnosticSeverity, QasmLanguageServer};
     use std::collections::HashMap;
     use std::io::{self, BufRead, Read, Write};
 
@@ -79,7 +79,10 @@ fn main() {
 
         let method = msg.get("method").and_then(|m| m.as_str()).unwrap_or("");
         let id = msg.get("id").cloned();
-        let params = msg.get("params").cloned().unwrap_or(serde_json::Value::Null);
+        let params = msg
+            .get("params")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null);
 
         match method {
             // ---- initialize ----
@@ -137,34 +140,31 @@ fn main() {
                                     .get("start")
                                     .and_then(|s| s.get("line"))
                                     .and_then(|l| l.as_u64())
-                                    .unwrap_or(0) as usize;
+                                    .unwrap_or(0)
+                                    as usize;
                                 let start_col = range
                                     .get("start")
                                     .and_then(|s| s.get("character"))
                                     .and_then(|c| c.as_u64())
-                                    .unwrap_or(0) as usize;
+                                    .unwrap_or(0)
+                                    as usize;
                                 let end_line = range
                                     .get("end")
                                     .and_then(|e| e.get("line"))
                                     .and_then(|l| l.as_u64())
-                                    .unwrap_or(0) as usize;
+                                    .unwrap_or(0)
+                                    as usize;
                                 let end_col = range
                                     .get("end")
                                     .and_then(|e| e.get("character"))
                                     .and_then(|c| c.as_u64())
-                                    .unwrap_or(0) as usize;
-                                let new_text = change
-                                    .get("text")
-                                    .and_then(|t| t.as_str())
-                                    .unwrap_or("");
+                                    .unwrap_or(0)
+                                    as usize;
+                                let new_text =
+                                    change.get("text").and_then(|t| t.as_str()).unwrap_or("");
 
                                 current = QasmLanguageServer::apply_incremental_edit(
-                                    &current,
-                                    start_line,
-                                    start_col,
-                                    end_line,
-                                    end_col,
-                                    new_text,
+                                    &current, start_line, start_col, end_line, end_col, new_text,
                                 );
                             } else {
                                 // Full content replacement (fallback for mode 1

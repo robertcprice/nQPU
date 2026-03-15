@@ -20,17 +20,28 @@ fn main() {
         output_dir: PathBuf::from("experiments"),
     };
 
-    println!("Testing {} extraction methods with {} samples...\n", 12, n_samples);
+    println!(
+        "Testing {} extraction methods with {} samples...\n",
+        12, n_samples
+    );
 
     match run_extraction_experiments(config) {
         Ok(results) => {
             // Find best method
-            let best = results.iter()
-                .filter_map(|r| r.nist_result.as_ref().map(|n| (r.method_name.clone(), n.passed_count, n.min_entropy)))
+            let best = results
+                .iter()
+                .filter_map(|r| {
+                    r.nist_result
+                        .as_ref()
+                        .map(|n| (r.method_name.clone(), n.passed_count, n.min_entropy))
+                })
                 .max_by_key(|(_, pass, _)| *pass);
 
             if let Some((name, pass, entropy)) = best {
-                println!("\n🏆 BEST METHOD: {} with {}/15 NIST passes ({:.4} entropy)", name, pass, entropy);
+                println!(
+                    "\n🏆 BEST METHOD: {} with {}/15 NIST passes ({:.4} entropy)",
+                    name, pass, entropy
+                );
             }
         }
         Err(e) => {

@@ -13,8 +13,8 @@
 //! - Fault-tolerant quantum computing
 //! - Topological quantum codes
 
-pub mod mwpm;
 pub mod bp;
+pub mod mwpm;
 
-pub use mwpm::{MWPMDecoder, SurfaceCodeConfig, SurfaceCodeDecoder, Syndrome};
 pub use bp::BPDecoder;
+pub use mwpm::{MWPMDecoder, SurfaceCodeConfig, SurfaceCodeDecoder, Syndrome};

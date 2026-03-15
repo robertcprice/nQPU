@@ -76,8 +76,10 @@ fn main() {
             "✅ Raw noise"
         };
 
-        println!("║ {:<25} │ {:.4}   │ {:.4}   │ {:5.1}% │ {:5.1} │ {:<21} ║",
-            r.name, r.shannon, r.min_entropy, r.score, r.throughput, quantum_status);
+        println!(
+            "║ {:<25} │ {:.4}   │ {:.4}   │ {:5.1}% │ {:5.1} │ {:<21} ║",
+            r.name, r.shannon, r.min_entropy, r.score, r.throughput, quantum_status
+        );
     }
 
     println!("╚══════════════════════════════════════════════════════════════════════════════════════════╝");
@@ -103,19 +105,40 @@ fn main() {
     println!();
 
     println!("CRITICAL INSIGHT:");
-    println!("  ┌─────────────────────────────────────────────────────────────────────────────────────┐");
-    println!("  │ High Shannon entropy does NOT prove quantum randomness!                           │");
-    println!("  │                                                                                    │");
-    println!("  │ Python PRNG scores ~0.999 Shannon but is DETERMINISTIC.                           │");
-    println!("  │ /dev/urandom scores ~0.999 Shannon but is a CRYPTO PRNG.                          │");
-    println!("  │                                                                                    │");
-    println!("  │ Only BELL INEQUALITY TESTS can certify quantum randomness.                        │");
-    println!("  │ Consumer hardware sources are BELIEVED quantum based on physics, not certified.   │");
-    println!("  └─────────────────────────────────────────────────────────────────────────────────────┘");
+    println!(
+        "  ┌─────────────────────────────────────────────────────────────────────────────────────┐"
+    );
+    println!(
+        "  │ High Shannon entropy does NOT prove quantum randomness!                           │"
+    );
+    println!(
+        "  │                                                                                    │"
+    );
+    println!(
+        "  │ Python PRNG scores ~0.999 Shannon but is DETERMINISTIC.                           │"
+    );
+    println!(
+        "  │ /dev/urandom scores ~0.999 Shannon but is a CRYPTO PRNG.                          │"
+    );
+    println!(
+        "  │                                                                                    │"
+    );
+    println!(
+        "  │ Only BELL INEQUALITY TESTS can certify quantum randomness.                        │"
+    );
+    println!(
+        "  │ Consumer hardware sources are BELIEVED quantum based on physics, not certified.   │"
+    );
+    println!(
+        "  └─────────────────────────────────────────────────────────────────────────────────────┘"
+    );
     println!();
 
     // Save results
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let timestamp = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
     let filename = format!("/tmp/shannon_benchmark_{}.json", timestamp);
     let json = serde_json::to_string_pretty(&results).unwrap_or_default();
     if let Ok(mut file) = File::create(&filename) {
@@ -172,7 +195,9 @@ fn measure_entropy(bits: &[u8]) -> (f64, f64, f64) {
     if bits.len() > 50 {
         let mut runs = 1;
         for i in 1..bits.len() {
-            if bits[i] != bits[i-1] { runs += 1; }
+            if bits[i] != bits[i - 1] {
+                runs += 1;
+            }
         }
         let expected = (bits.len() as f64 + 1.0) / 2.0;
         scores.push(1.0 - ((runs as f64 - expected).abs() / expected).min(1.0));
@@ -188,13 +213,22 @@ fn test_openentropy_raw() -> Option<SourceResult> {
     let start = Instant::now();
 
     let output = Command::new(path)
-        .args(["stream", "--format", "raw", "--bytes", &format!("{}", SAMPLES/8), "--conditioning", "raw"])
+        .args([
+            "stream",
+            "--format",
+            "raw",
+            "--bytes",
+            &format!("{}", SAMPLES / 8),
+            "--conditioning",
+            "raw",
+        ])
         .output()
         .ok()?;
 
     let elapsed = start.elapsed();
     let bytes = output.stdout;
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -215,13 +249,22 @@ fn test_openentropy_conditioned() -> Option<SourceResult> {
     let start = Instant::now();
 
     let output = Command::new(path)
-        .args(["stream", "--format", "raw", "--bytes", &format!("{}", SAMPLES/8), "--conditioning", "sha256"])
+        .args([
+            "stream",
+            "--format",
+            "raw",
+            "--bytes",
+            &format!("{}", SAMPLES / 8),
+            "--conditioning",
+            "sha256",
+        ])
         .output()
         .ok()?;
 
     let elapsed = start.elapsed();
     let bytes = output.stdout;
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -278,7 +321,8 @@ fn test_urandom() -> Option<SourceResult> {
     file.read_exact(&mut bytes).ok()?;
 
     let elapsed = start.elapsed();
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -304,7 +348,11 @@ fn test_python_prng() -> Option<SourceResult> {
 
     let elapsed = start.elapsed();
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let bits: Vec<u8> = stdout.trim().chars().map(|c| if c == '1' { 1 } else { 0 }).collect();
+    let bits: Vec<u8> = stdout
+        .trim()
+        .chars()
+        .map(|c| if c == '1' { 1 } else { 0 })
+        .collect();
 
     let (shannon, min_entropy, score) = measure_entropy(&bits);
     let throughput = bits.len() as f64 / 8.0 / elapsed.as_secs_f64() / 1024.0;
@@ -322,7 +370,15 @@ fn test_ssd_quantum() -> Option<SourceResult> {
     let start = Instant::now();
 
     let output = Command::new("cargo")
-        .args(["run", "--release", "--bin", "optimized_ssd_quantum", "--", "--samples", &format!("{}", SAMPLES/4)])
+        .args([
+            "run",
+            "--release",
+            "--bin",
+            "optimized_ssd_quantum",
+            "--",
+            "--samples",
+            &format!("{}", SAMPLES / 4),
+        ])
         .current_dir(std::env::current_dir().unwrap())
         .output()
         .ok()?;

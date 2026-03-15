@@ -492,6 +492,9 @@ adds adaptive refinement on top of that fixed-grid scan, using metrics like
 `strongest_cusp_strength`, `strongest_prominence`, `candidate_count`, or
 `strongest_candidate_time` together with the existing refinement strategies and
 insertion policies.
+`ModelQPU.adaptive_dqpt_diagnostics(...)` adds the complementary time-domain
+workflow, refining the DQPT time grid itself against `return_rate`, `echo`, or
+`amplitude_magnitude` before or alongside a parameter scan.
 
 ## Current Limits
 

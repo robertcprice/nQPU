@@ -6,7 +6,8 @@ fn main() {
     let mut bytes = vec![0u8; 100_000];
     file.read_exact(&mut bytes).unwrap();
 
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -18,7 +19,8 @@ fn main() {
         let num_patterns = 2_usize.pow(pattern_len as u32);
         let mut counts = vec![0i64; num_patterns];
 
-        let extended: Vec<u8> = bits.iter()
+        let extended: Vec<u8> = bits
+            .iter()
             .chain(bits[..pattern_len - 1].iter())
             .copied()
             .collect();
@@ -33,7 +35,7 @@ fn main() {
         let sum_sq: f64 = counts.iter().map(|&c| (c as f64).powi(2)).sum();
         let n_f = n as f64;
         let two_pow_m = 2.0_f64.powi(pattern_len as i32);
-        
+
         // NIST formula: ψ²_m = (2^m / n) * Σ count[i]² - n
         two_pow_m * sum_sq / n_f - n_f
     };
@@ -64,7 +66,7 @@ fn main() {
 
     println!("\ndf1 = {}", df1);
     println!("df2 = {}", df2);
-    
+
     // Expected: psi^2 should be small (close to 0) for random data
     // v1 and v2 should be small positive values
 }

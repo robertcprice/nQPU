@@ -1,6 +1,7 @@
 """Research-focused model Hamiltonians, solvers, and experiment workflows."""
 
 from .experiments import (
+    AdaptiveDQPTDiagnosticsResult,
     CorrelationMatrixResult,
     DQPTCandidate,
     DQPTDiagnosticsResult,
@@ -59,6 +60,7 @@ from .solvers import (
 
 __all__ = [
     "AutoSolver",
+    "AdaptiveDQPTDiagnosticsResult",
     "CorrelationMatrixResult",
     "CustomHamiltonian",
     "DQPTCandidate",

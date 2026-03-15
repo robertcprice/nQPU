@@ -168,26 +168,40 @@ fn main() {
 
     // --- Section 1: State allocation ---
     println!("--- State Allocation ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>12}",
-        "qubits", "memory", "mean_us", "min_us", "max_us");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>12}",
+        "qubits", "memory", "mean_us", "min_us", "max_us"
+    );
     println!("{}", "-".repeat(60));
 
     for &n in &qubit_counts {
         let mem = memory_bytes(n);
         // Skip if estimated memory exceeds 8 GB
         if mem > 8 * 1024 * 1024 * 1024 {
-            println!("{:>8} {:>12}  (skipped -- exceeds 8 GB limit)", n, format_memory(mem));
+            println!(
+                "{:>8} {:>12}  (skipped -- exceeds 8 GB limit)",
+                n,
+                format_memory(mem)
+            );
             continue;
         }
         let r = bench_allocation(n);
-        println!("{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1}",
-            n, format_memory(mem), r.mean_us, r.min_us, r.max_us);
+        println!(
+            "{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1}",
+            n,
+            format_memory(mem),
+            r.mean_us,
+            r.min_us,
+            r.max_us
+        );
     }
 
     // --- Section 2: Hadamard gate throughput ---
     println!("\n--- Hadamard Gate Throughput (100 H gates on qubit 0) ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>12} {:>12}",
-        "qubits", "memory", "mean_us", "min_us", "max_us", "GFlop/s");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>12} {:>12}",
+        "qubits", "memory", "mean_us", "min_us", "max_us", "GFlop/s"
+    );
     println!("{}", "-".repeat(74));
 
     let h_iters = 100;
@@ -201,14 +215,23 @@ fn main() {
         let dim = 1usize << n;
         // Each Hadamard touches dim/2 pairs, ~6 flops per pair
         let gflops = (dim as f64 * 6.0 * h_iters as f64) / (r.mean_us * 1e-6) / 1e9;
-        println!("{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1} {:>12.1}",
-            n, format_memory(mem), r.mean_us, r.min_us, r.max_us, gflops);
+        println!(
+            "{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1} {:>12.1}",
+            n,
+            format_memory(mem),
+            r.mean_us,
+            r.min_us,
+            r.max_us,
+            gflops
+        );
     }
 
     // --- Section 3: CNOT chain layer ---
     println!("\n--- CNOT Chain Layer (n-1 CNOT gates) ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>12} {:>14}",
-        "qubits", "gates", "mean_us", "min_us", "max_us", "us/gate");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>12} {:>14}",
+        "qubits", "gates", "mean_us", "min_us", "max_us", "us/gate"
+    );
     println!("{}", "-".repeat(76));
 
     for &n in &qubit_counts {
@@ -219,14 +242,23 @@ fn main() {
         }
         let r = bench_cnot_layer(n);
         let us_per_gate = r.mean_us / (n - 1) as f64;
-        println!("{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1} {:>14.2}",
-            n, n - 1, r.mean_us, r.min_us, r.max_us, us_per_gate);
+        println!(
+            "{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1} {:>14.2}",
+            n,
+            n - 1,
+            r.mean_us,
+            r.min_us,
+            r.max_us,
+            us_per_gate
+        );
     }
 
     // --- Section 4: Random circuit layer ---
     println!("\n--- Random Circuit Layer (H + CNOT + T + Rz, ~2n gates) ---");
-    println!("{:>8} {:>12} {:>12} {:>12} {:>12} {:>14}",
-        "qubits", "gates", "mean_us", "min_us", "max_us", "us/gate");
+    println!(
+        "{:>8} {:>12} {:>12} {:>12} {:>12} {:>14}",
+        "qubits", "gates", "mean_us", "min_us", "max_us", "us/gate"
+    );
     println!("{}", "-".repeat(76));
 
     for &n in &qubit_counts {
@@ -238,14 +270,15 @@ fn main() {
         let layer_gates = n * 2;
         let r = bench_random_circuit(n, &mut rng);
         let us_per_gate = r.mean_us / layer_gates as f64;
-        println!("{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1} {:>14.2}",
-            n, layer_gates, r.mean_us, r.min_us, r.max_us, us_per_gate);
+        println!(
+            "{:>8} {:>12} {:>12.1} {:>12.1} {:>12.1} {:>14.2}",
+            n, layer_gates, r.mean_us, r.min_us, r.max_us, us_per_gate
+        );
     }
 
     // --- Section 5: Summary table ---
     println!("\n--- Summary: Estimated Capacity ---");
-    println!("{:>8} {:>14} {:>20}",
-        "qubits", "memory", "state_dim");
+    println!("{:>8} {:>14} {:>20}", "qubits", "memory", "state_dim");
     println!("{}", "-".repeat(44));
 
     for n in (10..=33).step_by(1) {
@@ -260,7 +293,13 @@ fn main() {
         } else {
             "OOM"
         };
-        println!("{:>8} {:>14} {:>14}   {}", n, format_memory(mem), dim, feasible);
+        println!(
+            "{:>8} {:>14} {:>14}   {}",
+            n,
+            format_memory(mem),
+            dim,
+            feasible
+        );
     }
 
     println!("\n[done]");

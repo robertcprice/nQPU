@@ -305,7 +305,8 @@ impl BPDecoder {
                         }
                         // Correction: approximate log(1 + e^{-|a-b|}) - log(1 + e^{-|a+b|})
                         let correction = Self::bp_correction(min1, min2);
-                        new_msg = sign_prod * (min_mag * self.config.normalization_factor + correction);
+                        new_msg =
+                            sign_prod * (min_mag * self.config.normalization_factor + correction);
                     }
 
                     let old_msg = msg_cv[c][j];
@@ -407,7 +408,12 @@ impl BPDecoder {
     /// Returns (var_to_check_local_idx, check_to_var_local_idx) hashmaps.
     /// For large graphs, precomputing these avoids repeated linear scans.
     #[allow(dead_code)]
-    fn build_index_maps(&self) -> (HashMap<(usize, usize), usize>, HashMap<(usize, usize), usize>) {
+    fn build_index_maps(
+        &self,
+    ) -> (
+        HashMap<(usize, usize), usize>,
+        HashMap<(usize, usize), usize>,
+    ) {
         let mut vc_map = HashMap::new();
         let mut cv_map = HashMap::new();
 
@@ -574,11 +580,26 @@ mod tests {
         let result = decoder.decode(&syndrome, 0.05);
 
         // Verify beliefs are consistent with error_pattern
-        for (i, (&belief, &error)) in result.beliefs.iter().zip(result.error_pattern.iter()).enumerate() {
+        for (i, (&belief, &error)) in result
+            .beliefs
+            .iter()
+            .zip(result.error_pattern.iter())
+            .enumerate()
+        {
             if error {
-                assert!(belief < 0.0, "Qubit {} has error but belief {} >= 0", i, belief);
+                assert!(
+                    belief < 0.0,
+                    "Qubit {} has error but belief {} >= 0",
+                    i,
+                    belief
+                );
             } else {
-                assert!(belief >= 0.0, "Qubit {} has no error but belief {} < 0", i, belief);
+                assert!(
+                    belief >= 0.0,
+                    "Qubit {} has no error but belief {} < 0",
+                    i,
+                    belief
+                );
             }
         }
     }

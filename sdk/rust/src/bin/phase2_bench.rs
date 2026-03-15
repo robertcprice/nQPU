@@ -651,9 +651,8 @@ fn benchmark_new_modules() {
         ..DistributedAdjointConfig::default()
     };
     let dist_adj_mirror_stats = bench("distributed_adjoint::adjoint_mirror_w4", 8, || {
-        let out =
-            distributed_gradient(&adj, &params, Observable::PauliZ(2), &dist_adj_mirror_cfg)
-                .expect("distributed adjoint mirror gradient");
+        let out = distributed_gradient(&adj, &params, Observable::PauliZ(2), &dist_adj_mirror_cfg)
+            .expect("distributed adjoint mirror gradient");
         black_box((
             out.expectation,
             out.gradients[0],

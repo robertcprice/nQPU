@@ -245,6 +245,24 @@ class DQPTDiagnosticsResult:
 
 
 @dataclass
+class AdaptiveDQPTDiagnosticsResult(DQPTDiagnosticsResult):
+    seed_times: np.ndarray | None = None
+    refinement_metric: str | None = None
+    refinement_strategy: str | None = None
+    refinement_target_value: float | None = None
+    insertion_policy: str | None = None
+    points_per_interval: int = 1
+    max_refinement_rounds: int = 0
+    refinements_per_round: int = 0
+    min_spacing: float | None = None
+    refinement_history: list[dict[str, object]] | None = None
+
+    @property
+    def completed_rounds(self) -> int:
+        return len(self.refinement_history or [])
+
+
+@dataclass
 class DQPTScanPoint:
     value: float
     solver: str
@@ -481,6 +499,139 @@ class ModelQPU:
             min_prominence=min_prominence,
             min_cusp=min_cusp,
             mode=mode,
+        )
+
+    def adaptive_dqpt_diagnostics(
+        self,
+        model: object,
+        times: Iterable[float],
+        *,
+        initial_state: InitialStateLike | None = "all_up",
+        initial_state_model: object | None = None,
+        reference_state: InitialStateLike | None = None,
+        reference_state_model: object | None = None,
+        min_prominence: float = 0.0,
+        min_cusp: float = 0.0,
+        mode: str = "maxima",
+        metric: str = "return_rate",
+        strategy: str | None = None,
+        target_value: float | None = None,
+        insertion_policy: str | None = None,
+        points_per_interval: int = 1,
+        max_refinement_rounds: int = 2,
+        refinements_per_round: int = 1,
+        min_spacing: float | None = None,
+    ) -> AdaptiveDQPTDiagnosticsResult:
+        if max_refinement_rounds < 0:
+            raise ValueError("max_refinement_rounds must be non-negative")
+        if refinements_per_round < 1:
+            raise ValueError("refinements_per_round must be at least 1")
+        if points_per_interval < 1:
+            raise ValueError("points_per_interval must be at least 1")
+        if min_spacing is not None and min_spacing <= 0.0:
+            raise ValueError("min_spacing must be positive")
+
+        seed_times = _sorted_unique_values(times)
+        resolved_strategy = _resolve_refinement_strategy(
+            metric,
+            strategy=strategy,
+            target_value=target_value,
+        )
+        resolved_insertion_policy = _resolve_insertion_policy(
+            insertion_policy=insertion_policy,
+            refinement_strategy=resolved_strategy,
+            target_value=target_value,
+            points_per_interval=points_per_interval,
+        )
+
+        diagnostics = self.dqpt_diagnostics(
+            model,
+            seed_times,
+            initial_state=initial_state,
+            initial_state_model=initial_state_model,
+            reference_state=reference_state,
+            reference_state_model=reference_state_model,
+            min_prominence=min_prominence,
+            min_cusp=min_cusp,
+            mode=mode,
+        )
+        current_times = np.asarray(diagnostics.times, dtype=np.float64)
+        history: list[dict[str, object]] = []
+
+        while len(history) < max_refinement_rounds:
+            metric_values = _adaptive_dqpt_metric_trace(diagnostics, metric)
+            inserted = _plan_refinement_candidates(
+                current_times,
+                metric_values,
+                strategy=resolved_strategy,
+                target_value=target_value,
+                insertion_policy=resolved_insertion_policy,
+                points_per_interval=points_per_interval,
+                refinements_per_round=refinements_per_round,
+                min_spacing=min_spacing,
+            )
+            if not inserted:
+                break
+
+            inserted_values = np.asarray(
+                [value for candidate in inserted for value in candidate["inserted_values"]],
+                dtype=np.float64,
+            )
+            history.append(
+                {
+                    "round": len(history) + 1,
+                    "metric": metric,
+                    "strategy": resolved_strategy,
+                    "target_value": target_value,
+                    "insertion_policy": resolved_insertion_policy,
+                    "points_per_interval": points_per_interval,
+                    "inserted_values": inserted_values.tolist(),
+                    "inserted_by_interval": [
+                        [float(value) for value in candidate["inserted_values"]]
+                        for candidate in inserted
+                    ],
+                    "selected_intervals": [
+                        [float(candidate["left"]), float(candidate["right"])]
+                        for candidate in inserted
+                    ],
+                    "scores": [float(candidate["score"]) for candidate in inserted],
+                }
+            )
+            current_times = np.unique(np.concatenate([current_times, inserted_values]))
+            diagnostics = self.dqpt_diagnostics(
+                model,
+                current_times,
+                initial_state=initial_state,
+                initial_state_model=initial_state_model,
+                reference_state=reference_state,
+                reference_state_model=reference_state_model,
+                min_prominence=min_prominence,
+                min_cusp=min_cusp,
+                mode=mode,
+            )
+
+        return AdaptiveDQPTDiagnosticsResult(
+            model_name=diagnostics.model_name,
+            solver=diagnostics.solver,
+            num_sites=diagnostics.num_sites,
+            times=np.asarray(diagnostics.times, dtype=np.float64),
+            return_rate=np.asarray(diagnostics.return_rate, dtype=np.float64),
+            candidates=tuple(diagnostics.candidates),
+            amplitudes=None
+            if diagnostics.amplitudes is None
+            else np.asarray(diagnostics.amplitudes, dtype=np.complex128),
+            backend_state=diagnostics.backend_state,
+            model_metadata=diagnostics.model_metadata,
+            seed_times=seed_times,
+            refinement_metric=metric,
+            refinement_strategy=resolved_strategy,
+            refinement_target_value=target_value,
+            insertion_policy=resolved_insertion_policy,
+            points_per_interval=points_per_interval,
+            max_refinement_rounds=max_refinement_rounds,
+            refinements_per_round=refinements_per_round,
+            min_spacing=min_spacing,
+            refinement_history=history,
         )
 
     def entanglement_spectrum(
@@ -2147,6 +2298,27 @@ def _dqpt_scan_metric_trace(scan: DQPTScanResult, metric: str) -> np.ndarray:
     if trace.shape != scan.values.shape:
         raise ValueError(f"adaptive DQPT refinement metric '{metric}' has an invalid shape")
     return trace
+
+
+def _adaptive_dqpt_metric_trace(result: DQPTDiagnosticsResult, metric: str) -> np.ndarray:
+    if metric == "return_rate":
+        trace = np.asarray(result.return_rate, dtype=np.float64)
+    elif metric == "echo":
+        if result.amplitudes is None:
+            raise ValueError("adaptive DQPT metric 'echo' requires available Loschmidt amplitudes")
+        trace = np.abs(np.asarray(result.amplitudes, dtype=np.complex128)) ** 2
+    elif metric == "amplitude_magnitude":
+        if result.amplitudes is None:
+            raise ValueError(
+                "adaptive DQPT metric 'amplitude_magnitude' requires available Loschmidt amplitudes"
+            )
+        trace = np.abs(np.asarray(result.amplitudes, dtype=np.complex128))
+    else:
+        raise ValueError(f"adaptive DQPT time metric '{metric}' is not available")
+
+    if trace.shape != np.asarray(result.times, dtype=np.float64).shape:
+        raise ValueError(f"adaptive DQPT time metric '{metric}' has an invalid shape")
+    return np.asarray(trace, dtype=np.float64)
 
 
 def _refinement_score(

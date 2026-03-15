@@ -9,7 +9,7 @@
 use std::time::Instant;
 
 #[cfg(target_os = "macos")]
-use nqpu_metal::{FixedMetalSimulator, benchmark_grover};
+use nqpu_metal::{benchmark_grover, FixedMetalSimulator};
 
 fn main() {
     println!("╔═══════════════════════════════════════════════════════════════╗");
@@ -24,10 +24,13 @@ fn main() {
         for &num_qubits in &test_qubits {
             let dim = 1usize << num_qubits;
             let num_iterations = (std::f64::consts::PI / 4.0 * dim as f64).sqrt() as usize;
-            let target = dim / 3;  // Arbitrary target
+            let target = dim / 3; // Arbitrary target
 
             println!("═══════════════════════════════════════════════════════════════");
-            println!("n={} qubits ({} states, {} iterations)", num_qubits, dim, num_iterations);
+            println!(
+                "n={} qubits ({} states, {} iterations)",
+                num_qubits, dim, num_iterations
+            );
             println!("═══════════════════════════════════════════════════════════════\n");
 
             // CPU baseline
@@ -47,26 +50,46 @@ fn main() {
                     let speedup = cpu_time / gpu_time;
 
                     println!("\nResults:");
-                    println!("  CPU:  {:.6}s ({:.3} μs/iter)", cpu_time, cpu_time * 1e6 / num_iterations as f64);
-                    println!("  GPU:  {:.6}s ({:.3} μs/iter)", gpu_time, gpu_time * 1e6 / num_iterations as f64);
+                    println!(
+                        "  CPU:  {:.6}s ({:.3} μs/iter)",
+                        cpu_time,
+                        cpu_time * 1e6 / num_iterations as f64
+                    );
+                    println!(
+                        "  GPU:  {:.6}s ({:.3} μs/iter)",
+                        gpu_time,
+                        gpu_time * 1e6 / num_iterations as f64
+                    );
                     println!();
-                    println!("  🏆 SPEEDUP: {:.1}× {}",
+                    println!(
+                        "  🏆 SPEEDUP: {:.1}× {}",
                         speedup,
-                        if speedup >= 100.0 { "✅ (TARGET MET!)" }
-                        else if speedup >= 63.0 { "⚠️ (Above 63× baseline)" }
-                        else if speedup >= 10.0 { "📈 (Good progress)" }
-                        else { "❌ (Need more optimization)" }
+                        if speedup >= 100.0 {
+                            "✅ (TARGET MET!)"
+                        } else if speedup >= 63.0 {
+                            "⚠️ (Above 63× baseline)"
+                        } else if speedup >= 10.0 {
+                            "📈 (Good progress)"
+                        } else {
+                            "❌ (Need more optimization)"
+                        }
                     );
                     println!();
 
                     // Calculate theoretical maximum
-                    let gates_per_iter = 2 * num_qubits + 2;  // oracle + H^n + phase + H^n
+                    let gates_per_iter = 2 * num_qubits + 2; // oracle + H^n + phase + H^n
                     let total_gates = gates_per_iter * num_iterations;
                     println!("  Analysis:");
                     println!("    • Gates per iteration: {}", gates_per_iter);
                     println!("    • Total gates: {}", total_gates);
-                    println!("    • Synchronization points saved: {}", total_gates - num_iterations);
-                    println!("    • Theoretical max speedup: {:.1}×\n", total_gates as f64 / num_iterations as f64);
+                    println!(
+                        "    • Synchronization points saved: {}",
+                        total_gates - num_iterations
+                    );
+                    println!(
+                        "    • Theoretical max speedup: {:.1}×\n",
+                        total_gates as f64 / num_iterations as f64
+                    );
                 }
                 Err(e) => println!("  GPU error: {}\n", e),
             }

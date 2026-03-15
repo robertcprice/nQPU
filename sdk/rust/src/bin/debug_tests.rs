@@ -6,7 +6,8 @@ fn main() {
     let mut bytes = vec![0u8; 100_000];
     file.read_exact(&mut bytes).unwrap();
 
-    let bits: Vec<u8> = bytes.iter()
+    let bits: Vec<u8> = bytes
+        .iter()
         .flat_map(|&b| (0..8).map(move |i| ((b >> i) & 1) as u8))
         .collect();
 
@@ -18,7 +19,8 @@ fn main() {
     let count_patterns = |pattern_len: usize| -> f64 {
         let num_patterns = 2_usize.pow(pattern_len as u32);
         let mut counts = vec![0i64; num_patterns];
-        let extended: Vec<u8> = bits.iter()
+        let extended: Vec<u8> = bits
+            .iter()
             .chain(bits[..pattern_len - 1].iter())
             .copied()
             .collect();
@@ -41,16 +43,30 @@ fn main() {
     let del2 = psi_m - 2.0 * psi_m_1 + psi_m_2;
 
     println!("=== Serial Test ===");
-    println!("ψ²_m = {:.4}, ψ²_(m-1) = {:.4}, ψ²_(m-2) = {:.4}", psi_m, psi_m_1, psi_m_2);
-    println!("Δ1 = {:.4} (should be small, ~df={})", del1, 2.0_f64.powi(m as i32 - 2));
-    println!("Δ2 = {:.4} (should be small, ~df={})", del2, 2.0_f64.powi(m as i32 - 3));
+    println!(
+        "ψ²_m = {:.4}, ψ²_(m-1) = {:.4}, ψ²_(m-2) = {:.4}",
+        psi_m, psi_m_1, psi_m_2
+    );
+    println!(
+        "Δ1 = {:.4} (should be small, ~df={})",
+        del1,
+        2.0_f64.powi(m as i32 - 2)
+    );
+    println!(
+        "Δ2 = {:.4} (should be small, ~df={})",
+        del2,
+        2.0_f64.powi(m as i32 - 3)
+    );
 
     // Debug Approx Entropy
     let calc_phi = |pattern_len: usize| -> f64 {
-        if pattern_len == 0 { return 0.0; }
+        if pattern_len == 0 {
+            return 0.0;
+        }
         let num_patterns = 2_usize.pow(pattern_len as u32);
         let mut counts = vec![0usize; num_patterns];
-        let extended: Vec<u8> = bits.iter()
+        let extended: Vec<u8> = bits
+            .iter()
             .chain(bits[..pattern_len - 1].iter())
             .copied()
             .collect();
@@ -78,7 +94,11 @@ fn main() {
 
     println!("\n=== Approximate Entropy ===");
     println!("φ(m) = {:.4}, φ(m+1) = {:.4}", phi_m, phi_m_1);
-    println!("ApEn = {:.6} (should be ≈ ln(2) = {:.6})", ap_en, 2.0_f64.ln());
+    println!(
+        "ApEn = {:.6} (should be ≈ ln(2) = {:.6})",
+        ap_en,
+        2.0_f64.ln()
+    );
     println!("χ² = {:.4} (should be small for random data)", chi_sq);
 
     // Debug Overlapping Template
@@ -104,7 +124,10 @@ fn main() {
     let k = m_ot + 2;
 
     println!("\n=== Overlapping Template ===");
-    println!("m = {}, block_size = {}, num_blocks = {}", m_ot, block_size, num_blocks);
+    println!(
+        "m = {}, block_size = {}, num_blocks = {}",
+        m_ot, block_size, num_blocks
+    );
     println!("λ = {:.4}, η = {:.4}", lambda, eta);
 
     // Count frequency distribution

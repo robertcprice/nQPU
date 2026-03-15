@@ -90,11 +90,7 @@ struct DmrgBenchResult {
 /// The exact ground state energy for the 1D TFIM can be computed via Jordan-Wigner
 /// free-fermion mapping. At h/J = 0.5 (ordered phase), DMRG converges quickly and
 /// the entanglement entropy is low, so moderate bond dimensions (D=16-32) suffice.
-fn bench_dmrg_ising(
-    num_sites: usize,
-    bond_dim: usize,
-    rng: &mut StdRng,
-) -> DmrgBenchResult {
+fn bench_dmrg_ising(num_sites: usize, bond_dim: usize, rng: &mut StdRng) -> DmrgBenchResult {
     let j = 1.0;
     let h_field = 0.5;
     let mpo = MpoHamiltonian::ising(num_sites, j, h_field);
@@ -155,11 +151,7 @@ fn bench_dmrg_ising(
 /// The Heisenberg chain has higher entanglement than Ising (logarithmic scaling
 /// with L at criticality), so it requires larger bond dimensions for convergence.
 /// This makes it a better stress test for SVD truncation numerics.
-fn bench_dmrg_heisenberg(
-    num_sites: usize,
-    bond_dim: usize,
-    rng: &mut StdRng,
-) -> DmrgBenchResult {
+fn bench_dmrg_heisenberg(num_sites: usize, bond_dim: usize, rng: &mut StdRng) -> DmrgBenchResult {
     let j = 1.0;
     let mpo = MpoHamiltonian::heisenberg(num_sites, j);
 
@@ -231,10 +223,7 @@ struct VumpsBenchResult {
 /// VUMPS (Variational Uniform MPS) works directly in the thermodynamic limit
 /// using a uniform MPS ansatz. Cost per iteration scales as O(chi^3 * d^2).
 /// The exact energy per site at h/J=0.5 is approximately E/site ~ -1.0639.
-fn bench_vumps_ising(
-    bond_dim: usize,
-    rng: &mut StdRng,
-) -> VumpsBenchResult {
+fn bench_vumps_ising(bond_dim: usize, rng: &mut StdRng) -> VumpsBenchResult {
     let j = 1.0;
     let h_field = 0.5;
     let h_gate = ising_two_site_gate(j, h_field);
@@ -249,17 +238,15 @@ fn bench_vumps_ising(
     let mut last_converged = false;
     let mut last_grad = 0.0;
 
-    let timing = measure(|| {
-        match vumps(&h_gate, &config, rng) {
-            Ok(result) => {
-                last_energy = result.energy_per_site;
-                last_iters = result.iterations;
-                last_converged = result.converged;
-                last_grad = result.gradient_norm;
-            }
-            Err(e) => {
-                eprintln!("  VUMPS error (chi={}): {}", bond_dim, e);
-            }
+    let timing = measure(|| match vumps(&h_gate, &config, rng) {
+        Ok(result) => {
+            last_energy = result.energy_per_site;
+            last_iters = result.iterations;
+            last_converged = result.converged;
+            last_grad = result.gradient_norm;
+        }
+        Err(e) => {
+            eprintln!("  VUMPS error (chi={}): {}", bond_dim, e);
         }
     });
 
@@ -277,8 +264,10 @@ fn print_sweep_convergence(label: &str, result: &DmrgBenchResult) {
     if result.energy_history.len() <= 1 {
         return;
     }
-    println!("  {} per-sweep convergence ({} sweeps, {:.2} ms/sweep):",
-        label, result.sweeps, result.ms_per_sweep);
+    println!(
+        "  {} per-sweep convergence ({} sweeps, {:.2} ms/sweep):",
+        label, result.sweeps, result.ms_per_sweep
+    );
     for (i, e) in result.energy_history.iter().enumerate() {
         let delta = if i > 0 {
             format!("dE={:+.2e}", e - result.energy_history[i - 1])
@@ -306,8 +295,19 @@ fn main() {
     // Expected: roughly linear in L (each sweep visits L sites).
     // -----------------------------------------------------------------------
     println!("--- DMRG: Transverse-Field Ising Model (J=1.0, h=0.5) ---");
-    println!("{:>6} {:>6} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8} {:>5} {:>8}",
-        "sites", "D", "mean_ms", "min_ms", "max_ms", "ms/sweep", "energy", "sweeps", "conv", "S_ent");
+    println!(
+        "{:>6} {:>6} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8} {:>5} {:>8}",
+        "sites",
+        "D",
+        "mean_ms",
+        "min_ms",
+        "max_ms",
+        "ms/sweep",
+        "energy",
+        "sweeps",
+        "conv",
+        "S_ent"
+    );
     println!("{}", "-".repeat(100));
 
     let site_counts = [8, 16, 32];
@@ -315,9 +315,19 @@ fn main() {
     for &l in &site_counts {
         let r = bench_dmrg_ising(l, bond_dim, &mut rng);
         let conv_str = if r.converged { "yes" } else { "no" };
-        println!("{:>6} {:>6} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>12.6} {:>8} {:>5} {:>8.4}",
-            l, bond_dim, r.timing.mean_ms, r.timing.min_ms, r.timing.max_ms,
-            r.ms_per_sweep, r.energy, r.sweeps, conv_str, r.entropy);
+        println!(
+            "{:>6} {:>6} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>12.6} {:>8} {:>5} {:>8.4}",
+            l,
+            bond_dim,
+            r.timing.mean_ms,
+            r.timing.min_ms,
+            r.timing.max_ms,
+            r.ms_per_sweep,
+            r.energy,
+            r.sweeps,
+            conv_str,
+            r.entropy
+        );
     }
 
     // Show per-sweep convergence for the largest chain
@@ -330,17 +340,28 @@ fn main() {
     // Expected: cubic in D (O(D^3) per site per sweep).
     // -----------------------------------------------------------------------
     println!("\n--- DMRG: Ising Bond Dimension Scaling (L=16) ---");
-    println!("{:>6} {:>6} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8} {:>5}",
-        "sites", "D", "mean_ms", "min_ms", "max_ms", "ms/sweep", "energy", "sweeps", "conv");
+    println!(
+        "{:>6} {:>6} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8} {:>5}",
+        "sites", "D", "mean_ms", "min_ms", "max_ms", "ms/sweep", "energy", "sweeps", "conv"
+    );
     println!("{}", "-".repeat(82));
 
     let l_fixed = 16;
     for &d in &[4, 8, 16, 32] {
         let r = bench_dmrg_ising(l_fixed, d, &mut rng);
         let conv_str = if r.converged { "yes" } else { "no" };
-        println!("{:>6} {:>6} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>12.6} {:>8} {:>5}",
-            l_fixed, d, r.timing.mean_ms, r.timing.min_ms, r.timing.max_ms,
-            r.ms_per_sweep, r.energy, r.sweeps, conv_str);
+        println!(
+            "{:>6} {:>6} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>12.6} {:>8} {:>5}",
+            l_fixed,
+            d,
+            r.timing.mean_ms,
+            r.timing.min_ms,
+            r.timing.max_ms,
+            r.ms_per_sweep,
+            r.energy,
+            r.sweeps,
+            conv_str
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -354,16 +375,37 @@ fn main() {
     // svd_truncate guard (min rank 1) in gpu_dmrg.rs and dmrg_tdvp.rs
     // prevents this cascade. If you see errors here, verify that fix.
     println!("\n--- DMRG: Heisenberg XXX Model (J=1.0, D=16) ---");
-    println!("{:>6} {:>6} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8} {:>5} {:>8}",
-        "sites", "D", "mean_ms", "min_ms", "max_ms", "ms/sweep", "energy", "sweeps", "conv", "S_ent");
+    println!(
+        "{:>6} {:>6} {:>10} {:>10} {:>10} {:>10} {:>12} {:>8} {:>5} {:>8}",
+        "sites",
+        "D",
+        "mean_ms",
+        "min_ms",
+        "max_ms",
+        "ms/sweep",
+        "energy",
+        "sweeps",
+        "conv",
+        "S_ent"
+    );
     println!("{}", "-".repeat(100));
 
     for &l in &site_counts {
         let r = bench_dmrg_heisenberg(l, bond_dim, &mut rng);
         let conv_str = if r.converged { "yes" } else { "no" };
-        println!("{:>6} {:>6} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>12.6} {:>8} {:>5} {:>8.4}",
-            l, bond_dim, r.timing.mean_ms, r.timing.min_ms, r.timing.max_ms,
-            r.ms_per_sweep, r.energy, r.sweeps, conv_str, r.entropy);
+        println!(
+            "{:>6} {:>6} {:>10.2} {:>10.2} {:>10.2} {:>10.2} {:>12.6} {:>8} {:>5} {:>8.4}",
+            l,
+            bond_dim,
+            r.timing.mean_ms,
+            r.timing.min_ms,
+            r.timing.max_ms,
+            r.ms_per_sweep,
+            r.energy,
+            r.sweeps,
+            conv_str,
+            r.entropy
+        );
     }
 
     // Show per-sweep convergence for Heisenberg
@@ -376,8 +418,10 @@ fn main() {
     // avoiding finite-size effects. Cost is O(chi^3 * d^2) per iteration.
     // -----------------------------------------------------------------------
     println!("\n--- VUMPS: Infinite Ising Model (J=1.0, h=0.5) ---");
-    println!("{:>6} {:>10} {:>10} {:>10} {:>14} {:>8} {:>5} {:>12}",
-        "chi", "mean_ms", "min_ms", "max_ms", "E/site", "iters", "conv", "grad_norm");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>14} {:>8} {:>5} {:>12}",
+        "chi", "mean_ms", "min_ms", "max_ms", "E/site", "iters", "conv", "grad_norm"
+    );
     println!("{}", "-".repeat(84));
 
     // Exact energy per site for TF Ising at h=0.5 is approximately:
@@ -385,9 +429,17 @@ fn main() {
     for &chi in &[4, 8, 16, 32] {
         let r = bench_vumps_ising(chi, &mut rng);
         let conv_str = if r.converged { "yes" } else { "no" };
-        println!("{:>6} {:>10.2} {:>10.2} {:>10.2} {:>14.8} {:>8} {:>5} {:>12.2e}",
-            chi, r.timing.mean_ms, r.timing.min_ms, r.timing.max_ms,
-            r.energy_per_site, r.iterations, conv_str, r.gradient_norm);
+        println!(
+            "{:>6} {:>10.2} {:>10.2} {:>10.2} {:>14.8} {:>8} {:>5} {:>12.2e}",
+            chi,
+            r.timing.mean_ms,
+            r.timing.min_ms,
+            r.timing.max_ms,
+            r.energy_per_site,
+            r.iterations,
+            conv_str,
+            r.gradient_norm
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -409,17 +461,32 @@ fn main() {
         let exp_1 = (r_d8.timing.mean_ms / r_d4.timing.mean_ms).ln() / (8.0f64 / 4.0).ln();
         let exp_2 = (r_d16.timing.mean_ms / r_d8.timing.mean_ms).ln() / (16.0f64 / 8.0).ln();
         println!("\nEmpirical DMRG bond-dim scaling exponent (L=16):");
-        println!("  D=4->8:  t ~ D^{:.2}  ({:.2}ms -> {:.2}ms)", exp_1, r_d4.timing.mean_ms, r_d8.timing.mean_ms);
-        println!("  D=8->16: t ~ D^{:.2}  ({:.2}ms -> {:.2}ms)", exp_2, r_d8.timing.mean_ms, r_d16.timing.mean_ms);
+        println!(
+            "  D=4->8:  t ~ D^{:.2}  ({:.2}ms -> {:.2}ms)",
+            exp_1, r_d4.timing.mean_ms, r_d8.timing.mean_ms
+        );
+        println!(
+            "  D=8->16: t ~ D^{:.2}  ({:.2}ms -> {:.2}ms)",
+            exp_2, r_d8.timing.mean_ms, r_d16.timing.mean_ms
+        );
         println!("  Expected: t ~ D^3");
     }
 
     // Per-sweep throughput summary
     if r_d4.sweeps > 0 && r_d8.sweeps > 0 && r_d16.sweeps > 0 {
         println!("\nPer-sweep throughput (L=16):");
-        println!("  D=4:  {:.2} ms/sweep ({} sweeps)", r_d4.ms_per_sweep, r_d4.sweeps);
-        println!("  D=8:  {:.2} ms/sweep ({} sweeps)", r_d8.ms_per_sweep, r_d8.sweeps);
-        println!("  D=16: {:.2} ms/sweep ({} sweeps)", r_d16.ms_per_sweep, r_d16.sweeps);
+        println!(
+            "  D=4:  {:.2} ms/sweep ({} sweeps)",
+            r_d4.ms_per_sweep, r_d4.sweeps
+        );
+        println!(
+            "  D=8:  {:.2} ms/sweep ({} sweeps)",
+            r_d8.ms_per_sweep, r_d8.sweeps
+        );
+        println!(
+            "  D=16: {:.2} ms/sweep ({} sweeps)",
+            r_d16.ms_per_sweep, r_d16.sweeps
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -429,7 +496,10 @@ fn main() {
     // O(D^3) matvec parallelism outweighs dispatch overhead.
     // -----------------------------------------------------------------------
     println!("\n--- GPU vs CPU Comparison (L=12, varying D) ---");
-    println!("{:>6} {:>10} {:>10} {:>10} {:>10}", "D", "GPU_ms", "CPU_ms", "speedup", "backend");
+    println!(
+        "{:>6} {:>10} {:>10} {:>10} {:>10}",
+        "D", "GPU_ms", "CPU_ms", "speedup", "backend"
+    );
     println!("{}", "-".repeat(50));
 
     for &d in &[16, 32, 64] {
@@ -445,7 +515,9 @@ fn main() {
         let mut mps_gpu = GpuMps::random(12, 2, d.min(4), &mut rng);
         let result_gpu = engine_gpu.run(&mut mps_gpu, &MpoHamiltonian::ising(12, 1.0, 0.5));
         let gpu_ms = t0.elapsed().as_secs_f64() * 1000.0;
-        let backend = result_gpu.map(|r| format!("{}", r.backend)).unwrap_or_else(|_| "N/A".to_string());
+        let backend = result_gpu
+            .map(|r| format!("{}", r.backend))
+            .unwrap_or_else(|_| "N/A".to_string());
 
         // CPU mode (force by setting threshold very high so Metal is never triggered)
         let config_cpu = GpuDmrgConfig::new()
@@ -462,7 +534,10 @@ fn main() {
         let cpu_ms = t0.elapsed().as_secs_f64() * 1000.0;
 
         let speedup = if gpu_ms > 0.0 { cpu_ms / gpu_ms } else { 0.0 };
-        println!("{:>6} {:>10.1} {:>10.1} {:>10.2}x {:>10}", d, gpu_ms, cpu_ms, speedup, backend);
+        println!(
+            "{:>6} {:>10.1} {:>10.1} {:>10.2}x {:>10}",
+            d, gpu_ms, cpu_ms, speedup, backend
+        );
     }
 
     // -----------------------------------------------------------------------
@@ -470,7 +545,10 @@ fn main() {
     // Shows variance across the MEASURE_RUNS samples to assess stability.
     // High variance may indicate memory allocation jitter or GC pressure.
     // -----------------------------------------------------------------------
-    println!("\n--- Timing Variance (L=16, D=16, {} samples) ---", MEASURE_RUNS);
+    println!(
+        "\n--- Timing Variance (L=16, D=16, {} samples) ---",
+        MEASURE_RUNS
+    );
     let r_var = bench_dmrg_ising(16, 16, &mut rng);
     for (i, &t) in r_var.timing.samples.iter().enumerate() {
         println!("  Sample {}: {:.3} ms", i, t);

@@ -14,6 +14,8 @@ try:
     __all__ = [
         'QuantumSimulator',
         'MPSSimulator',
+        'TensorNetworkState1D',
+        'statevector_to_mps_1d',
         'QuantumState',
         'QuantumCircuit',
         'EnhancedSimulator',
@@ -29,6 +31,12 @@ try:
         'run_vqe',
         'simulate_noisy_circuit',
         'compare_ideal_vs_noisy',
+        'dmrg_ground_state_1d',
+        'tdvp_time_evolution_1d',
+        'tdvp_loschmidt_echo_1d',
+        'entanglement_spectrum_1d',
+        'apply_local_pauli_1d',
+        'tdvp_transition_observables_1d',
         # Quantum entropy extraction for LLM seeding
         'QuantumEntropyExtractor',
         'py_quick_seed',
@@ -46,6 +54,8 @@ except ImportError:
     __all__ = [
         'QuantumSimulator',
         'MPSSimulator',
+        'TensorNetworkState1D',
+        'statevector_to_mps_1d',
         'QuantumState',
         'QuantumCircuit',
         'EnhancedSimulator',
@@ -61,17 +71,24 @@ except ImportError:
         'run_vqe',
         'simulate_noisy_circuit',
         'compare_ideal_vs_noisy',
+        'dmrg_ground_state_1d',
+        'tdvp_time_evolution_1d',
+        'tdvp_loschmidt_echo_1d',
+        'entanglement_spectrum_1d',
+        'apply_local_pauli_1d',
+        'tdvp_transition_observables_1d',
         # Quantum entropy extraction for LLM seeding
         'QuantumEntropyExtractor',
         'py_quick_seed',
         'py_batch_seeds',
     ]
 
-# Try to import Qiskit compatibility
+# Python utilities have moved to sdk/python/nqpu/metal/
+# Import them from the new location for backward compatibility
 try:
-    from . import qiskit_compat
+    from nqpu.metal import qiskit_compat
     QISKIT_AVAILABLE = True
-except ImportError:
+except Exception:
     QISKIT_AVAILABLE = False
 
 __all__.extend(['__version__', 'QISKIT_AVAILABLE'])

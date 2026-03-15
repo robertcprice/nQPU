@@ -110,10 +110,18 @@ fn bench_tableau_gates(n_qubits: usize, n_gates: usize, rng: &mut StdRng) -> Ben
         let mut tab = StabilizerTableau::new(n_qubits);
         for instr in &circuit {
             match instr {
-                StabilizerInstruction::H(q) => { tab.h(*q).ok(); }
-                StabilizerInstruction::S(q) => { tab.s(*q).ok(); }
-                StabilizerInstruction::CX(c, t) => { tab.cx(*c, *t).ok(); }
-                StabilizerInstruction::CZ(a, b) => { tab.cz(*a, *b).ok(); }
+                StabilizerInstruction::H(q) => {
+                    tab.h(*q).ok();
+                }
+                StabilizerInstruction::S(q) => {
+                    tab.s(*q).ok();
+                }
+                StabilizerInstruction::CX(c, t) => {
+                    tab.cx(*c, *t).ok();
+                }
+                StabilizerInstruction::CZ(a, b) => {
+                    tab.cz(*a, *b).ok();
+                }
                 _ => {}
             }
         }
@@ -205,59 +213,91 @@ fn main() {
 
     // --- Section 1: Raw tableau throughput (mixed Clifford) ---
     println!("--- Raw Tableau: Mixed Clifford ({} gates) ---", n_gates);
-    println!("{:>8} {:>14} {:>14} {:>14} {:>16} {:>16}",
-        "qubits", "mean_ms", "min_ms", "max_ms", "gates/sec", "row_ops/sec");
+    println!(
+        "{:>8} {:>14} {:>14} {:>14} {:>16} {:>16}",
+        "qubits", "mean_ms", "min_ms", "max_ms", "gates/sec", "row_ops/sec"
+    );
     println!("{}", "-".repeat(86));
 
     for &n in &qubit_counts {
         let r = bench_tableau_gates(n, n_gates, &mut rng);
         let gates_sec = (n_gates as f64) / (r.mean_us * 1e-6);
         let row_ops = pauli_row_ops(n, n_gates, r.mean_us);
-        println!("{:>8} {:>14.2} {:>14.2} {:>14.2} {:>16.0} {:>16.2e}",
-            n, r.mean_us / 1000.0, r.min_us / 1000.0, r.max_us / 1000.0,
-            gates_sec, row_ops);
+        println!(
+            "{:>8} {:>14.2} {:>14.2} {:>14.2} {:>16.0} {:>16.2e}",
+            n,
+            r.mean_us / 1000.0,
+            r.min_us / 1000.0,
+            r.max_us / 1000.0,
+            gates_sec,
+            row_ops
+        );
     }
 
     // --- Section 2: CircuitSimulator (instruction dispatch) ---
     let sim_gates = 100_000; // Fewer gates since CircuitSimulator has more overhead
-    println!("\n--- CircuitSimulator: Mixed Clifford ({} gates) ---", sim_gates);
-    println!("{:>8} {:>14} {:>14} {:>14} {:>16}",
-        "qubits", "mean_ms", "min_ms", "max_ms", "gates/sec");
+    println!(
+        "\n--- CircuitSimulator: Mixed Clifford ({} gates) ---",
+        sim_gates
+    );
+    println!(
+        "{:>8} {:>14} {:>14} {:>14} {:>16}",
+        "qubits", "mean_ms", "min_ms", "max_ms", "gates/sec"
+    );
     println!("{}", "-".repeat(70));
 
     for &n in &qubit_counts {
         let r = bench_circuit_simulator(n, sim_gates, &mut rng);
         let gates_sec = (sim_gates as f64) / (r.mean_us * 1e-6);
-        println!("{:>8} {:>14.2} {:>14.2} {:>14.2} {:>16.0}",
-            n, r.mean_us / 1000.0, r.min_us / 1000.0, r.max_us / 1000.0,
-            gates_sec);
+        println!(
+            "{:>8} {:>14.2} {:>14.2} {:>14.2} {:>16.0}",
+            n,
+            r.mean_us / 1000.0,
+            r.min_us / 1000.0,
+            r.max_us / 1000.0,
+            gates_sec
+        );
     }
 
     // --- Section 3: Isolated gate types ---
     println!("\n--- Isolated Gate: Hadamard Only ({} gates) ---", n_gates);
-    println!("{:>8} {:>14} {:>16} {:>14}",
-        "qubits", "mean_ms", "gates/sec", "ns/gate");
+    println!(
+        "{:>8} {:>14} {:>16} {:>14}",
+        "qubits", "mean_ms", "gates/sec", "ns/gate"
+    );
     println!("{}", "-".repeat(56));
 
     for &n in &qubit_counts {
         let r = bench_single_h(n, n_gates, &mut rng);
         let gates_sec = (n_gates as f64) / (r.mean_us * 1e-6);
         let ns_per_gate = r.mean_us * 1000.0 / n_gates as f64;
-        println!("{:>8} {:>14.2} {:>16.0} {:>14.1}",
-            n, r.mean_us / 1000.0, gates_sec, ns_per_gate);
+        println!(
+            "{:>8} {:>14.2} {:>16.0} {:>14.1}",
+            n,
+            r.mean_us / 1000.0,
+            gates_sec,
+            ns_per_gate
+        );
     }
 
     println!("\n--- Isolated Gate: CNOT Only ({} gates) ---", n_gates);
-    println!("{:>8} {:>14} {:>16} {:>14}",
-        "qubits", "mean_ms", "gates/sec", "ns/gate");
+    println!(
+        "{:>8} {:>14} {:>16} {:>14}",
+        "qubits", "mean_ms", "gates/sec", "ns/gate"
+    );
     println!("{}", "-".repeat(56));
 
     for &n in &qubit_counts {
         let r = bench_single_cx(n, n_gates, &mut rng);
         let gates_sec = (n_gates as f64) / (r.mean_us * 1e-6);
         let ns_per_gate = r.mean_us * 1000.0 / n_gates as f64;
-        println!("{:>8} {:>14.2} {:>16.0} {:>14.1}",
-            n, r.mean_us / 1000.0, gates_sec, ns_per_gate);
+        println!(
+            "{:>8} {:>14.2} {:>16.0} {:>14.1}",
+            n,
+            r.mean_us / 1000.0,
+            gates_sec,
+            ns_per_gate
+        );
     }
 
     // --- Section 4: Comparison with Stim ---
@@ -280,7 +320,10 @@ fn main() {
     } else if ratio >= 0.5 {
         println!("    Status: Competitive (within 2x of Stim)");
     } else {
-        println!("    Status: Room for improvement ({:.1}x slower)", 1.0 / ratio);
+        println!(
+            "    Status: Room for improvement ({:.1}x slower)",
+            1.0 / ratio
+        );
     }
 
     println!("\n[done]");

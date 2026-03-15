@@ -1,5 +1,5 @@
 use nqpu_metal::benchmark_suite::*;
-use nqpu_metal::quantum_f32::{QuantumStateF32, GateOpsF32};
+use nqpu_metal::quantum_f32::{GateOpsF32, QuantumStateF32};
 
 fn main() {
     println!("=== NQPU-METAL BENCHMARK SUITE ===\n");
@@ -19,8 +19,10 @@ fn main() {
         let us_per_gate = elapsed * 1e6 / iters as f64;
         let dim = 1usize << n;
         let gflops = (dim as f64 * 6.0 * iters as f64) / elapsed / 1e9;
-        println!("  n={:2} (2^{:2} = {:>10}): {:>8.3} us/gate  {:.1} GFlop/s",
-            n, n, dim, us_per_gate, gflops);
+        println!(
+            "  n={:2} (2^{:2} = {:>10}): {:>8.3} us/gate  {:.1} GFlop/s",
+            n, n, dim, us_per_gate, gflops
+        );
     }
 
     // ============================================================
@@ -53,8 +55,10 @@ fn main() {
         let mem_f64 = (dim * 16) as f64 / (1024.0 * 1024.0);
         let mem_f32 = (dim * 8) as f64 / (1024.0 * 1024.0);
 
-        println!("  n={:2}: f64={:>8.1}us  f32={:>8.1}us  speedup={:.2}x  mem: {:.0}MB→{:.0}MB",
-            n, us_f64, us_f32, speedup, mem_f64, mem_f32);
+        println!(
+            "  n={:2}: f64={:>8.1}us  f32={:>8.1}us  speedup={:.2}x  mem: {:.0}MB→{:.0}MB",
+            n, us_f64, us_f32, speedup, mem_f64, mem_f32
+        );
     }
 
     println!("\n=== F32 vs F64: CNOT THROUGHPUT ===");
@@ -78,7 +82,10 @@ fn main() {
         let us_f32 = start.elapsed().as_secs_f64() * 1e6 / iters as f64;
 
         let speedup = us_f64 / us_f32;
-        println!("  n={:2}: f64={:>8.1}us  f32={:>8.1}us  speedup={:.2}x", n, us_f64, us_f32, speedup);
+        println!(
+            "  n={:2}: f64={:>8.1}us  f32={:>8.1}us  speedup={:.2}x",
+            n, us_f64, us_f32, speedup
+        );
     }
 
     println!("\n=== F32 vs F64: BELL CIRCUIT ===");
@@ -87,8 +94,8 @@ fn main() {
         let mut state64 = nqpu_metal::QuantumState::new(n);
         let start = std::time::Instant::now();
         nqpu_metal::GateOperations::h(&mut state64, 0);
-        for q in 0..n-1 {
-            nqpu_metal::GateOperations::cnot(&mut state64, q, q+1);
+        for q in 0..n - 1 {
+            nqpu_metal::GateOperations::cnot(&mut state64, q, q + 1);
         }
         let ms_f64 = start.elapsed().as_secs_f64() * 1000.0;
 
@@ -96,8 +103,8 @@ fn main() {
         let mut state32 = QuantumStateF32::new(n);
         let start = std::time::Instant::now();
         GateOpsF32::h(&mut state32, 0);
-        for q in 0..n-1 {
-            GateOpsF32::cnot(&mut state32, q, q+1);
+        for q in 0..n - 1 {
+            GateOpsF32::cnot(&mut state32, q, q + 1);
         }
         let ms_f32 = start.elapsed().as_secs_f64() * 1000.0;
 
@@ -105,8 +112,10 @@ fn main() {
         let fidelity = state32.fidelity_vs_f64(&state64);
         let speedup = ms_f64 / ms_f32;
 
-        println!("  n={:2}: f64={:>8.2}ms  f32={:>8.2}ms  speedup={:.2}x  fidelity={:.10}",
-            n, ms_f64, ms_f32, speedup, fidelity);
+        println!(
+            "  n={:2}: f64={:>8.2}ms  f32={:>8.2}ms  speedup={:.2}x  fidelity={:.10}",
+            n, ms_f64, ms_f32, speedup, fidelity
+        );
     }
 
     println!("\n=== F32 PRECISION ANALYSIS ===");
@@ -119,8 +128,8 @@ fn main() {
             for q in 0..n {
                 nqpu_metal::GateOperations::h(&mut state64, q);
             }
-            for q in 0..n-1 {
-                nqpu_metal::GateOperations::cnot(&mut state64, q, q+1);
+            for q in 0..n - 1 {
+                nqpu_metal::GateOperations::cnot(&mut state64, q, q + 1);
             }
         }
 
@@ -130,29 +139,46 @@ fn main() {
             for q in 0..n {
                 GateOpsF32::h(&mut state32, q);
             }
-            for q in 0..n-1 {
-                GateOpsF32::cnot(&mut state32, q, q+1);
+            for q in 0..n - 1 {
+                GateOpsF32::cnot(&mut state32, q, q + 1);
             }
         }
 
         let fidelity = state32.fidelity_vs_f64(&state64);
-        println!("  depth={:>3} ({}q, {} gates): fidelity={:.10}",
-            depth, n, depth * (n + n - 1), fidelity);
+        println!(
+            "  depth={:>3} ({}q, {} gates): fidelity={:.10}",
+            depth,
+            n,
+            depth * (n + n - 1),
+            fidelity
+        );
     }
 
     // ============================================================
     // 2-QUBIT FUSION BENCHMARKS
     // ============================================================
     println!("\n=== 2-QUBIT FUSION: QFT (with absorption) ===");
-    use nqpu_metal::gate_fusion::{fuse_gates, execute_fused_circuit, FusedOrOriginal};
+    use nqpu_metal::gate_fusion::{execute_fused_circuit, fuse_gates, FusedOrOriginal};
     for n in [8, 10, 12, 14, 16, 18, 20] {
         let gates = qft_circuit(n);
         let fusion = fuse_gates(&gates);
 
         // Count gate types
-        let fused_1q = fusion.gates.iter().filter(|g| matches!(g, FusedOrOriginal::Fused(_))).count();
-        let fused_2q = fusion.gates.iter().filter(|g| matches!(g, FusedOrOriginal::FusedTwo(_))).count();
-        let originals = fusion.gates.iter().filter(|g| matches!(g, FusedOrOriginal::Original(_))).count();
+        let fused_1q = fusion
+            .gates
+            .iter()
+            .filter(|g| matches!(g, FusedOrOriginal::Fused(_)))
+            .count();
+        let fused_2q = fusion
+            .gates
+            .iter()
+            .filter(|g| matches!(g, FusedOrOriginal::FusedTwo(_)))
+            .count();
+        let originals = fusion
+            .gates
+            .iter()
+            .filter(|g| matches!(g, FusedOrOriginal::Original(_)))
+            .count();
 
         // Time sequential
         let mut state_seq = nqpu_metal::QuantumState::new(n);
@@ -180,7 +206,11 @@ fn main() {
         let gates = random_circuit(n, 20, 42);
         let fusion = fuse_gates(&gates);
 
-        let fused_2q = fusion.gates.iter().filter(|g| matches!(g, FusedOrOriginal::FusedTwo(_))).count();
+        let fused_2q = fusion
+            .gates
+            .iter()
+            .filter(|g| matches!(g, FusedOrOriginal::FusedTwo(_)))
+            .count();
 
         let mut state_seq = nqpu_metal::QuantumState::new(n);
         let start = std::time::Instant::now();
@@ -207,7 +237,11 @@ fn main() {
         let gates = grover_circuit(n, target);
         let fusion = fuse_gates(&gates);
 
-        let fused_2q = fusion.gates.iter().filter(|g| matches!(g, FusedOrOriginal::FusedTwo(_))).count();
+        let fused_2q = fusion
+            .gates
+            .iter()
+            .filter(|g| matches!(g, FusedOrOriginal::FusedTwo(_)))
+            .count();
 
         let mut state_seq = nqpu_metal::QuantumState::new(n);
         let start = std::time::Instant::now();
@@ -256,28 +290,59 @@ fn main() {
         let mut state32 = QuantumStateF32::new(n);
         let start = std::time::Instant::now();
         // Simplified: H on all, then Grover iterations with f32 gates
-        for q in 0..n { GateOpsF32::h(&mut state32, q); }
+        for q in 0..n {
+            GateOpsF32::h(&mut state32, q);
+        }
         let num_iters = ((std::f64::consts::PI / 4.0) * ((1 << n) as f64).sqrt()) as usize;
         for _ in 0..num_iters.max(1) {
             for q in 0..n {
-                if target & (1 << q) == 0 { GateOpsF32::x(&mut state32, q); }
+                if target & (1 << q) == 0 {
+                    GateOpsF32::x(&mut state32, q);
+                }
             }
-            for q in 0..n-1 { GateOpsF32::z(&mut state32, q); } // simplified oracle
+            for q in 0..n - 1 {
+                GateOpsF32::z(&mut state32, q);
+            } // simplified oracle
             for q in 0..n {
-                if target & (1 << q) == 0 { GateOpsF32::x(&mut state32, q); }
+                if target & (1 << q) == 0 {
+                    GateOpsF32::x(&mut state32, q);
+                }
             }
-            for q in 0..n { GateOpsF32::h(&mut state32, q); }
-            for q in 0..n { GateOpsF32::x(&mut state32, q); }
-            for q in 0..n-1 { GateOpsF32::z(&mut state32, q); }
-            for q in 0..n { GateOpsF32::x(&mut state32, q); }
-            for q in 0..n { GateOpsF32::h(&mut state32, q); }
+            for q in 0..n {
+                GateOpsF32::h(&mut state32, q);
+            }
+            for q in 0..n {
+                GateOpsF32::x(&mut state32, q);
+            }
+            for q in 0..n - 1 {
+                GateOpsF32::z(&mut state32, q);
+            }
+            for q in 0..n {
+                GateOpsF32::x(&mut state32, q);
+            }
+            for q in 0..n {
+                GateOpsF32::h(&mut state32, q);
+            }
         }
         let ms_f32 = start.elapsed().as_secs_f64() * 1000.0;
 
         println!("  f64 seq:     {:>8.2} ms (baseline)", ms_baseline);
-        println!("  f64 fused:   {:>8.2} ms ({:.2}x)", ms_fused, ms_baseline / ms_fused);
-        println!("  f32 seq:     {:>8.2} ms ({:.2}x)", ms_f32, ms_baseline / ms_f32);
-        println!("  gates: {} → {} after fusion (elim={})", gates.len(), fusion.gates.len(), fusion.gates_eliminated);
+        println!(
+            "  f64 fused:   {:>8.2} ms ({:.2}x)",
+            ms_fused,
+            ms_baseline / ms_fused
+        );
+        println!(
+            "  f32 seq:     {:>8.2} ms ({:.2}x)",
+            ms_f32,
+            ms_baseline / ms_f32
+        );
+        println!(
+            "  gates: {} → {} after fusion (elim={})",
+            gates.len(),
+            fusion.gates.len(),
+            fusion.gates_eliminated
+        );
     }
 
     // Legacy sections
@@ -301,7 +366,7 @@ fn main() {
         let start = std::time::Instant::now();
         let iters = 1000;
         for _ in 0..iters {
-            nqpu_metal::GateOperations::swap(&mut state, 0, n-1);
+            nqpu_metal::GateOperations::swap(&mut state, 0, n - 1);
         }
         let elapsed = start.elapsed().as_secs_f64();
         let us_per_gate = elapsed * 1e6 / iters as f64;

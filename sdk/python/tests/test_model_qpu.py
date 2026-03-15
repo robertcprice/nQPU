@@ -5,6 +5,7 @@ import numpy as np
 import pytest
 
 from nqpu import (
+    AdaptiveDQPTDiagnosticsResult,
     DQPTCandidate,
     DQPTDiagnosticsResult,
     DQPTScanResult,
@@ -404,6 +405,67 @@ class SyntheticAdaptiveDQPTQPU(ModelQPU):
                 "num_sites": model.num_sites,
                 "transverse_field": sweep_value,
             },
+        )
+
+
+class SyntheticTimeAdaptiveDQPTQPU(ModelQPU):
+    def __init__(self):
+        super().__init__()
+        self.calls: list[np.ndarray] = []
+
+    def dqpt_diagnostics(self, model, times, **kwargs):
+        del model, kwargs
+        times_array = np.asarray(list(times), dtype=np.float64)
+        self.calls.append(times_array.copy())
+        return_rate = 0.1 + np.exp(-40.0 * (times_array - 0.8) ** 2)
+        peak_index = int(np.argmax(return_rate))
+        candidate = DQPTCandidate(
+            index=peak_index,
+            time=float(times_array[peak_index]),
+            return_rate=float(return_rate[peak_index]),
+            prominence=max(float(return_rate[peak_index] - np.min(return_rate)), 0.0),
+            cusp_strength=float(np.exp(-40.0 * (times_array[peak_index] - 0.8) ** 2)),
+            left_slope=1.0,
+            right_slope=-1.0,
+        )
+        amplitudes = np.exp(-2.0 * return_rate).astype(np.complex128)
+        return DQPTDiagnosticsResult(
+            model_name="synthetic_time_dqpt",
+            solver="synthetic_dqpt",
+            num_sites=4,
+            times=times_array,
+            return_rate=return_rate,
+            candidates=(candidate,),
+            amplitudes=amplitudes,
+            model_metadata={"model_name": "synthetic_time_dqpt", "num_sites": 4},
+        )
+
+
+class SyntheticLinearTimeDQPTQPU(ModelQPU):
+    def dqpt_diagnostics(self, model, times, **kwargs):
+        del model, kwargs
+        times_array = np.asarray(list(times), dtype=np.float64)
+        return_rate = times_array.copy()
+        peak_index = int(np.argmax(return_rate))
+        candidate = DQPTCandidate(
+            index=peak_index,
+            time=float(times_array[peak_index]),
+            return_rate=float(return_rate[peak_index]),
+            prominence=0.0,
+            cusp_strength=0.0,
+            left_slope=1.0,
+            right_slope=1.0,
+        )
+        amplitudes = np.exp(-2.0 * return_rate).astype(np.complex128)
+        return DQPTDiagnosticsResult(
+            model_name="synthetic_linear_time_dqpt",
+            solver="synthetic_dqpt",
+            num_sites=4,
+            times=times_array,
+            return_rate=return_rate,
+            candidates=(candidate,),
+            amplitudes=amplitudes,
+            model_metadata={"model_name": "synthetic_linear_time_dqpt", "num_sites": 4},
         )
 
 
@@ -1034,6 +1096,68 @@ def test_model_qpu_dqpt_diagnostics_can_use_rust_loschmidt_path():
     assert diagnostics.amplitudes is not None
     assert diagnostics.backend_state is not None
     assert call["model"] == "heisenberg_xyz_1d"
+
+
+def test_model_qpu_adaptive_dqpt_diagnostics_refines_peak_region():
+    qpu = SyntheticTimeAdaptiveDQPTQPU()
+    model = TransverseFieldIsing1D(num_sites=4, coupling=1.0, transverse_field=0.7)
+
+    result = qpu.adaptive_dqpt_diagnostics(
+        model,
+        [0.0, 0.5, 1.0, 1.5],
+        metric="return_rate",
+        strategy="curvature",
+        max_refinement_rounds=1,
+    )
+
+    assert isinstance(result, AdaptiveDQPTDiagnosticsResult)
+    assert result.refinement_metric == "return_rate"
+    assert result.refinement_strategy == "curvature"
+    assert result.insertion_policy == "equal_spacing"
+    assert result.completed_rounds == 1
+    assert np.allclose(result.seed_times, [0.0, 0.5, 1.0, 1.5])
+    assert np.isclose(result.refinement_history[0]["inserted_values"][0], 0.75)
+    assert np.any(np.isclose(result.times, 0.75))
+    assert len(qpu.calls) == 2
+
+
+def test_adaptive_dqpt_diagnostics_target_crossing_can_insert_requested_time():
+    qpu = SyntheticLinearTimeDQPTQPU()
+    model = TransverseFieldIsing1D(num_sites=4, coupling=1.0, transverse_field=0.7)
+
+    result = qpu.adaptive_dqpt_diagnostics(
+        model,
+        [0.0, 0.5, 1.0, 1.5],
+        metric="return_rate",
+        strategy="target_crossing",
+        target_value=0.8,
+        max_refinement_rounds=1,
+    )
+
+    assert result.refinement_strategy == "target_crossing"
+    assert np.isclose(result.refinement_target_value, 0.8)
+    assert result.insertion_policy == "target_linear"
+    assert np.isclose(result.refinement_history[0]["inserted_values"][0], 0.8)
+    assert np.any(np.isclose(result.times, 0.8))
+
+
+def test_model_qpu_adaptive_dqpt_diagnostics_works_on_exact_path():
+    qpu = ModelQPU()
+    model = TransverseFieldIsing1D(num_sites=4, coupling=1.0, transverse_field=0.7)
+
+    result = qpu.adaptive_dqpt_diagnostics(
+        model,
+        [0.0, 0.1, 0.2],
+        metric="return_rate",
+        strategy="gradient_magnitude",
+        max_refinement_rounds=1,
+    )
+
+    assert isinstance(result, AdaptiveDQPTDiagnosticsResult)
+    assert result.solver == "exact_diagonalization"
+    assert result.times.ndim == 1
+    assert result.return_rate.shape == result.times.shape
+    assert result.completed_rounds in (0, 1)
 
 
 def test_model_qpu_dqpt_parameter_scan_builds_exact_summary_traces():

@@ -1,7 +1,5 @@
 use nqpu_metal::ascii_viz::apply_gate_to_state;
-use nqpu_metal::concurrent_uma::{
-    ConcurrentUmaExecutor, GpuExecutionBackend, PartitionStrategy,
-};
+use nqpu_metal::concurrent_uma::{ConcurrentUmaExecutor, GpuExecutionBackend, PartitionStrategy};
 use nqpu_metal::gates::Gate;
 use nqpu_metal::QuantumState;
 use std::env;
@@ -43,7 +41,13 @@ fn build_circuit(num_qubits: usize, depth: usize) -> Vec<Gate> {
 
 fn arg_value(args: &[String], key: &str, default: &str) -> String {
     args.windows(2)
-        .find_map(|w| if w[0] == key { Some(w[1].clone()) } else { None })
+        .find_map(|w| {
+            if w[0] == key {
+                Some(w[1].clone())
+            } else {
+                None
+            }
+        })
         .unwrap_or_else(|| default.to_string())
 }
 

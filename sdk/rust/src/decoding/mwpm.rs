@@ -575,7 +575,8 @@ impl MWPMDecoder {
 
                     // Add boundary edges (connecting stabilizers)
                     if stabilizer_idx > 0 {
-                        let prev_stab = (stabilizer_idx - 1) % self.code_distance.min(num_stabilizers);
+                        let prev_stab =
+                            (stabilizer_idx - 1) % self.code_distance.min(num_stabilizers);
                         self.edges[stabilizer_idx].push(GraphEdge::new(
                             stabilizer_idx,
                             prev_stab,
@@ -875,7 +876,7 @@ mod tests {
         // num_stabilizers = 2*5 - 2 = 8
         // Need at least 8 syndrome bits
         let syndrome = Syndrome::new(vec![
-            true, false, true, false,  // defects at positions 0, 2
+            true, false, true, false, // defects at positions 0, 2
             false, false, false, false,
         ]);
 
@@ -919,10 +920,10 @@ mod tests {
     fn test_blossom_v_weighted() {
         // Test weighted matching - should prefer lower weight edges
         let mut blossom = BlossomV::new(4);
-        blossom.add_edge(0, 1, 5.0);  // High weight
-        blossom.add_edge(0, 2, 1.0);  // Low weight
-        blossom.add_edge(1, 3, 1.0);  // Low weight
-        blossom.add_edge(2, 3, 5.0);  // High weight
+        blossom.add_edge(0, 1, 5.0); // High weight
+        blossom.add_edge(0, 2, 1.0); // Low weight
+        blossom.add_edge(1, 3, 1.0); // Low weight
+        blossom.add_edge(2, 3, 5.0); // High weight
 
         let matching = blossom.solve();
         let weight = blossom.matching_weight(&matching);
@@ -992,7 +993,7 @@ mod tests {
         // Use syndrome with enough bits for the graph
         // num_stabilizers = 2*5 - 2 = 8
         let syndrome = Syndrome::new(vec![
-            true, false, true, false,  // defects at positions 0, 2
+            true, false, true, false, // defects at positions 0, 2
             false, false, false, false,
         ]);
 
@@ -1036,6 +1037,10 @@ mod tests {
         let matching = blossom.solve();
 
         // Should find a matching (exact size depends on algorithm)
-        assert!(matching.len() >= 2, "Expected at least 2 pairs, got {}", matching.len());
+        assert!(
+            matching.len() >= 2,
+            "Expected at least 2 pairs, got {}",
+            matching.len()
+        );
     }
 }
