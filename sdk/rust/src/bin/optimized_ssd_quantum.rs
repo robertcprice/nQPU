@@ -262,6 +262,7 @@ fn break_correlations(bits: &[u8]) -> Vec<u8> {
 
 /// SHA-256 hash extraction - extracts high-quality randomness
 /// Output rate: ~50% of input bits (through cryptographic hashing)
+#[allow(dead_code)]
 fn hash_extraction(bits: &[u8]) -> Vec<u8> {
     let mut output = Vec::with_capacity(bits.len() / 2);
 
@@ -305,7 +306,7 @@ fn hash_extraction(bits: &[u8]) -> Vec<u8> {
 }
 
 /// Measure quantum score (simplified version)
-fn measure_quantum_score(timing: &[u64], bits: &[u8]) -> f64 {
+fn measure_quantum_score(_timing: &[u64], bits: &[u8]) -> f64 {
     let mut scores = Vec::new();
 
     // 1. Entropy

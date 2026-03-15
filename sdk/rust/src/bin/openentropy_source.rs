@@ -24,7 +24,7 @@
 //!   CERTIFY quantum randomness - and those require entangled photon pairs.
 
 use std::fs::File;
-use std::io::{Read, Write};
+use std::io::Write;
 use std::process::Command;
 use std::time::{Instant, SystemTime, UNIX_EPOCH};
 

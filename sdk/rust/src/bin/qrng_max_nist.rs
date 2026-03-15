@@ -7,7 +7,7 @@
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 use nqpu_metal::nist_tests::NistTestSuite;
 
@@ -97,6 +97,7 @@ fn vn(bits: &[u8]) -> Vec<u8> {
         .collect()
 }
 
+#[allow(dead_code)]
 fn xor(a: &[u8], b: &[u8]) -> Vec<u8> {
     (0..a.len().min(b.len())).map(|i| a[i] ^ b[i]).collect()
 }

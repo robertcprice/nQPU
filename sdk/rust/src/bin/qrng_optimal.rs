@@ -11,8 +11,7 @@
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
-use std::path::PathBuf;
-use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
+use std::time::{Duration, Instant};
 
 use nqpu_metal::nist_tests::NistTestSuite;
 
@@ -72,7 +71,7 @@ fn collect_ssd_desync(n_samples: usize) -> Vec<u64> {
             let _ = file.write_all(&data);
             #[cfg(unix)]
             {
-                use std::os::unix::fs::FileExt;
+                
                 let _ = file.sync_all();
             }
         }

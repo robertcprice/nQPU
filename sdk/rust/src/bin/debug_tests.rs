@@ -121,7 +121,7 @@ fn main() {
 
     let lambda = (block_size as f64 - m_ot as f64 + 1.0) / 2.0_f64.powi(m_ot as i32);
     let eta = lambda / 2.0;
-    let k = m_ot + 2;
+    let _k = m_ot + 2;
 
     println!("\n=== Overlapping Template ===");
     println!(

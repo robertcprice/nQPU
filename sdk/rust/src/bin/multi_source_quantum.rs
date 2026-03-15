@@ -292,11 +292,11 @@ fn collect_ram_timing(n: usize) -> Vec<u8> {
         let start = Instant::now();
 
         // Random access pattern to defeat cache
-        let idx = ((i * 7919) % buffer.len());
+        let idx = (i * 7919) % buffer.len();
         buffer[idx] = buffer[idx].wrapping_add(1);
 
         // Also touch another location
-        let idx2 = ((i * 104729) % buffer.len());
+        let idx2 = (i * 104729) % buffer.len();
         let _ = buffer[idx2];
 
         let elapsed = start.elapsed().as_nanos() as u64;
@@ -496,6 +496,7 @@ fn erfc(x: f64) -> f64 {
 }
 
 // Additional test: SSD + RAM only (skip CPU noise)
+#[allow(dead_code)]
 fn test_ssd_ram_only() {
     println!("\n═══════════════════════════════════════════════════════════════");
     println!("BONUS: Testing SSD + RAM only (CPU is too noisy)");

@@ -127,7 +127,7 @@ fn run_cpu_gpu_comparison() {
     // CPU benchmark
     println!("  Running CPU benchmark...");
     let cpu_start = Instant::now();
-    let cpu_time = nqpu_metal::benchmark_gates(num_qubits, num_gates);
+    let _cpu_time = nqpu_metal::benchmark_gates(num_qubits, num_gates);
     let cpu_elapsed = cpu_start.elapsed().as_secs_f64();
 
     // GPU benchmark

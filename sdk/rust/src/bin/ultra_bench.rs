@@ -6,7 +6,7 @@
 use std::time::Instant;
 
 #[cfg(target_os = "macos")]
-use nqpu_metal::{benchmark_gates, benchmark_ultra_batched};
+use nqpu_metal::benchmark_ultra_batched;
 
 fn main() {
     println!("╔═══════════════════════════════════════════════════════════════╗");
@@ -57,7 +57,7 @@ fn main() {
 
             let cpu_gates = 10000;
             let cpu_start = Instant::now();
-            let cpu_time = nqpu_metal::benchmark_gates(num_qubits, cpu_gates);
+            let _cpu_time = nqpu_metal::benchmark_gates(num_qubits, cpu_gates);
             let cpu_elapsed = cpu_start.elapsed().as_secs_f64();
 
             match benchmark_ultra_batched(num_qubits, cpu_gates) {
