@@ -15,9 +15,10 @@ mod tests {
         assert_eq!(mapper.map_2d_to_1d(3, 0), 3);
         assert_eq!(mapper.map_2d_to_1d(0, 1), 7);
 
-        // Test inverse mapping
+        // Test inverse mapping: index 7 is the last position in odd row 1,
+        // which snakes right-to-left, so it maps back to (0, 1).
         let coord = mapper.map_1d_to_2d(7);
-        assert_eq!(coord.x, 3);
+        assert_eq!(coord.x, 0);
         assert_eq!(coord.y, 1);
     }
 

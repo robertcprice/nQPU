@@ -507,21 +507,21 @@ impl QuantumMeasurementTool {
         // Entropy at scale 4 (4-bit blocks)
         let blocks_4: Vec<u8> = bits
             .chunks(4)
-            .map(|chunk| chunk.iter().fold(0u8, |acc, &b| acc * 2 + b) % 2)
+            .map(|chunk| chunk.iter().fold(0u8, |acc, &b| acc ^ b))
             .collect();
         entropies.push(calculate_entropy(&blocks_4));
 
         // Entropy at scale 16
         let blocks_16: Vec<u8> = bits
             .chunks(16)
-            .map(|chunk| chunk.iter().fold(0u8, |acc, &b| acc * 2 + b) % 2)
+            .map(|chunk| chunk.iter().fold(0u8, |acc, &b| acc ^ b))
             .collect();
         entropies.push(calculate_entropy(&blocks_16));
 
         // Entropy at scale 64
         let blocks_64: Vec<u8> = bits
             .chunks(64)
-            .map(|chunk| chunk.iter().fold(0u8, |acc, &b| acc * 2 + b) % 2)
+            .map(|chunk| chunk.iter().fold(0u8, |acc, &b| acc ^ b))
             .collect();
         entropies.push(calculate_entropy(&blocks_64));
 

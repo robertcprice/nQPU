@@ -466,12 +466,19 @@ fn zyz_to_gates(q: usize, beta: f64, gamma: f64, delta: f64) -> Vec<OptGate> {
     let tol = 1e-10;
     let mut gates = Vec::new();
 
+    // When gamma ≈ 0 (pure Z rotation), merge the two Rz rotations into one
+    if gamma.abs() <= tol {
+        let total = beta + delta;
+        if total.abs() > tol {
+            gates.push(OptGate::Rz(q, total));
+        }
+        return gates;
+    }
+
     if delta.abs() > tol {
         gates.push(OptGate::Rz(q, delta));
     }
-    if gamma.abs() > tol {
-        gates.push(OptGate::Ry(q, gamma));
-    }
+    gates.push(OptGate::Ry(q, gamma));
     if beta.abs() > tol {
         gates.push(OptGate::Rz(q, beta));
     }
@@ -1585,8 +1592,9 @@ fn pass_peephole(gates: &[OptGate], window: usize) -> Vec<OptGate> {
 
         while i + window <= result.len() {
             let slice = &result[i..i + window];
-            // Try cancellation then fusion on the window.
-            let opt1 = pass_gate_cancellation(slice);
+            // Try commutation, then cancellation, then fusion on the window.
+            let opt0 = pass_commutation_analysis(slice);
+            let opt1 = pass_gate_cancellation(&opt0);
             let opt2 = pass_single_qubit_fusion(&opt1);
 
             if opt2.len() < window {

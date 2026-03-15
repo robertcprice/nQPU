@@ -669,11 +669,34 @@ mod tests {
     fn test_certify_ssd() {
         let certifier = QuantumSourceCertifier::new();
 
-        // Simulate SSD timing data
-        let timing: Vec<u64> = (0..10000)
-            .map(|i| i as u64 * 1000 + (i % 17) * 50)
-            .collect();
-        let bits: Vec<u8> = (0..8000u32).map(|i| ((i % 7) % 2) as u8).collect();
+        // Xorshift64 PRNG — much better statistical properties than LCG
+        let mut state = 88172645463325252u64;
+        let mut xorshift = || -> u64 {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state
+        };
+
+        // Simulate quantum-like SSD timing with exponential-ish inter-arrivals
+        // (CV ≈ 1.0 mimics Poisson process)
+        let mut timing = vec![0u64];
+        for _ in 1..10000 {
+            let r = xorshift();
+            let interval = (r % 2000) + 1; // variable intervals, mean ≈ 1000
+            timing.push(timing.last().unwrap() + interval);
+        }
+
+        // Generate unbiased, uncorrelated bits with slight thermal drift
+        // (bias drifts slowly over time, mimicking real SSD quantum source)
+        let mut bits: Vec<u8> = Vec::with_capacity(8000);
+        for i in 0..8000 {
+            let r = xorshift();
+            // Slight sinusoidal bias drift to mimic thermal fluctuation
+            let drift = (i as f64 * 0.001).sin() * 0.03;
+            let threshold = (0.5 + drift) * u64::MAX as f64;
+            bits.push(if (r as f64) < threshold { 1 } else { 0 });
+        }
 
         let mechanism = QuantumMechanism::FowlerNordheimTunneling {
             oxide_thickness_nm: 7.0,
@@ -684,7 +707,7 @@ mod tests {
 
         println!("{}", certifier.generate_report(&cert));
 
-        // Fowler-Nordheim should be certified quantum
+        // Fowler-Nordheim with quantum-like statistics should have reasonable confidence
         assert!(cert.quantum_confidence > 50.0);
     }
 }
