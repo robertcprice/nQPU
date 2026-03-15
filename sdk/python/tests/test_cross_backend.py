@@ -177,7 +177,7 @@ class TestIdealBenchmarks:
         """QFT benchmark returns valid comparison."""
         comp = bench_3q.benchmark_qft()
         assert comp.circuit_name == "QFT"
-        assert len(comp.results) == 4  # ideal + noisy for ion + sc
+        assert len(comp.results) == 6  # ideal + noisy for ion + sc + na
 
     def test_qft_ideal_fidelity(self, bench_3q):
         """QFT ideal fidelity is 1.0."""
@@ -198,15 +198,16 @@ class TestIdealBenchmarks:
             if "ideal" in name:
                 assert res.fidelity_vs_ideal == pytest.approx(1.0)
 
-    def test_run_all_returns_four_comparisons(self, bench_3q):
-        """run_all() returns exactly 4 benchmark comparisons."""
+    def test_run_all_returns_five_comparisons(self, bench_3q):
+        """run_all() returns exactly 5 benchmark comparisons."""
         results = bench_3q.run_all()
-        assert len(results) == 4
+        assert len(results) == 5
         names = [r.circuit_name for r in results]
         assert "Bell State" in names
         assert "GHZ State" in names
         assert "QFT" in names
         assert "Random Circuit" in names
+        assert "Toffoli Circuit" in names
 
 
 # ======================================================================
@@ -455,7 +456,7 @@ class TestEdgeCases:
         bench = CrossBackendBenchmark(num_qubits=2)
         comp = bench.benchmark_bell()
         assert comp.num_qubits == 2
-        assert len(comp.results) == 4  # ideal + noisy for ion + sc
+        assert len(comp.results) == 6  # ideal + noisy for ion + sc + na
 
     def test_ghz_with_two_qubits(self):
         """GHZ on 2 qubits is equivalent to a Bell state."""

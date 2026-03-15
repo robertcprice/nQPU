@@ -1,11 +1,12 @@
-"""Cross-backend benchmarking: trapped-ion vs superconducting.
+"""Cross-backend benchmarking: trapped-ion vs superconducting vs neutral atom.
 
-Runs identical quantum circuits on both hardware backends, comparing:
+Runs identical quantum circuits on all three hardware backends, comparing:
 - Ideal fidelity (should be identical)
 - Noisy fidelity (hardware-dependent error rates)
 - Native gate counts (compilation efficiency)
 - Estimated circuit duration
 - QCVV metrics (RB error rates, Bell/GHZ fidelity)
+- Multi-qubit gate advantage (Toffoli benchmark for neutral atom CCZ)
 """
 
 from __future__ import annotations
@@ -23,6 +24,12 @@ from nqpu.superconducting import (
     ChipConfig,
     DevicePresets,
     TransmonQCVV,
+)
+from nqpu.neutral_atom import (
+    NeutralAtomSimulator,
+    ArrayConfig,
+    AtomSpecies,
+    DevicePresets as NeutralAtomPresets,
 )
 
 
@@ -66,8 +73,8 @@ class BackendComparison:
 class CrossBackendBenchmark:
     """Cross-backend benchmarking suite.
 
-    Runs identical circuits on trapped-ion and superconducting backends
-    in both ideal and noisy modes.
+    Runs identical circuits on trapped-ion, superconducting, and neutral-atom
+    backends in both ideal and noisy modes.
 
     Parameters
     ----------
@@ -77,6 +84,8 @@ class CrossBackendBenchmark:
         Ion species for the trapped-ion backend.
     sc_preset : DevicePresets
         Device preset for the superconducting backend.
+    na_species : AtomSpecies
+        Atom species for the neutral-atom backend.
     """
 
     def __init__(
@@ -84,6 +93,7 @@ class CrossBackendBenchmark:
         num_qubits: int = 3,
         ion_species: IonSpecies | None = None,
         sc_preset: DevicePresets = DevicePresets.IBM_HERON,
+        na_species: AtomSpecies | None = None,
     ) -> None:
         self.num_qubits = num_qubits
 
@@ -94,6 +104,11 @@ class CrossBackendBenchmark:
 
         # Superconducting config
         self.sc_config = sc_preset.build(num_qubits=num_qubits)
+
+        # Neutral atom config
+        if na_species is None:
+            na_species = AtomSpecies.RB87
+        self.na_config = ArrayConfig(n_atoms=num_qubits, species=na_species)
 
     # ------------------------------------------------------------------
     # Circuit definitions
@@ -165,6 +180,105 @@ class CrossBackendBenchmark:
             for q in range(0, n - 1, 2):
                 sim.cnot(q, q + 1)
 
+    # --- Neutral atom circuits ---
+
+    @staticmethod
+    def _bell_circuit_na(sim: NeutralAtomSimulator) -> None:
+        """Bell state on neutral atom."""
+        sim.h(0)
+        sim.cnot(0, 1)
+
+    @staticmethod
+    def _ghz_circuit_na(sim: NeutralAtomSimulator, n: int) -> None:
+        """GHZ state on neutral atom."""
+        sim.h(0)
+        for i in range(1, n):
+            sim.cnot(0, i)
+
+    @staticmethod
+    def _qft_circuit_na(sim: NeutralAtomSimulator, n: int) -> None:
+        """QFT on neutral atom."""
+        for i in range(n):
+            sim.h(i)
+            for j in range(i + 1, n):
+                angle = math.pi / (2 ** (j - i))
+                sim.rz(j, angle)
+
+    @staticmethod
+    def _random_circuit_na(
+        sim: NeutralAtomSimulator, n: int, depth: int = 5
+    ) -> None:
+        """Random circuit on neutral atom."""
+        rng = np.random.RandomState(42)
+        for _ in range(depth):
+            for q in range(n):
+                sim.rx(q, rng.uniform(0, 2 * math.pi))
+                sim.rz(q, rng.uniform(0, 2 * math.pi))
+            for q in range(0, n - 1, 2):
+                sim.cnot(q, q + 1)
+
+    # --- Toffoli circuits (neutral atom advantage) ---
+
+    @staticmethod
+    def _toffoli_circuit_ion(sim: TrappedIonSimulator, n: int) -> None:
+        """Toffoli-heavy circuit on trapped-ion.
+
+        Decomposes each Toffoli into 6 two-qubit entangling gates
+        since trapped-ion hardware lacks a native three-qubit gate.
+        """
+        sim.h(0)
+        for q in range(0, n - 2):
+            # Toffoli decomposition: 6 CNOTs + single-qubit gates
+            sim.h(q + 2)
+            sim.cnot(q + 1, q + 2)
+            sim.rz(q + 2, -math.pi / 4)
+            sim.cnot(q, q + 2)
+            sim.rz(q + 2, math.pi / 4)
+            sim.cnot(q + 1, q + 2)
+            sim.rz(q + 2, -math.pi / 4)
+            sim.cnot(q, q + 2)
+            sim.rz(q + 2, math.pi / 4)
+            sim.rz(q + 1, math.pi / 4)
+            sim.cnot(q, q + 1)
+            sim.rz(q + 1, -math.pi / 4)
+            sim.cnot(q, q + 1)
+            sim.h(q + 2)
+
+    @staticmethod
+    def _toffoli_circuit_sc(sim: TransmonSimulator, n: int) -> None:
+        """Toffoli-heavy circuit on superconducting.
+
+        Same decomposition as trapped-ion: 6 two-qubit gates per Toffoli.
+        """
+        sim.h(0)
+        for q in range(0, n - 2):
+            sim.h(q + 2)
+            sim.cnot(q + 1, q + 2)
+            sim.rz(q + 2, -math.pi / 4)
+            sim.cnot(q, q + 2)
+            sim.rz(q + 2, math.pi / 4)
+            sim.cnot(q + 1, q + 2)
+            sim.rz(q + 2, -math.pi / 4)
+            sim.cnot(q, q + 2)
+            sim.rz(q + 2, math.pi / 4)
+            sim.rz(q + 1, math.pi / 4)
+            sim.cnot(q, q + 1)
+            sim.rz(q + 1, -math.pi / 4)
+            sim.cnot(q, q + 1)
+            sim.h(q + 2)
+
+    @staticmethod
+    def _toffoli_circuit_na(sim: NeutralAtomSimulator, n: int) -> None:
+        """Toffoli-heavy circuit on neutral atom.
+
+        Uses the native CCZ/Toffoli gate via Rydberg multi-body blockade,
+        requiring only 1 three-qubit gate per Toffoli vs 6 two-qubit gates
+        on other backends.
+        """
+        sim.h(0)
+        for q in range(0, n - 2):
+            sim.toffoli(q, q + 1, q + 2)
+
     # ------------------------------------------------------------------
     # Benchmark runners
     # ------------------------------------------------------------------
@@ -235,6 +349,50 @@ class CrossBackendBenchmark:
             wall_time_ms=dt,
         )
 
+    def _run_na(
+        self, circuit_fn, mode: str, label: str
+    ) -> CircuitBenchmark:
+        """Run circuit on neutral-atom backend."""
+        t0 = time.time()
+        sim = NeutralAtomSimulator(self.na_config, execution_mode=mode)
+        circuit_fn(sim)
+
+        # In noisy mode the state vector is not available -- use
+        # the density matrix diagonal to get measurement probabilities.
+        if mode == "noisy":
+            dm = sim.density_matrix()
+            probs = np.real(np.diag(dm))
+            probs = np.maximum(probs, 0.0)
+            psum = probs.sum()
+            if psum > 0:
+                probs /= psum
+        else:
+            probs = np.array([abs(x)**2 for x in sim.statevector()])
+
+        dt = (time.time() - t0) * 1000
+        stats = sim.circuit_stats()
+
+        # Ideal reference
+        ideal_sim = NeutralAtomSimulator(self.na_config, execution_mode="ideal")
+        circuit_fn(ideal_sim)
+        ideal_probs = np.array([abs(x)**2 for x in ideal_sim.statevector()])
+        fidelity = float(np.sum(np.sqrt(probs * ideal_probs)) ** 2)
+
+        extra: dict[str, Any] = {}
+        if hasattr(stats, "three_qubit_gates"):
+            extra["three_qubit_gates"] = stats.three_qubit_gates
+
+        return CircuitBenchmark(
+            backend_name=f"neutral_atom_{label}",
+            execution_mode=mode,
+            probabilities=probs,
+            fidelity_vs_ideal=fidelity if mode != "ideal" else 1.0,
+            num_gates_1q=stats.single_qubit_gates,
+            num_gates_2q=stats.two_qubit_gates,
+            wall_time_ms=dt,
+            extra=extra,
+        )
+
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
@@ -249,6 +407,9 @@ class CrossBackendBenchmark:
             results[f"sc_{mode}"] = self._run_sc(
                 self._bell_circuit_sc, mode, mode
             )
+            results[f"na_{mode}"] = self._run_na(
+                self._bell_circuit_na, mode, mode
+            )
         return BackendComparison("Bell State", 2, results)
 
     def benchmark_ghz(self) -> BackendComparison:
@@ -261,6 +422,9 @@ class CrossBackendBenchmark:
             )
             results[f"sc_{mode}"] = self._run_sc(
                 lambda sim: self._ghz_circuit_sc(sim, n), mode, mode
+            )
+            results[f"na_{mode}"] = self._run_na(
+                lambda sim: self._ghz_circuit_na(sim, n), mode, mode
             )
         return BackendComparison("GHZ State", n, results)
 
@@ -275,6 +439,9 @@ class CrossBackendBenchmark:
             results[f"sc_{mode}"] = self._run_sc(
                 lambda sim: self._qft_circuit_sc(sim, n), mode, mode
             )
+            results[f"na_{mode}"] = self._run_na(
+                lambda sim: self._qft_circuit_na(sim, n), mode, mode
+            )
         return BackendComparison("QFT", n, results)
 
     def benchmark_random(self, depth: int = 5) -> BackendComparison:
@@ -288,7 +455,33 @@ class CrossBackendBenchmark:
             results[f"sc_{mode}"] = self._run_sc(
                 lambda sim: self._random_circuit_sc(sim, n, depth), mode, mode
             )
+            results[f"na_{mode}"] = self._run_na(
+                lambda sim: self._random_circuit_na(sim, n, depth), mode, mode
+            )
         return BackendComparison("Random Circuit", n, results)
+
+    def benchmark_toffoli(self) -> BackendComparison:
+        """Benchmark Toffoli-heavy circuit (neutral atom advantage).
+
+        Demonstrates the native CCZ gate advantage: neutral atoms use a
+        single three-qubit Rydberg blockade gate per Toffoli, while
+        trapped-ion and superconducting backends must decompose each
+        Toffoli into 6 two-qubit entangling gates plus single-qubit
+        rotations.
+        """
+        n = max(self.num_qubits, 3)
+        results = {}
+        for mode in ("ideal", "noisy"):
+            results[f"ion_{mode}"] = self._run_ion(
+                lambda sim: self._toffoli_circuit_ion(sim, n), mode, mode
+            )
+            results[f"sc_{mode}"] = self._run_sc(
+                lambda sim: self._toffoli_circuit_sc(sim, n), mode, mode
+            )
+            results[f"na_{mode}"] = self._run_na(
+                lambda sim: self._toffoli_circuit_na(sim, n), mode, mode
+            )
+        return BackendComparison("Toffoli Circuit", n, results)
 
     def run_all(self) -> list[BackendComparison]:
         """Run all benchmark circuits."""
@@ -297,15 +490,16 @@ class CrossBackendBenchmark:
             self.benchmark_ghz(),
             self.benchmark_qft(),
             self.benchmark_random(),
+            self.benchmark_toffoli(),
         ]
 
     @staticmethod
     def print_report(comparisons: list[BackendComparison]) -> None:
         """Print a formatted benchmark report."""
-        print("=" * 72)
+        print("=" * 78)
         print("CROSS-BACKEND BENCHMARK REPORT")
-        print("Trapped-Ion vs Superconducting Transmon")
-        print("=" * 72)
+        print("Trapped-Ion vs Superconducting vs Neutral Atom")
+        print("=" * 78)
 
         for comp in comparisons:
             print(f"\n--- {comp.circuit_name} ({comp.num_qubits}Q) ---")
@@ -313,11 +507,14 @@ class CrossBackendBenchmark:
                   f"{'2Q Gates':>10} {'Time(ms)':>10}")
             print("-" * 65)
             for name, res in comp.results.items():
+                extra_str = ""
+                if res.extra.get("three_qubit_gates", 0) > 0:
+                    extra_str = f"  [3Q: {res.extra['three_qubit_gates']}]"
                 print(f"{name:<25} {res.fidelity_vs_ideal:>10.4f} "
                       f"{res.num_gates_1q:>10} {res.num_gates_2q:>10} "
-                      f"{res.wall_time_ms:>10.2f}")
+                      f"{res.wall_time_ms:>10.2f}{extra_str}")
 
-        print("\n" + "=" * 72)
+        print("\n" + "=" * 78)
 
 
 # ------------------------------------------------------------------

@@ -1,7 +1,9 @@
 """Cross-backend benchmarking framework for nQPU.
 
-Compare quantum circuits across trapped-ion and superconducting backends,
-measuring fidelity, gate counts, depth, noise impact, and resource usage.
+Compare quantum circuits across trapped-ion, superconducting, and neutral-atom
+backends, measuring fidelity, gate counts, depth, noise impact, and resource
+usage.  Includes a Toffoli benchmark that highlights the native CCZ gate
+advantage of neutral-atom hardware.
 
 Example:
     from nqpu.benchmarks import CrossBackendBenchmark
