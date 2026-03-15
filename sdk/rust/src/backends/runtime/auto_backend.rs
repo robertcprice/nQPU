@@ -41,6 +41,23 @@ pub enum BackendType {
     CPU,
     /// Trapped-ion backend (Molmer-Sorensen native gate set)
     TrappedIon,
+    /// Superconducting transmon backend (ECR/SqrtISWAP/CZ native gates)
+    Superconducting,
+    /// Neutral atom / Rydberg backend (CZ via blockade, native CCZ)
+    NeutralAtom,
+}
+
+/// Target hardware platform hint for routing circuits to the right backend.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum HardwareTarget {
+    /// Any available simulator (auto-select best)
+    Any,
+    /// Superconducting processor (IBM, Google, Rigetti)
+    Superconducting,
+    /// Trapped-ion processor (Quantinuum, IonQ)
+    TrappedIon,
+    /// Neutral atom array (QuEra, Atom Computing, Pasqal)
+    NeutralAtom,
 }
 
 impl BackendType {
@@ -54,7 +71,18 @@ impl BackendType {
             BackendType::Fused => "FusedCPU",
             BackendType::CPU => "CPU",
             BackendType::TrappedIon => "TrappedIon",
+            BackendType::Superconducting => "Superconducting",
+            BackendType::NeutralAtom => "NeutralAtom",
         }
+    }
+
+    /// Whether this backend represents a specific hardware simulator
+    /// (as opposed to a generic state-vector / tensor-network engine).
+    pub fn is_hardware_backend(&self) -> bool {
+        matches!(
+            self,
+            BackendType::TrappedIon | BackendType::Superconducting | BackendType::NeutralAtom
+        )
     }
 }
 
@@ -87,6 +115,8 @@ pub struct AutoBackend {
     gpu_gate_threshold: usize,
     /// Gate count threshold for fusion consideration
     fusion_gate_threshold: usize,
+    /// Optional hardware target hint
+    hardware_target: HardwareTarget,
 }
 
 impl Default for AutoBackend {
@@ -103,6 +133,7 @@ impl AutoBackend {
             mps_entanglement_threshold: 0.3,
             gpu_gate_threshold: 50,
             fusion_gate_threshold: 5,
+            hardware_target: HardwareTarget::Any,
         }
     }
 
@@ -118,7 +149,14 @@ impl AutoBackend {
             mps_entanglement_threshold,
             gpu_gate_threshold,
             fusion_gate_threshold,
+            hardware_target: HardwareTarget::Any,
         }
+    }
+
+    /// Set a hardware target hint for routing to a specific backend type.
+    pub fn with_hardware_target(mut self, target: HardwareTarget) -> Self {
+        self.hardware_target = target;
+        self
     }
 
     /// Analyze a circuit and recommend the best backend.
@@ -148,6 +186,7 @@ impl AutoBackend {
             depth,
             is_clifford,
             entanglement_estimate,
+            gates,
         );
 
         CircuitAnalysis {
@@ -169,7 +208,61 @@ impl AutoBackend {
         _depth: usize,
         _is_clifford: bool,
         entanglement_estimate: f64,
+        gates: &[Gate],
     ) -> (BackendType, String) {
+        // If a hardware target is specified, route directly.
+        match self.hardware_target {
+            HardwareTarget::Superconducting => {
+                return (
+                    BackendType::Superconducting,
+                    format!(
+                        "Hardware target: superconducting transmon ({} qubits, {} gates)",
+                        num_qubits, num_gates
+                    ),
+                );
+            }
+            HardwareTarget::TrappedIon => {
+                return (
+                    BackendType::TrappedIon,
+                    format!(
+                        "Hardware target: trapped-ion ({} qubits, {} gates)",
+                        num_qubits, num_gates
+                    ),
+                );
+            }
+            HardwareTarget::NeutralAtom => {
+                return (
+                    BackendType::NeutralAtom,
+                    format!(
+                        "Hardware target: neutral atom Rydberg ({} qubits, {} gates)",
+                        num_qubits, num_gates
+                    ),
+                );
+            }
+            HardwareTarget::Any => {} // fall through to auto-selection
+        }
+
+        // Check for circuit properties that strongly favor a hardware backend.
+        let has_toffoli = gates
+            .iter()
+            .any(|g| matches!(g.gate_type, GateType::Toffoli));
+        let three_qubit_fraction = gates
+            .iter()
+            .filter(|g| g.controls.len() + g.targets.len() >= 3)
+            .count() as f64
+            / num_gates.max(1) as f64;
+
+        // Neutral atom excels at circuits with native 3-qubit gates (CCZ/Toffoli).
+        if has_toffoli && three_qubit_fraction > 0.1 {
+            return (
+                BackendType::NeutralAtom,
+                format!(
+                    "Circuit has {:.0}% 3-qubit gates — neutral atom native CCZ advantageous",
+                    three_qubit_fraction * 100.0
+                ),
+            );
+        }
+
         // Distributed for very large circuits (30+ qubits)
         if num_qubits >= 30 {
             return (
@@ -438,6 +531,42 @@ mod tests {
         assert_eq!(BackendType::F32Fused.name(), "F32FusionCPU");
         assert_eq!(BackendType::Fused.name(), "FusedCPU");
         assert_eq!(BackendType::CPU.name(), "CPU");
+        assert_eq!(BackendType::TrappedIon.name(), "TrappedIon");
+        assert_eq!(BackendType::Superconducting.name(), "Superconducting");
+        assert_eq!(BackendType::NeutralAtom.name(), "NeutralAtom");
+    }
+
+    #[test]
+    fn test_is_hardware_backend() {
+        assert!(BackendType::TrappedIon.is_hardware_backend());
+        assert!(BackendType::Superconducting.is_hardware_backend());
+        assert!(BackendType::NeutralAtom.is_hardware_backend());
+        assert!(!BackendType::CPU.is_hardware_backend());
+        assert!(!BackendType::MPS.is_hardware_backend());
+        assert!(!BackendType::MetalGPU.is_hardware_backend());
+    }
+
+    #[test]
+    fn test_hardware_target_superconducting() {
+        let selector = AutoBackend::new().with_hardware_target(HardwareTarget::Superconducting);
+        let gates = vec![Gate::h(0), Gate::cnot(0, 1)];
+        let analysis = selector.analyze(&gates);
+        assert_eq!(analysis.recommended_backend, BackendType::Superconducting);
+        assert!(analysis.reasoning.contains("superconducting"));
+    }
+
+    #[test]
+    fn test_hardware_target_trapped_ion() {
+        let selector = AutoBackend::new().with_hardware_target(HardwareTarget::TrappedIon);
+        let gates = vec![Gate::h(0), Gate::cnot(0, 1)];
+        assert_eq!(selector.select(&gates), BackendType::TrappedIon);
+    }
+
+    #[test]
+    fn test_hardware_target_neutral_atom() {
+        let selector = AutoBackend::new().with_hardware_target(HardwareTarget::NeutralAtom);
+        let gates = vec![Gate::h(0), Gate::cnot(0, 1)];
+        assert_eq!(selector.select(&gates), BackendType::NeutralAtom);
     }
 
     #[test]

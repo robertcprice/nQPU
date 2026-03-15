@@ -35,6 +35,8 @@ pub mod ibm_quantum;
 pub mod live_calibration;
 #[path = "hardware/neutral_atom_array.rs"]
 pub mod neutral_atom_array;
+#[path = "hardware/neutral_atom_backend.rs"]
+pub mod neutral_atom_backend;
 #[path = "hardware/photonic_advantage.rs"]
 pub mod photonic_advantage;
 #[path = "hardware/pinnacle_architecture.rs"]
