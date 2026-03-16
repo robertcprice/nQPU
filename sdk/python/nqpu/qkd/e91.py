@@ -131,14 +131,42 @@ class E91Protocol:
             if pair is None:
                 continue  # Photon lost
 
-            alice_raw, bob_raw = pair
-
-            # Alice and Bob measure in their chosen angles
+            # For Bell state |Phi+> = (|00> + |11>)/sqrt(2), measurements
+            # are correlated: E(a,b) = cos(a - b).
+            # Alice measures first (random 0 or 1 for Bell state).
+            # Bob's outcome is correlated with Alice's via:
+            #   P(B=Alice) = cos^2((a-b)/2), P(B!=Alice) = sin^2((a-b)/2)
             a_angle = ALICE_ANGLES[alice_basis_choices[i]]
             b_angle = BOB_ANGLES[bob_basis_choices[i]]
 
-            a_outcome = self._measure_in_basis(alice_raw, a_angle, self.rng)
-            b_outcome = self._measure_in_basis(bob_raw, b_angle, self.rng)
+            # Alice's measurement: 50/50 for Bell state
+            a_outcome = self.rng.randint(0, 2)
+
+            # Check for entanglement-breaking eavesdropper
+            eve_breaks = (
+                channel.eavesdropper is not None
+                and channel.eavesdropper.strategy == "entanglement_breaking"
+                and self.rng.random() < channel.eavesdropper.interception_rate
+            )
+
+            if eve_breaks:
+                # Eve's attack destroys quantum correlations:
+                # Bob's outcome is now independent of Alice's
+                b_outcome = self.rng.randint(0, 2)
+            else:
+                # Bob's measurement: correlated with Alice's outcome
+                angle_diff = a_angle - b_angle
+                # Probability Bob gets same outcome as Alice
+                p_same = math.cos(angle_diff / 2.0) ** 2
+
+                if self.rng.random() < p_same:
+                    b_outcome = a_outcome
+                else:
+                    b_outcome = 1 - a_outcome
+
+                # Apply channel noise (bit flip on Bob's side)
+                if self.rng.random() < channel.error_rate:
+                    b_outcome = 1 - b_outcome
 
             alice_outcomes.append(a_outcome)
             bob_outcomes.append(b_outcome)

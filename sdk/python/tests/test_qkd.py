@@ -350,31 +350,30 @@ class TestE91:
     simulation behavior.
     """
 
-    def test_chsh_s_value_consistent_with_model(self, perfect_channel):
-        """S-value from the independent-flip model should be approximately sqrt(2).
+    def test_chsh_s_value_at_tsirelson_bound(self, perfect_channel):
+        """S-value from proper Bell state correlations should be near Tsirelson bound.
 
-        The model produces E(A3,B1) ~ 0 and E(A3,B3) ~ 0 because
-        Alice at 90 deg has flip probability 0.5 (purely random).
-        Only E(A1,B1) ~ 0.707 and E(A1,B3) ~ -0.707 contribute,
-        giving S ~ |0.707 - (-0.707)| + |0 + 0| ~ 1.414.
+        For the Bell state |Phi+> = (|00> + |11>)/sqrt(2), the correlation is
+        E(a,b) = cos(a-b). With optimal angles (0, 45, 90, 135 deg), this gives
+        S = 2*sqrt(2) ~ 2.828, the maximum quantum value (Tsirelson bound).
         """
         protocol = E91Protocol(seed=42)
         result = protocol.generate_key(n_pairs=50000, channel=perfect_channel)
 
         assert result.chsh_s_value is not None
-        # Model produces S ~ sqrt(2) ~ 1.414
-        expected_s = math.sqrt(2.0)
-        assert abs(result.chsh_s_value - expected_s) < 0.15, (
+        # Tsirelson bound: 2*sqrt(2) ~ 2.828
+        tsirelson = 2.0 * math.sqrt(2.0)
+        assert abs(result.chsh_s_value - tsirelson) < 0.10, (
             f"S-value {result.chsh_s_value:.3f} should be near "
-            f"sqrt(2) ~ {expected_s:.3f} for this measurement model"
+            f"Tsirelson bound 2*sqrt(2) ~ {tsirelson:.3f}"
         )
 
-    def test_eve_drops_s_value(self):
-        """An entanglement-breaking Eve should reduce the S-value further.
+    def test_eve_reduces_s_value(self):
+        """An entanglement-breaking Eve should reduce the S-value toward classical.
 
-        Without Eve, S ~ 1.414.  With Eve breaking entanglement, Bob's
-        outcomes become independent, destroying all correlations and
-        pushing S closer to 0.
+        Without Eve, S ~ 2.828 (Tsirelson bound). With Eve breaking entanglement,
+        Bob's outcomes become less correlated, pushing S toward the classical
+        bound of 2.0 or below.
         """
         eve_ch = QuantumChannel(
             error_rate=0.0,
@@ -394,10 +393,10 @@ class TestE91:
 
         assert result_eve.chsh_s_value is not None
         assert result_clean.chsh_s_value is not None
-        # Eve's entanglement breaking should reduce S
-        assert result_eve.chsh_s_value < result_clean.chsh_s_value, (
-            f"S with Eve ({result_eve.chsh_s_value:.3f}) should be less than "
-            f"without Eve ({result_clean.chsh_s_value:.3f})"
+        # Eve's entanglement breaking should reduce S toward classical bound
+        assert result_eve.chsh_s_value < 2.5, (
+            f"S with Eve ({result_eve.chsh_s_value:.3f}) should be below 2.5 "
+            f"(reduced from clean {result_clean.chsh_s_value:.3f})"
         )
 
     def test_key_generation_with_lowered_threshold(self, perfect_channel):
@@ -413,19 +412,19 @@ class TestE91:
         assert len(result.final_key) > 0
         assert result.protocol == "E91"
 
-    def test_default_threshold_flags_insecure(self, perfect_channel):
-        """With default CHSH threshold (2.0), the sim model should flag insecure.
+    def test_default_threshold_secure_with_quantum_correlations(self, perfect_channel):
+        """With proper quantum correlations, S > 2.0 should pass security check.
 
-        The independent-flip measurement model gives S ~ 1.414 < 2.0,
-        so the protocol correctly detects this and aborts.
+        The correct Bell state implementation gives S ~ 2.828 > 2.0,
+        so the protocol correctly considers the channel secure.
         """
         protocol = E91Protocol(seed=42)
         result = protocol.generate_key(n_pairs=20000, channel=perfect_channel)
 
-        assert result.secure is False
-        assert result.final_key == []
+        assert result.secure is True
+        assert len(result.final_key) > 0
         assert result.chsh_s_value is not None
-        assert result.chsh_s_value < 2.0
+        assert result.chsh_s_value > 2.0
 
     def test_sifting_efficiency(self, perfect_channel):
         """E91 matching bases (A2=B1 at 45deg, A3=B2 at 90deg) yield ~2/9 sifting.
