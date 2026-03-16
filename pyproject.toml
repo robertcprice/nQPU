@@ -52,7 +52,7 @@ all = [
 
 [tool.setuptools.packages.find]
 where = ["sdk/python"]
-include = ["nqpu*", "bio*", "chem*", "core*"]
+include = ["nqpu*"]
 exclude = ["tests*", "demos*"]
 
 [tool.black]
@@ -66,4 +66,5 @@ select = ["E", "F", "I"]
 [tool.pytest.ini_options]
 markers = [
     "slow: longer-running backend and VQE validation tests",
+    "integration: cross-package integration tests",
 ]

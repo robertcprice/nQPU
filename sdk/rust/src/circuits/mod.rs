@@ -45,6 +45,8 @@ pub mod quantum_synthesis;
 pub mod transpiler;
 #[path = "synthesis/treespilation.rs"]
 pub mod treespilation;
+#[path = "synthesis/noise_aware_routing.rs"]
+pub mod noise_aware_routing;
 #[path = "synthesis/zx_calculus.rs"]
 pub mod zx_calculus;
 

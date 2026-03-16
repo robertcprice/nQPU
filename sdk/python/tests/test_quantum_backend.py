@@ -13,7 +13,15 @@ Tests include:
 import pytest
 import numpy as np
 
-# Import module
+from nqpu.core import _HAS_QUANTUM_BACKEND
+
+if not _HAS_QUANTUM_BACKEND:
+    pytest.skip(
+        "Legacy PennyLane quantum backend not available (core.quantum_backend removed)",
+        allow_module_level=True,
+    )
+
+# Import module -- only reached when the backend is present
 from nqpu.core import (
     HAS_PENNYLANE,
     VQEMolecule,

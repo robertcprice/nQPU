@@ -8,19 +8,26 @@ The package now exposes two stable entrypoints:
 
 from .core import (
     Backend,
-    BackendType,
     HAS_PENNYLANE,
     NQPUBackend,
     PENNYLANE_VERSION,
     QuantumBackend,
-    QuantumBackendConfig,
     QuantumCircuit,
-    QuantumFingerprint,
-    QuantumKernel,
     Result,
     SimulationResult,
-    VQEMolecule,
 )
+
+# Optional symbols that require the PennyLane quantum backend
+try:
+    from .core import (
+        BackendType,
+        QuantumBackendConfig,
+        QuantumFingerprint,
+        QuantumKernel,
+        VQEMolecule,
+    )
+except ImportError:
+    pass
 from .physics import (
     AdaptiveDQPTDiagnosticsResult,
     AutoSolver,
@@ -80,8 +87,16 @@ from .physics import (
 __version__ = "0.1.0"
 
 __all__ = [
+    # core (always available)
     "Backend",
-    "BackendType",
+    "HAS_PENNYLANE",
+    "NQPUBackend",
+    "PENNYLANE_VERSION",
+    "QuantumBackend",
+    "QuantumCircuit",
+    "Result",
+    "SimulationResult",
+    # physics (always available)
     "AdaptiveDQPTDiagnosticsResult",
     "AutoSolver",
     "CorrelationMatrixResult",
@@ -94,10 +109,21 @@ __all__ = [
     "ExactDiagonalizationSolver",
     "FrequencyStructureFactorResult",
     "GroundStateResult",
-    "HAS_PENNYLANE",
     "HeisenbergXXZ1D",
     "HeisenbergXYZ1D",
+    "LoschmidtEchoResult",
+    "ModelQPU",
+    "ResponseSpectrumResult",
+    "RustTensorNetworkSolver",
+    "StructureFactorResult",
+    "SweepPoint",
+    "SweepResult",
+    "TimeEvolutionResult",
+    "TransverseFieldIsing1D",
+    "TwoTimeCorrelatorResult",
+    "analyze_dqpt_from_loschmidt",
     "dump_tensor_network_state",
+    "fourier_transform_structure_factor",
     "load_dqpt_diagnostics_result",
     "load_dqpt_scan_result",
     "load_dynamic_structure_factor_result",
@@ -110,22 +136,8 @@ __all__ = [
     "load_tensor_network_state",
     "load_two_time_correlator_result",
     "load_time_evolution_result",
-    "analyze_dqpt_from_loschmidt",
-    "fourier_transform_structure_factor",
-    "LoschmidtEchoResult",
-    "ModelQPU",
-    "NQPUBackend",
-    "PENNYLANE_VERSION",
-    "QuantumBackend",
-    "QuantumBackendConfig",
-    "QuantumCircuit",
-    "QuantumFingerprint",
-    "QuantumKernel",
-    "Result",
-    "ResponseSpectrumResult",
-    "restore_tensor_network_state",
     "response_spectrum_from_correlator",
-    "RustTensorNetworkSolver",
+    "restore_tensor_network_state",
     "save_dqpt_diagnostics_result",
     "save_dqpt_scan_result",
     "save_dynamic_structure_factor_result",
@@ -138,12 +150,16 @@ __all__ = [
     "save_tensor_network_state",
     "save_two_time_correlator_result",
     "save_time_evolution_result",
-    "SimulationResult",
-    "StructureFactorResult",
-    "SweepPoint",
-    "SweepResult",
-    "TimeEvolutionResult",
-    "TransverseFieldIsing1D",
-    "TwoTimeCorrelatorResult",
-    "VQEMolecule",
 ]
+
+# Append optional PennyLane backend symbols if available
+from .core import _HAS_QUANTUM_BACKEND as _HQB  # noqa: E402
+if _HQB:
+    __all__ += [
+        "BackendType",
+        "QuantumBackendConfig",
+        "QuantumFingerprint",
+        "QuantumKernel",
+        "VQEMolecule",
+    ]
+del _HQB

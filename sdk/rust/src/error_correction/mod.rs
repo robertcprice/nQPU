@@ -63,6 +63,8 @@ pub mod qec_interop;
 pub mod stim_format;
 #[path = "tooling/stim_import.rs"]
 pub mod stim_import;
+#[path = "tooling/resource_estimator.rs"]
+pub mod resource_estimator;
 
 // End-to-end QEC workflows and analysis pipelines.
 #[path = "workflows/approximate_dynamical_qec.rs"]

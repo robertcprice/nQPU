@@ -1,41 +1,78 @@
 # nQPU Architecture Guide
 
 This document describes the internal architecture of the nQPU quantum computing
-SDK: how the 14 domain modules fit together, how backends are selected and
-dispatched, and the key design decisions that shape the system.
+SDK: how the Rust core and Python SDK fit together, how backends are selected
+and dispatched, and the key design decisions that shape the system.
 
 ## High-level structure
 
-The crate `nqpu-metal` is organized into 14 domain modules plus a handful of
-standalone modules for decoding, QPU connectivity, and web serving.  Every
-domain module re-exports its public types into the crate root, so most items
-are available directly from `nqpu_metal::*`.
+nQPU is a two-layer system. The performance-critical core is a Rust crate
+(`nqpu-metal`) organized into 14 domain modules. On top of that sits a pure-Python
+SDK (`sdk/python/nqpu/`) with 22 subpackages covering applied quantum computing
+workflows. Both layers share the same design philosophy: self-contained modules,
+numpy-compatible data types, and no mandatory heavy dependencies.
 
 ```
-nqpu-metal (lib.rs)
+nqpu-metal (Rust crate -- sdk/rust/src/)
  |
  |-- Core data types: QuantumState, GateOperations, QuantumSimulator
  |
  +-- 14 domain modules ─────────────────────────────────
- |   core/              Quantum primitives
- |   tensor_networks/   MPS, PEPS, MERA, DMRG
- |   error_correction/  QEC codes and decoders
- |   noise/             Noise models and mitigation
- |   algorithms/        VQE, QAOA, QPE, Grover, Shor
- |   quantum_ml/        Kernels, transformers, NQS
- |   chemistry/         Molecular simulation, drug design
- |   backends/          Metal, CUDA, ROCm, auto-select
- |   circuits/          Optimizer, transpiler, QASM/QIR
- |   networking/        QKD, QRNG, entropy, PQC
- |   physics/           Walks, topology, thermodynamics
- |   applications/      Finance, logistics, games, NLP
- |   measurement/       Tomography, QCVV, shadows
- |   infra/             Traits, utils, benchmarks, FFI
+ |   core/              Quantum primitives (stabilizer, density matrix, CV)
+ |   tensor_networks/   MPS, PEPS, MERA, DMRG, TEBD, GPU-accelerated
+ |   error_correction/  QEC codes, decoders, magic state distillation
+ |   noise/             Noise models, Lindblad dynamics, error mitigation
+ |   algorithms/        VQE, QAOA, QPE, Grover, Shor, HHL, AE, QWalk
+ |   quantum_ml/        Kernels, transformers, NQS, JAX/PyTorch bridges
+ |   chemistry/         Molecular simulation, drug design, materials
+ |   backends/          Metal, CUDA, ROCm, auto-select, pulse control
+ |   circuits/          Optimizer, transpiler, ZX-calculus, QASM/QIR
+ |   networking/        QKD, QRNG, entropy, PQC assessment
+ |   physics/           Walks, topology, thermodynamics, quantum biology
+ |   applications/      Finance, logistics, games, NLP, generative art
+ |   measurement/       Tomography, QCVV, classical shadows
+ |   infra/             Traits, SIMD ops, autodiff, benchmarks, FFI
  |
  +-- Standalone modules ─────────────────────────────────
      decoding/          Classical decoding utilities
      qpu/               Real QPU hardware (feature-gated)
      web/               REST API and web GUI (feature-gated)
+
+Python SDK (sdk/python/nqpu/) ──────────────────────────
+ |
+ +-- Foundation ─────────────────────────────────────────
+ |   core/              Quantum primitives and shared utilities
+ |   metal/             Metal GPU bindings (macOS)
+ |   physics/           Physics research tools
+ |
+ +-- Hardware backends ──────────────────────────────────
+ |   ion_trap/          Trapped-ion backend (digital->analog->atomic)
+ |   superconducting/   Transmon backend with pulse-level control
+ |   neutral_atom/      Neutral-atom Rydberg blockade backend
+ |   benchmarks/        Cross-backend performance benchmarks
+ |
+ +-- Algorithms & circuit tools ─────────────────────────
+ |   optimizers/        Variational optimizers (SPSA, Adam, PSR, VQE)
+ |   transpiler/        SABRE routing, gate cancellation, KAK decomposition
+ |   simulation/        Hamiltonian dynamics (Trotter, QITE, VarQTE)
+ |   tensor_networks/   MPS, MPO, DMRG, TEBD
+ |   qcl/               Quantum circuit learning, QSVM, kernel methods
+ |
+ +-- Error handling ─────────────────────────────────────
+ |   error_correction/  Surface/color codes, MWPM, union-find, lattice surgery
+ |   mitigation/        ZNE, PEC, CDR, Pauli twirling, readout correction
+ |
+ +-- Measurement & verification ─────────────────────────
+ |   tomography/        State/process/shadow tomography, fidelity, QCVV
+ |   qrng/              Quantum random number generation, NIST tests
+ |
+ +-- Domain applications ────────────────────────────────
+ |   chem/              Quantum chemistry (VQE, molecular Hamiltonians)
+ |   bio/               Quantum biology (photosynthesis, tunneling, olfaction)
+ |   finance/           Option pricing, portfolio optimization, risk analysis
+ |   trading/           Quantum-enhanced trading strategies and backtesting
+ |   qkd/               Quantum key distribution (BB84, E91, B92, decoy-state)
+ |   games/             Quantum game theory, combinatorial optimization
 ```
 
 ## Core data types
@@ -102,7 +139,7 @@ pub struct QuantumSimulator {
 }
 ```
 
-## The 14 domain modules
+## The 14 Rust domain modules
 
 ### 1. core/ -- Quantum primitives
 
@@ -346,6 +383,38 @@ Cross-cutting concerns shared by all domain modules.
 - `python`, `python_api_v2` -- PyO3 Python bindings (feature-gated)
 - `c_ffi` -- C foreign function interface
 - `wasm_backend`, `wasm_bindings` -- WebAssembly backend (feature-gated)
+
+## The 22 Python SDK subpackages
+
+The Python SDK provides accessible, research-friendly interfaces for applied
+quantum computing. Every package is pure Python with numpy as the only required
+dependency. Packages use dataclasses for structured results and numpy arrays
+for quantum states.
+
+| Package | Purpose | Key classes |
+|---------|---------|-------------|
+| `core` | Quantum primitives and shared utilities | -- |
+| `metal` | Metal GPU bindings (macOS) | -- |
+| `physics` | Physics research tools | -- |
+| `ion_trap` | Trapped-ion backend (digital, analog, atomic layers) | `IonTrapBackend` |
+| `superconducting` | Transmon backend with pulse-level control | `SuperconductingBackend` |
+| `neutral_atom` | Neutral-atom Rydberg blockade backend | `NeutralAtomBackend` |
+| `benchmarks` | Cross-backend performance comparison | `CrossBackendBenchmark`, `BackendComparison` |
+| `optimizers` | Variational optimizers for VQE/QAOA | `SPSA`, `Adam`, `VQEOptimizer`, `NaturalGradient` |
+| `transpiler` | Circuit routing and basis decomposition | `SABRERouter`, `QuantumCircuit`, `CouplingMap` |
+| `simulation` | Hamiltonian dynamics and time evolution | `TrotterEvolution`, `QITE`, `VarQTE` |
+| `tensor_networks` | Tensor network methods for 1-D systems | `MPS`, `MPO`, `DMRG`, `TEBD` |
+| `qcl` | Quantum circuit learning and kernel methods | `QCLTrainer`, `QSVM`, `QuantumKernel` |
+| `error_correction` | Stabilizer codes and syndrome decoders | `SurfaceCode`, `MWPMDecoder`, `UnionFindDecoder` |
+| `mitigation` | Error mitigation for near-term hardware | `ZNEEstimator`, `PECEstimator`, `CDREstimator` |
+| `tomography` | State reconstruction and verification | `StateTomographer`, `ClassicalShadow` |
+| `qrng` | Quantum random number generation | `MeasurementQRNG`, `RandomnessReport`, `CHSHCertifier` |
+| `chem` | Quantum chemistry (VQE, molecular Hamiltonians) | `MolecularVQE`, `UCCSD`, `FermionicHamiltonian` |
+| `bio` | Quantum biology simulation | `FMOComplex`, `EnzymeTunneling`, `RadicalPair` |
+| `finance` | Option pricing, portfolio optimization, risk | `QuantumOptionPricer`, `PortfolioOptimizer`, `RiskAnalyzer` |
+| `trading` | Quantum-enhanced trading strategies | `QuantumVolatilitySurface`, `QuantumRegimeDetector` |
+| `qkd` | Quantum key distribution protocols | `BB84Protocol`, `E91Protocol`, `QKDNetwork` |
+| `games` | Quantum game theory and combinatorial optimization | `PrisonersDilemma`, `MaxCut`, `QuantumBayesian` |
 
 ## Backend selection pipeline
 
@@ -667,6 +736,10 @@ opt-level = 2
 
 - [Getting Started](GETTING_STARTED.md) -- build, run, and write your first
   circuit
-- [README](../README.md) -- project overview and Python SDK
+- [Python SDK Guide](PYTHON_SDK.md) -- installation, quick start, and API
+  patterns for the Python SDK
+- [README](../README.md) -- project overview
+- [Quantum Domains](QUANTUM_DOMAINS.md) -- educational deep-dive into each
+  Rust domain module
 - [Cargo.toml](../sdk/rust/Cargo.toml) -- full dependency and feature list
 - [lib.rs](../sdk/rust/src/lib.rs) -- crate root with all re-exports

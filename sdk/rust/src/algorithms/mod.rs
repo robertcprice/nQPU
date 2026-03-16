@@ -4,6 +4,8 @@
 //! - concrete descriptive modules live on disk
 //! - compatibility aliases preserve the older flat names during the reorg
 
+#[path = "transforms/amplitude_estimation.rs"]
+pub mod amplitude_estimation;
 #[path = "variational/adapt_vqe.rs"]
 pub mod adapt_vqe;
 #[path = "transforms/foundational_algorithms.rs"]
@@ -14,10 +16,16 @@ pub mod grid_algorithms;
 pub use grid_algorithms as algorithms_2d;
 #[path = "optimization/annealing.rs"]
 pub mod annealing;
+#[path = "optimization/qaoa.rs"]
+pub mod qaoa;
 #[path = "simulation/comprehensive_algorithms.rs"]
 pub mod comprehensive_algorithms;
 #[path = "variational/gga_vqe.rs"]
 pub mod gga_vqe;
+#[path = "transforms/grover.rs"]
+pub mod grover;
+#[path = "transforms/hhl.rs"]
+pub mod hhl;
 #[path = "simulation/gpu_pauli_propagation.rs"]
 pub mod gpu_pauli_propagation;
 #[path = "transforms/heisenberg_qpe.rs"]
@@ -50,6 +58,10 @@ pub mod qram;
 pub mod qsp_qsvt;
 #[path = "transforms/qswift.rs"]
 pub mod qswift;
+#[path = "simulation/quantum_dynamics.rs"]
+pub mod quantum_dynamics;
+#[path = "transforms/quantum_walk.rs"]
+pub mod quantum_walk;
 #[path = "optimization/quantum_annealing.rs"]
 pub mod quantum_annealing;
 #[path = "optimization/qubo_encoder.rs"]
@@ -68,6 +80,8 @@ pub mod sqd;
 pub mod symmetry_simulation;
 #[path = "simulation/tucker_state_prep.rs"]
 pub mod tucker_state_prep;
+#[path = "variational/ssvqe.rs"]
+pub mod ssvqe;
 #[path = "variational/vqe.rs"]
 pub mod vqe;
 #[path = "optimization/warm_start_qaoa.rs"]

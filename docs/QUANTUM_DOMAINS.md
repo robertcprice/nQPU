@@ -215,12 +215,24 @@ More recent developments include **Quantum Signal Processing (QSP)** and **Quant
 
 ### Key files and entry points
 
+**Rust (core algorithms)**:
+
 | File | Purpose |
 |------|---------|
 | `vqe.rs` | VQE with multiple optimizers and ansatz choices |
+| `amplitude_estimation.rs` | Canonical QAE, Iterative IQAE, Maximum Likelihood MLAE |
 | `qsp_qsvt.rs` | QSP/QSVT framework for polynomial transformations of block-encoded matrices |
 | `shor.rs` | Shor's factoring algorithm with modular exponentiation |
 | `pauli_propagation.rs` | Efficient Pauli-frame tracking for Clifford+few-T circuits |
+
+**Python Optimizer Suite** (`sdk/python/nqpu/optimizers/`):
+
+| File | Purpose |
+|------|---------|
+| `gradient_free.py` | COBYLA, Nelder-Mead, SPSA -- robust to quantum shot noise |
+| `gradient_based.py` | Adam, L-BFGS-B, GradientDescent (4 LR schedules + momentum) |
+| `quantum.py` | Parameter-shift gradient, natural gradient (QFI), VQEOptimizer driver |
+| `base.py` | Optimizer/OptimizerResult base abstractions |
 
 ### Prerequisites and background reading
 
@@ -228,6 +240,8 @@ More recent developments include **Quantum Signal Processing (QSP)** and **Quant
 - Peruzzo et al., "A variational eigenvalue solver on a photonic quantum processor" (2014) for VQE.
 - Farhi et al., "A Quantum Approximate Optimization Algorithm" (2014) for QAOA.
 - Martyn et al., "Grand Unification of Quantum Algorithms" (2021) for QSP/QSVT.
+- Suzuki et al., "Amplitude estimation without phase estimation" (2020) for IQAE/MLAE.
+- Spall, "Multivariate stochastic approximation using a simultaneous perturbation gradient approximation" (1992) for SPSA.
 
 ### Typical workflow
 
@@ -428,27 +442,49 @@ Quantum mechanics enables communication protocols with security guarantees roote
 
 ### Key files and entry points
 
+**Rust (core networking)**:
+
 | File | Purpose |
 |------|---------|
 | `qkd_protocols.rs` | BB84, E91, and CV-QKD protocol simulation |
 | `quantum_randomness.rs` | QRNG sources, entropy extraction, randomness certification |
 | `nist_tests.rs` | Full NIST SP 800-22 statistical test suite |
 
+**Python QKD Networking** (`sdk/python/nqpu/qkd/`):
+
+| File | Purpose |
+|------|---------|
+| `bb84.py` | Full BB84 protocol: basis sifting, QBER estimation, Eve detection |
+| `e91.py` | Ekert-91 entanglement-based protocol with CHSH inequality testing |
+| `b92.py` | Simplified B92 two-state protocol with conclusive/inconclusive discrimination |
+| `channel.py` | Fiber-optic quantum channel with distance-based loss and depolarizing noise |
+| `privacy.py` | Cascade error correction, Toeplitz privacy amplification, QBER estimation |
+| `network.py` | Multi-node QKD network with trusted relay key chaining, star/line/mesh topologies |
+
 ### Prerequisites and background reading
 
 - Basic cryptography (symmetric keys, public-key encryption).
 - Bennett & Brassard, "Quantum cryptography" (1984) for BB84.
+- Ekert, "Quantum cryptography based on Bell's theorem" (1991) for E91.
 - NIST SP 800-22: "A Statistical Test Suite for Random and Pseudorandom Number Generators."
 - For PQC: NIST Post-Quantum Cryptography standardization project.
 
 ### Typical workflow
 
 ```
+# Rust workflow (core)
 1. Simulate a QKD protocol between Alice and Bob over a noisy channel.
 2. Perform sifting, error estimation, and privacy amplification.
 3. Estimate secure key rate as a function of channel noise.
 4. For QRNG: generate raw random bits, apply entropy extraction.
 5. Validate output with NIST statistical tests.
+
+# Python QKD Networking workflow
+1. Create a QuantumChannel with fiber loss and optional eavesdropper.
+2. Run a protocol (BB84Protocol, E91Protocol, or B92Protocol).
+3. Inspect QKDResult: QBER, final key, key rate, security flag.
+4. For multi-node: build a QKDNetwork, add nodes and links.
+5. Establish keys via direct links or trusted relay paths.
 ```
 
 ---

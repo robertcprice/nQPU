@@ -9,38 +9,52 @@ from .simulator import (
     SimulationResult,
 )
 
-from core.quantum_backend import (
-    BackendType,
-    ClassicalFallback,
-    HAS_PENNYLANE,
-    MolecularGeometry,
-    PENNYLANE_VERSION,
-    QuantumBackendConfig,
-    QuantumFingerprint,
-    QuantumKernel,
-    REFERENCE_ENERGIES,
-    VQEMolecule,
-    check_quantum_backend,
-    quick_h2_energy,
-)
+# Optional PennyLane-based quantum backend symbols.
+# These lived in the legacy sdk/python/core/ directory which has been removed.
+# They are only available when PennyLane is installed and the backend module
+# is accessible.  We gracefully degrade so the rest of the SDK works without it.
+try:
+    from core.quantum_backend import (  # type: ignore[import-not-found]
+        BackendType,
+        ClassicalFallback,
+        HAS_PENNYLANE,
+        MolecularGeometry,
+        PENNYLANE_VERSION,
+        QuantumBackendConfig,
+        QuantumFingerprint,
+        QuantumKernel,
+        REFERENCE_ENERGIES,
+        VQEMolecule,
+        check_quantum_backend,
+        quick_h2_energy,
+    )
+    _HAS_QUANTUM_BACKEND = True
+except (ImportError, ModuleNotFoundError):
+    _HAS_QUANTUM_BACKEND = False
+    HAS_PENNYLANE = False
+    PENNYLANE_VERSION = None
 
 __all__ = [
     "Backend",
-    "BackendType",
-    "ClassicalFallback",
-    "HAS_PENNYLANE",
-    "MolecularGeometry",
     "NQPUBackend",
-    "PENNYLANE_VERSION",
     "QuantumBackend",
-    "QuantumBackendConfig",
     "QuantumCircuit",
-    "QuantumFingerprint",
-    "QuantumKernel",
-    "REFERENCE_ENERGIES",
     "Result",
     "SimulationResult",
-    "VQEMolecule",
-    "check_quantum_backend",
-    "quick_h2_energy",
 ]
+
+if _HAS_QUANTUM_BACKEND:
+    __all__ += [
+        "BackendType",
+        "ClassicalFallback",
+        "HAS_PENNYLANE",
+        "MolecularGeometry",
+        "PENNYLANE_VERSION",
+        "QuantumBackendConfig",
+        "QuantumFingerprint",
+        "QuantumKernel",
+        "REFERENCE_ENERGIES",
+        "VQEMolecule",
+        "check_quantum_backend",
+        "quick_h2_energy",
+    ]
