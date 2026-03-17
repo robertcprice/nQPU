@@ -404,16 +404,16 @@ class TestQuantumMomentum:
 
 
 class TestQuantumMeanReversion:
-    def test_fit_compute(self, daily_returns):
+    def test_fit_compute(self, price_series):
         qmr = QuantumMeanReversion(n_qubits=3)
-        qmr.fit(daily_returns[:200])
-        result = qmr.compute(daily_returns[200:])
+        qmr.fit(price_series[:200])
+        result = qmr.compute(price_series[200:])
         assert len(result) > 0
 
-    def test_fidelity(self, daily_returns):
+    def test_fidelity(self, price_series):
         qmr = QuantumMeanReversion(n_qubits=3)
-        qmr.fit(daily_returns[:200])
-        fid = qmr.fidelity(daily_returns[200:250])
+        qmr.fit(price_series[:200])
+        fid = qmr.fidelity(price_series[200:250])
         assert isinstance(fid, float)
 
 

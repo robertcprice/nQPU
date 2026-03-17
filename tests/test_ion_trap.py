@@ -34,8 +34,6 @@ from nqpu.ion_trap import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
-SEED = 42
-
 
 @pytest.fixture
 def yb_species():
