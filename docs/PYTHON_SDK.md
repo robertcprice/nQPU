@@ -1,6 +1,6 @@
 # Python SDK Guide
 
-The nQPU Python SDK provides 22 subpackages for applied quantum computing
+The nQPU Python SDK provides 24 subpackages for applied quantum computing
 research. Every package is pure Python, requires only numpy, and follows
 consistent API conventions: dataclasses for structured results, numpy arrays
 for quantum states, and factory functions for common setups.
@@ -25,8 +25,8 @@ reference, shared API patterns, testing, and contributing.
 
 ### Prerequisites
 
-- Python 3.9 or later
-- NumPy 1.20 or later
+- Python 3.11 or later
+- NumPy 1.26 or later
 
 ### Setup
 
@@ -42,7 +42,7 @@ cd sdk/python
 pip install -e .
 ```
 
-All 22 subpackages depend only on numpy. No heavy frameworks (Qiskit,
+All 24 subpackages depend only on numpy. No heavy frameworks (Qiskit,
 Cirq, PennyLane) are required. Optional visualization features use matplotlib.
 
 ### Verify installation
@@ -110,6 +110,160 @@ print(f"Raw key length: {result.raw_key_length}")
 print(f"Final key length: {len(result.final_key)}")
 print(f"Secure: {result.qber < 0.11}")
 ```
+
+### QKD network planning API
+
+```bash
+# Install with web extras and start the server
+pip install nqpu[web]
+nqpu-qkd-api
+# Swagger UI at http://localhost:8000/docs
+```
+
+The `nqpu.web` package provides a FastAPI REST API for quantum key distribution
+network planning. Endpoints support:
+
+- **Network CRUD**: Create networks, add nodes and quantum links
+- **Key establishment**: Run BB84, E91, or B92 protocols on links or relay paths
+- **Topology generation**: Star, line, and mesh network topologies
+- **Protocol simulation**: Standalone simulation with optional eavesdropper
+- **Network reports**: Per-link QBER, key rates, and security analysis
+
+```python
+from fastapi.testclient import TestClient
+from nqpu.web.qkd_api import app
+
+client = TestClient(app)
+net = client.post("/networks").json()
+nid = net["network_id"]
+client.post(f"/networks/{nid}/nodes", json={"node_id": "alice", "x": 0, "y": 0})
+client.post(f"/networks/{nid}/nodes", json={"node_id": "bob", "x": 50, "y": 0})
+client.post(f"/networks/{nid}/links", json={"node_a": "alice", "node_b": "bob"})
+key = client.post(f"/networks/{nid}/establish-key",
+                  json={"node_a": "alice", "node_b": "bob"}).json()
+print(f"Secure: {key['secure']}, Key length: {key['key_length']}")
+```
+
+### Quantum finance: option pricing, portfolios, and risk
+
+```python
+from nqpu.finance import QuantumOptionPricer, black_scholes_call
+from nqpu.finance import PortfolioOptimizer, RiskAnalyzer, RiskConfig
+
+# QAE vs Black-Scholes option pricing
+pricer = QuantumOptionPricer(spot=100, strike=100, rate=0.05,
+                             volatility=0.2, maturity=1.0)
+result = pricer.price()
+bs = black_scholes_call(100, 100, 0.05, 0.2, 1.0)
+print(f"QAE: {result.price:.2f}, BS: {bs:.2f}")
+```
+
+See `demos/quantum_finance_demo.py` for a full walkthrough covering option
+pricing, QAOA portfolio optimization, VaR/CVaR risk analysis, and quantum
+trading signal backtesting with synthetic data.
+
+### Hardware benchmarking
+
+```bash
+python scripts/run_benchmarks.py    # Run 7 circuits across 3 backends
+python scripts/generate_figures.py  # Generate publication-quality plots
+```
+
+The `nqpu.benchmarks` package provides a cross-backend comparison framework.
+Results and analysis are documented in `papers/hardware_benchmarking.md`.
+
+### QPU emulator: run circuits on emulated hardware
+
+```python
+from nqpu.emulator import QPU, HardwareProfile
+
+# Run a Bell circuit on emulated IonQ Aria
+qpu = QPU(HardwareProfile.IONQ_ARIA, noise=True, seed=42)
+job = qpu.run([("h", 0), ("cx", 0, 1)], shots=1000)
+print(f"Counts: {dict(job.result.counts)}")
+print(f"Fidelity: {job.result.fidelity_estimate:.4f}")
+
+# Compare the same circuit across hardware families
+results = QPU.compare([("h", 0), ("cx", 0, 1)], shots=1000, seed=42)
+for name, result in results.items():
+    print(f"{name}: fidelity={result.fidelity_estimate:.4f}")
+```
+
+The `nqpu.emulator` package wraps all three hardware backends (trapped-ion,
+superconducting, neutral-atom) behind a single `QPU` interface driven by 9 real
+hardware profiles. Supports noisy/ideal modes, statevector extraction, Toffoli
+decomposition, and cross-backend comparison.
+
+### Physics-application bridges
+
+```python
+from nqpu.bridges import IsingCorrelationModel, QuantumWalkPricer
+
+# Map 3-asset correlations to an Ising spin system
+import numpy as np
+cov = np.array([[0.04, 0.02, 0.01],
+                [0.02, 0.09, 0.03],
+                [0.01, 0.03, 0.16]])
+model = IsingCorrelationModel.from_covariance(cov, names=["AAPL", "GOOG", "MSFT"])
+print(f"Critical temp: {model.critical_temperature:.3f}")
+print(f"Entanglement risk: {model.entanglement_risk():.4f}")
+
+# Quantum walk option pricing
+pricer = QuantumWalkPricer(n_sites=64, volatility=0.2)
+dist = pricer.price_distribution(spot=100, n_steps=100)
+print(f"Mean price: {dist['mean_price']:.2f}")
+```
+
+The `nqpu.bridges` package connects foundational physics and simulation modules
+to domain applications. Seven bridge modules: `physics_finance` (Ising
+correlations, quantum walk pricing, Hamiltonian portfolios), `physics_trading`
+(Hamiltonian volatility, phase transition regimes, quantum walk momentum),
+`physics_games` (Ising game theory, quantum auctions, MaxCut QAOA benchmarking),
+`simulation_bio` (canonical FMO validation against Lindblad solver),
+`simulation_chem` (open quantum chemistry with decoherence analysis),
+`simulation_trading` (Lindblad volatility surface decoherence, noisy signals,
+quantum momentum filtering), and `vqe_noise` (noise-aware VQE benchmarking
+across 9 hardware profiles).
+
+### Hardware decision engine
+
+```python
+from nqpu.emulator import HardwareAdvisor
+
+advisor = HardwareAdvisor()
+circuit = [("h", 0), ("cx", 0, 1), ("ccx", 0, 1, 2)]
+
+rec = advisor.recommend(circuit)
+print(rec.best_profile.name)   # Best hardware for this circuit
+print(rec.reasoning)           # Human-readable explanation
+
+# Full report with actual execution on top 3 platforms
+report = advisor.full_report(circuit, shots=1000)
+for entry in report["comparison_table"]:
+    print(f"{entry['profile']}: score={entry['total_score']}, fidelity={entry['fidelity']}")
+```
+
+The hardware decision engine scores all 9 QPU profiles across 5 factors:
+fidelity (40%), speed (20%), capacity (15%), Toffoli efficiency (15%), and
+connectivity (10%). Toffoli-heavy circuits are automatically routed to
+neutral-atom backends with native 3Q gates.
+
+### VQE noise benchmarking
+
+```python
+from nqpu.bridges import VQENoiseBenchmark
+
+bench = VQENoiseBenchmark(t_final=10.0, n_steps=50)
+result = bench.h2_benchmark()
+for r in result["results"]:
+    print(f"{r.profile_name}: error={r.energy_error:.6f}, "
+          f"purity={r.final_purity:.4f}, "
+          f"chemical_accuracy={r.chemical_accuracy}")
+```
+
+The VQE noise benchmark evolves molecular ground states under Lindblad dynamics
+calibrated to real hardware noise parameters, measuring how quickly each QPU
+architecture degrades the VQE energy estimate below chemical accuracy (1.6 mHa).
 
 ### Error mitigation: zero-noise extrapolation
 
@@ -180,13 +334,16 @@ print(f"Mitigated value: {result.estimated_value:.6f}")
 | `finance` | Quantum finance: amplitude estimation option pricing, QAOA portfolio optimization, VaR/CVaR | `QuantumOptionPricer`, `PortfolioOptimizer`, `RiskAnalyzer`, `quantum_var` |
 | `trading` | Quantum-enhanced trading: volatility surfaces, regime detection, signal generation, backtesting | `QuantumVolatilitySurface`, `QuantumRegimeDetector`, `QuantumSignalGenerator`, `QuantumBacktester` |
 | `qkd` | Quantum key distribution: BB84, E91, B92 protocols with post-processing and network simulation | `BB84Protocol`, `E91Protocol`, `B92Protocol`, `QKDNetwork`, `QuantumChannel` |
+| `web` | REST API for QKD network planning with Swagger docs, topology generation, and protocol simulation | `app` (FastAPI), `qkd_api` |
+| `emulator` | Unified QPU emulation across 9 real hardware profiles with hardware decision engine | `QPU`, `HardwareProfile`, `HardwareAdvisor`, `Recommendation`, `CircuitProfile`, `HardwareScore` |
+| `bridges` | Cross-package integration: 7 bridge modules connecting physics/simulation to finance, trading, games, bio, chem | `IsingCorrelationModel`, `QuantumWalkPricer`, `IsingGameSolver`, `QuantumAuctionModel`, `QuantumMaxCutBridge`, `LindbladVolatility`, `VQENoiseBenchmark` |
 | `games` | Quantum game theory, combinatorial optimization (MaxCut, TSP), Bayesian inference, quantum auctions | `PrisonersDilemma`, `MaxCut`, `GraphColoring`, `QuantumBayesian`, `QuantumAuction` |
 
 ---
 
 ## API Patterns
 
-All 22 packages follow consistent conventions that make the SDK predictable
+All 24 packages follow consistent conventions that make the SDK predictable
 and easy to learn.
 
 ### Dataclass results
@@ -327,6 +484,14 @@ these conventions:
 | `test_games.py` | `nqpu.games` |
 | `test_benchmarks.py` | `nqpu.benchmarks` |
 | `test_neutral_atom.py` | `nqpu.neutral_atom` |
+| `test_qkd_api.py` | `nqpu.web` (QKD Network Planning API) |
+| `test_emulator.py` | `nqpu.emulator` (QPU emulation across hardware profiles) |
+| `test_bridges.py` | `nqpu.bridges` (physics_finance, physics_trading, simulation_bio, simulation_chem) |
+| `test_bridges_extended.py` | `nqpu.bridges` (physics_games, simulation_trading) |
+| `test_advisor.py` | `nqpu.emulator.advisor` (hardware decision engine) |
+| `test_vqe_noise.py` | `nqpu.bridges.vqe_noise` (noise-aware VQE benchmarking) |
+| `test_superconducting.py` | `nqpu.superconducting` (transmon backend) |
+| `test_physics_pkg.py` | `nqpu.physics` (model Hamiltonians, solvers, experiments) |
 
 ---
 
@@ -386,6 +551,8 @@ import nqpu.chem, nqpu.bio, nqpu.finance, nqpu.trading
 import nqpu.qkd, nqpu.optimizers, nqpu.mitigation, nqpu.tomography
 import nqpu.qrng, nqpu.error_correction, nqpu.qcl, nqpu.simulation
 import nqpu.transpiler, nqpu.tensor_networks, nqpu.games, nqpu.benchmarks
-print('All packages import successfully')
+import nqpu.emulator, nqpu.bridges, nqpu.web
+import nqpu.ion_trap, nqpu.superconducting, nqpu.neutral_atom
+print('All 24 packages import successfully')
 "
 ```

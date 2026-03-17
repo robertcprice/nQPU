@@ -59,7 +59,7 @@ pip install nqpu[trading]
 pip install nqpu[all]
 
 # Or from source
-git clone https://github.com/entropy-research/nqpu.git
+git clone https://github.com/robertcprice/nQPU.git
 cd nqpu/sdk/python
 pip install -e ".[all]"
 ```
@@ -72,6 +72,8 @@ pip install -e ".[all]"
 | Chemistry | `pip install nqpu[chem]` | Drug design, ADMET, molecular fingerprints |
 | Biology | `pip install nqpu[bio]` | Quantum biology, genome tools |
 | Trading | `pip install nqpu[trading]` | Quantum volatility, regime detection, signal processing |
+| Finance | `pip install nqpu[finance]` | QAE option pricing, QAOA portfolios, VaR/CVaR (adds matplotlib) |
+| Web | `pip install nqpu[web]` | QKD network planning REST API (adds FastAPI + uvicorn) |
 | All | `pip install nqpu[all]` | Everything |
 
 ### Basic Usage
@@ -405,32 +407,210 @@ kelly = KellyCriterion(n_qubits=3)
 position_size = kelly.optimal_fraction(win_rate=0.65, avg_win=0.02, avg_loss=0.01)
 ```
 
+### Quantum Finance
+
+```python
+from nqpu.finance import (
+    QuantumOptionPricer, black_scholes_call,
+    PortfolioOptimizer, compute_efficient_frontier,
+    RiskAnalyzer, RiskConfig, quantum_var,
+)
+
+# QAE-based European call pricing vs Black-Scholes
+pricer = QuantumOptionPricer(spot=100, strike=100, rate=0.05,
+                             volatility=0.2, maturity=1.0)
+result = pricer.price()
+bs = black_scholes_call(100, 100, 0.05, 0.2, 1.0)
+print(f"QAE: {result.price:.2f}  BS: {bs:.2f}")
+
+# QAOA portfolio optimization
+optimizer = PortfolioOptimizer(expected_returns, covariance,
+                               risk_aversion=1.0, budget=3)
+portfolio = optimizer.optimize()
+frontier = compute_efficient_frontier(expected_returns, covariance, n_points=20)
+```
+
+See `demos/quantum_finance_demo.py` and `demos/quantum_finance_demo.ipynb` for
+a full walkthrough covering option pricing, portfolio optimization, VaR/CVaR
+risk analysis, and quantum trading signal backtesting.
+
+### QKD Network Planning API
+
+```bash
+# Start the REST API
+pip install nqpu[web]
+nqpu-qkd-api
+# -> Swagger UI at http://localhost:8000/docs
+```
+
+```python
+# Or use programmatically
+import requests
+
+# Create a network and add nodes
+net = requests.post("http://localhost:8000/networks").json()
+nid = net["network_id"]
+requests.post(f"http://localhost:8000/networks/{nid}/nodes",
+              json={"node_id": "alice", "x": 0, "y": 0})
+requests.post(f"http://localhost:8000/networks/{nid}/nodes",
+              json={"node_id": "bob", "x": 50, "y": 0})
+requests.post(f"http://localhost:8000/networks/{nid}/links",
+              json={"node_a": "alice", "node_b": "bob"})
+
+# Establish a quantum key
+key = requests.post(f"http://localhost:8000/networks/{nid}/establish-key",
+                    json={"node_a": "alice", "node_b": "bob",
+                          "protocol": "BB84", "n_bits": 10000}).json()
+print(f"Secure: {key['secure']}, QBER: {key['qber']:.4f}")
+```
+
+Supports BB84, E91, and B92 protocols, trusted relay paths, star/line/mesh
+topology generation, per-link security reports, and eavesdropper simulation.
+
+### QPU Emulator
+
+```python
+from nqpu.emulator import QPU, HardwareProfile
+from nqpu.transpiler import QuantumCircuit
+
+# Build a GHZ circuit
+qc = QuantumCircuit(3)
+qc.h(0).cx(0, 1).cx(1, 2)
+
+# Emulate on real hardware profiles
+for profile in [HardwareProfile.IONQ_ARIA, HardwareProfile.IBM_HERON,
+                HardwareProfile.QUERA_AQUILA]:
+    qpu = QPU(profile, noise=True, seed=42, max_qubits=8)
+    job = qpu.run(qc, shots=1000)
+    r = job.result
+    print(f"{qpu.name}: fidelity={r.fidelity_estimate:.4f}, "
+          f"depth={r.circuit_depth}, runtime={r.estimated_runtime_us:.0f}us")
+
+# Cross-backend comparison in one call
+results = QPU.compare(qc, shots=1000, seed=42)
+```
+
+Wraps trapped-ion, superconducting, and neutral-atom backends behind a single
+`QPU` interface with 9 real hardware profiles (IonQ Aria/Forte, Quantinuum H2,
+IBM Eagle/Heron, Google Sycamore, Rigetti Ankaa-2, QuEra Aquila, Atom Computing).
+Supports noisy/ideal modes, statevector extraction, and automatic Toffoli
+decomposition (native on neutral-atom, 6-CNOT on others).
+
+### Physics-Application Bridges
+
+```python
+from nqpu.bridges import IsingCorrelationModel, HamiltonianVolatility
+import numpy as np
+
+# Map asset correlations to a quantum spin model
+cov = np.array([[0.04, 0.02], [0.02, 0.09]])
+model = IsingCorrelationModel.from_covariance(cov, names=["AAPL", "GOOG"])
+print(f"Critical temperature: {model.critical_temperature:.3f}")
+print(f"Systemic risk (entanglement): {model.entanglement_risk():.4f}")
+
+# Evolve an implied volatility surface via Hamiltonian dynamics
+hv = HamiltonianVolatility(n_strikes=4, coupling=0.5)
+result = hv.evolve_surface(np.array([0.2, 0.3, 0.25, 0.35]), t_final=1.0)
+print(f"Final vol profile: {result['final_vols']}")
+```
+
+Seven bridge modules connecting the physics and simulation engines to domain
+applications: Ising models for financial correlations, quantum walks for option
+pricing, Hamiltonian dynamics for volatility surfaces, phase transitions for
+regime detection, Lindblad master equations for bio/chem validation, game-theoretic
+Nash equilibria via Ising ground states, quantum auction models, QAOA vs exact
+MaxCut benchmarking, Lindblad volatility surface decoherence, noisy trading
+signals, and noise-aware VQE benchmarking across 9 hardware profiles.
+
+### Hardware Decision Engine
+
+```python
+from nqpu.emulator import HardwareAdvisor
+
+advisor = HardwareAdvisor()
+rec = advisor.recommend([("h", 0), ("cx", 0, 1), ("ccx", 0, 1, 2)])
+print(rec.best_profile.name)   # Recommended QPU
+print(rec.reasoning)           # Why this hardware is optimal
+```
+
+Scores all 9 QPU profiles across fidelity (40%), speed (20%), capacity (15%),
+Toffoli efficiency (15%), and connectivity (10%). Toffoli-heavy circuits are
+automatically routed to neutral-atom backends with native 3Q gates. Includes
+a `full_report()` that executes the circuit on the top 3 platforms for
+empirical validation.
+
+### Hardware Benchmarking
+
+```bash
+# Run all 7 benchmark circuits across 3 backends (3-8 qubits)
+python scripts/run_benchmarks.py
+
+# Generate publication-quality figures
+pip install nqpu[finance]  # adds matplotlib
+python scripts/generate_figures.py
+```
+
+Compares trapped-ion, superconducting, and neutral-atom backends on Bell, GHZ,
+QFT, Random Clifford, Toffoli-heavy, QAOA, and Supremacy circuits. Key finding:
+neutral-atom backends achieve 83% entangling gate reduction on Toffoli circuits
+via native CCZ. See `papers/hardware_benchmarking.md` for the full analysis.
+
 ## Architecture
 
 ```
 nQPU/
 ├── sdk/
-│   ├── python/                # Python SDK
-│   │   ├── nqpu/              # Core package + metal/ utilities
-│   │   │   ├── physics/       # Model QPU research API
-│   │   ├── chem/              # Drug discovery
-│   │   └── bio/               # Quantum biology
-│   └── rust/                  # Rust core engine
-│       └── src/
-│           ├── core/          # State vectors, gates, stabilizers, channels
-│           ├── tensor_networks/  # MPS, PEPS, MERA, DMRG
-│           ├── error_correction/ # QEC codes, decoders, magic states
-│           ├── noise/         # Noise models, error mitigation
-│           ├── algorithms/    # VQE, QAOA, QPE, Shor, QSP/QSVT
-│           ├── quantum_ml/    # Kernels, transformers, NQS
-│           ├── chemistry/     # Molecular simulation, drug design
-│           ├── backends/      # Metal, CUDA, ROCm, pulse control
-│           ├── circuits/      # Optimizer, transpiler, QASM/QIR
-│           ├── networking/    # QKD, QRNG, entropy extraction
-│           ├── physics/       # Walks, topology, thermodynamics
-│           ├── applications/  # Finance, logistics, games
-│           ├── measurement/   # Tomography, QCVV, shadows
-│           └── infra/         # Traits, FFI, benchmarks, TUI
+│   ├── python/nqpu/           # Python SDK — 31 packages, numpy-only
+│   │   ├── core/              # Quantum state, circuits, backends
+│   │   ├── metal/             # Apple Metal GPU utilities
+│   │   ├── physics/           # Model QPU research API
+│   │   ├── ion_trap/          # Trapped-ion hardware backend
+│   │   ├── superconducting/   # Superconducting hardware backend
+│   │   ├── neutral_atom/      # Neutral-atom hardware backend
+│   │   ├── emulator/          # Multi-backend QPU emulator + hardware advisor
+│   │   ├── transpiler/        # Circuit routing, optimization, decomposition
+│   │   ├── simulation/        # Hamiltonians, time evolution, Lindblad
+│   │   ├── error_correction/  # Stabilizer codes, decoders, noise models
+│   │   ├── mitigation/        # ZNE, PEC, twirling, readout correction
+│   │   ├── tomography/        # State/process/shadow tomography
+│   │   ├── optimizers/        # Classical optimizers for variational algorithms
+│   │   ├── qcl/               # Quantum circuit learning, kernels
+│   │   ├── tensor_networks/   # MPS, MPO, DMRG, TEBD
+│   │   ├── chem/              # Molecular simulation, drug discovery
+│   │   ├── bio/               # Quantum biology (photosynthesis, tunneling)
+│   │   ├── finance/           # QAE option pricing, portfolio, risk
+│   │   ├── trading/           # Quantum volatility, regime detection, signals
+│   │   ├── games/             # Game theory, combinatorial optimization
+│   │   ├── qkd/               # QKD protocols (BB84, E91, B92)
+│   │   ├── qrng/              # Quantum random number generation
+│   │   ├── benchmarks/        # Cross-backend benchmarking
+│   │   ├── bridges/           # Physics-application integrations
+│   │   ├── web/               # FastAPI QKD network planning API
+│   │   ├── calibration/       # Hardware calibration & export
+│   │   ├── classical_inspired/# Classical benchmarks & linear algebra
+│   │   ├── crypto/            # Blind computation, oblivious transfer
+│   │   ├── dashboard/         # Cost estimator, benchmark dashboard
+│   │   ├── education/         # Interactive tutorials & exercises
+│   │   └── visualization/     # Bloch sphere, circuit drawing
+│   └── rust/src/              # Rust core engine — 14 domain modules
+│       ├── core/              # State vectors, gates, stabilizers, channels
+│       ├── algorithms/        # VQE, QAOA, QPE, Shor, QSP/QSVT
+│       ├── backends/          # Metal, CUDA, ROCm, pulse control
+│       ├── circuits/          # Optimizer, transpiler, QASM/QIR
+│       ├── tensor_networks/   # MPS, PEPS, MERA, DMRG
+│       ├── error_correction/  # QEC codes, decoders, magic states
+│       ├── noise/             # Noise models, error mitigation
+│       ├── quantum_ml/        # Kernels, transformers, NQS
+│       ├── chemistry/         # Molecular simulation, drug design
+│       ├── networking/        # QKD, QRNG, entropy extraction
+│       ├── physics/           # Walks, topology, thermodynamics
+│       ├── applications/      # Finance, logistics, games
+│       ├── measurement/       # Tomography, QCVV, shadows
+│       └── infra/             # Traits, FFI, benchmarks, TUI
+├── tests/                     # 1400+ pytest tests (22 test files)
+├── demos/                     # Jupyter notebooks & demo scripts
+├── papers/                    # Research writeups
+├── scripts/                   # Benchmark & figure generation scripts
 └── docs/                      # Documentation & guides
 ```
 
@@ -493,7 +673,7 @@ MIT License - See [LICENSE](LICENSE) for details.
   title = {nQPU: Neural Quantum Processing Unit},
   author = {Entropy Research},
   year = {2025},
-  url = {https://github.com/your-org/nqpu}
+  url = {https://github.com/robertcprice/nQPU}
 }
 ```
 

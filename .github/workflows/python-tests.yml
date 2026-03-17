@@ -36,7 +36,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install numpy pytest pytest-asyncio
 
-      - name: Verify all 24 packages import
+      - name: Verify all 31 packages import
         working-directory: sdk/python
         run: |
           python3 -c "
@@ -47,7 +47,9 @@ jobs:
               'nqpu.tensor_networks', 'nqpu.qcl', 'nqpu.error_correction',
               'nqpu.mitigation', 'nqpu.tomography', 'nqpu.qrng', 'nqpu.chem',
               'nqpu.bio', 'nqpu.finance', 'nqpu.trading', 'nqpu.qkd',
-              'nqpu.games', 'nqpu.emulator', 'nqpu.bridges',
+              'nqpu.games', 'nqpu.emulator', 'nqpu.bridges', 'nqpu.web',
+              'nqpu.calibration', 'nqpu.classical_inspired', 'nqpu.crypto',
+              'nqpu.dashboard', 'nqpu.education', 'nqpu.visualization',
           ]
           failed = []
           for pkg in packages:

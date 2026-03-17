@@ -1,0 +1,2925 @@
+{
+  "benchmarks": {
+    "3": {
+      "Bell State": {
+        "circuit_name": "Bell State",
+        "num_qubits": 2,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 8,
+            "num_gates_2q": 1,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.290964126586914
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.999913820331741,
+            "num_gates_1q": 8,
+            "num_gates_2q": 1,
+            "num_gates_3q": 0,
+            "wall_time_ms": 25.336742401123047
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 1,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.07390975952148438
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9957038303833449,
+            "num_gates_1q": 1,
+            "num_gates_2q": 1,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.2868175506591797
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 6,
+            "num_gates_2q": 1,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.09083747863769531
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9807244393883484,
+            "num_gates_1q": 6,
+            "num_gates_2q": 1,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.188039779663086
+          }
+        }
+      },
+      "GHZ State": {
+        "circuit_name": "GHZ State",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 14,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.13184547424316406
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9998271146365126,
+            "num_gates_1q": 14,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.881143569946289
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.05698204040527344
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9914215259431466,
+            "num_gates_1q": 1,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.7622241973876953
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 10,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.11229515075683594
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9617339380814912,
+            "num_gates_1q": 10,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.0230541229248047
+          }
+        }
+      },
+      "QFT": {
+        "circuit_name": "QFT",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 66,
+            "num_gates_2q": 9,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.5589466094970703
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999999999999973,
+            "num_gates_1q": 66,
+            "num_gates_2q": 9,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.768941879272461
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 9,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.18715858459472656
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999999152251782,
+            "num_gates_1q": 9,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.971099853515625
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 48,
+            "num_gates_2q": 9,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.8269290924072266
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9997060326241567,
+            "num_gates_1q": 48,
+            "num_gates_2q": 9,
+            "num_gates_3q": 0,
+            "wall_time_ms": 14.637947082519531
+          }
+        }
+      },
+      "Random Clifford": {
+        "circuit_name": "Random Clifford",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 45,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.5509853363037109
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9983441301358333,
+            "num_gates_1q": 45,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.4411163330078125
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 15,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.14901161193847656
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9779282662965484,
+            "num_gates_1q": 15,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 13.98921012878418
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 35,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.5387535095214844
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8802310185471354,
+            "num_gates_1q": 35,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 19.160985946655273
+          }
+        }
+      },
+      "Toffoli Circuit": {
+        "circuit_name": "Toffoli Circuit",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 59,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.9951591491699219
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9979858089751886,
+            "num_gates_1q": 59,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 22.63498306274414
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 15,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.063678741455078
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9677849972072128,
+            "num_gates_1q": 15,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 8.505821228027344
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 16,
+            "num_gates_2q": 0,
+            "num_gates_3q": 1,
+            "wall_time_ms": 1.402139663696289
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9661676616249674,
+            "num_gates_1q": 16,
+            "num_gates_2q": 0,
+            "num_gates_3q": 1,
+            "wall_time_ms": 3.5560131072998047
+          }
+        }
+      },
+      "QAOA": {
+        "circuit_name": "QAOA",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 64,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.6830692291259766
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999936272276945,
+            "num_gates_1q": 64,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 10.758161544799805
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 13,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.1690387725830078
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9977924184927324,
+            "num_gates_1q": 13,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.169940948486328
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 48,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.41484832763671875
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9695490778123986,
+            "num_gates_1q": 48,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.2389373779296875
+          }
+        }
+      },
+      "Supremacy Circuit": {
+        "circuit_name": "Supremacy Circuit",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 60,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.280069351196289
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999970510508811,
+            "num_gates_1q": 60,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 10.934114456176758
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 30,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.47588348388671875
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9998905428082118,
+            "num_gates_1q": 30,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 14.187097549438477
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 30,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.7580986022949219
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9974928424827073,
+            "num_gates_1q": 30,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.159948348999023
+          }
+        }
+      }
+    },
+    "4": {
+      "Bell State": {
+        "circuit_name": "Bell State",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 16,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.19097328186035156
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9998265849189774,
+            "num_gates_1q": 16,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 11.810064315795898
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 2,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.08082389831542969
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9914261178400653,
+            "num_gates_1q": 2,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.6989707946777344
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 12,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.12612342834472656
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9618204260135905,
+            "num_gates_1q": 12,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.8057823181152344
+          }
+        }
+      },
+      "GHZ State": {
+        "circuit_name": "GHZ State",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 20,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.17380714416503906
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9997398848972341,
+            "num_gates_1q": 20,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.6919116973876953
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.080108642578125
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9871576288889077,
+            "num_gates_1q": 1,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.9920597076416016
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 14,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.14710426330566406
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9431145558184347,
+            "num_gates_1q": 14,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.02178955078125
+          }
+        }
+      },
+      "QFT": {
+        "circuit_name": "QFT",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 128,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.9777545928955078
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999999999999951,
+            "num_gates_1q": 128,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 23.59318733215332
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 16,
+            "num_gates_2q": 14,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.45228004455566406
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999997994070514,
+            "num_gates_1q": 16,
+            "num_gates_2q": 14,
+            "num_gates_3q": 0,
+            "wall_time_ms": 11.441230773925781
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 92,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.3140907287597656
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9992875879707263,
+            "num_gates_1q": 92,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 137.96186447143555
+          }
+        }
+      },
+      "Random Clifford": {
+        "circuit_name": "Random Clifford",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 83,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.0918846130371094
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9979203996075227,
+            "num_gates_1q": 83,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 96.94695472717285
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 20,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.6248950958251953
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.965448960800265,
+            "num_gates_1q": 20,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 14.245748519897461
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 63,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.8902549743652344
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8363268763063247,
+            "num_gates_1q": 63,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 60.49299240112305
+          }
+        }
+      },
+      "Toffoli Circuit": {
+        "circuit_name": "Toffoli Circuit",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 110,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.8761882781982422
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.996297327286267,
+            "num_gates_1q": 110,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 22.155046463012695
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 26,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3170967102050781
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9367798188868706,
+            "num_gates_1q": 26,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 39.41702842712402
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 24,
+            "num_gates_2q": 0,
+            "num_gates_3q": 2,
+            "wall_time_ms": 0.2560615539550781
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9360391965433289,
+            "num_gates_1q": 24,
+            "num_gates_2q": 0,
+            "num_gates_3q": 2,
+            "wall_time_ms": 30.74193000793457
+          }
+        }
+      },
+      "QAOA": {
+        "circuit_name": "QAOA",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 94,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.127004623413086
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999986263279493,
+            "num_gates_1q": 94,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 12.837886810302734
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 18,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.4830360412597656
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9994527370783525,
+            "num_gates_1q": 18,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 8.675098419189453
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 70,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.4429092407226562
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9901228403091444,
+            "num_gates_1q": 70,
+            "num_gates_2q": 12,
+            "num_gates_3q": 0,
+            "wall_time_ms": 57.082176208496094
+          }
+        }
+      },
+      "Supremacy Circuit": {
+        "circuit_name": "Supremacy Circuit",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 88,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.6171932220458984
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999919837708259,
+            "num_gates_1q": 88,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 16.026020050048828
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 40,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.5638599395751953
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.999436264676244,
+            "num_gates_1q": 40,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 10.794878005981445
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 40,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 47.892093658447266
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9857822318466548,
+            "num_gates_1q": 40,
+            "num_gates_2q": 8,
+            "num_gates_3q": 0,
+            "wall_time_ms": 29.757022857666016
+          }
+        }
+      }
+    },
+    "5": {
+      "Bell State": {
+        "circuit_name": "Bell State",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 16,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.9589195251464844
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9998265849189774,
+            "num_gates_1q": 16,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.674745559692383
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 2,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3230571746826172
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9914261178400653,
+            "num_gates_1q": 2,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.3620853424072266
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 12,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.2491474151611328
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9618204260135905,
+            "num_gates_1q": 12,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.938985824584961
+          }
+        }
+      },
+      "GHZ State": {
+        "circuit_name": "GHZ State",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 26,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.2460479736328125
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9996521312523582,
+            "num_gates_1q": 26,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.594015121459961
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.11706352233886719
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.982912069944742,
+            "num_gates_1q": 1,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.611948013305664
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 18,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.19311904907226562
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9248598836536513,
+            "num_gates_1q": 18,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 45.22395133972168
+          }
+        }
+      },
+      "QFT": {
+        "circuit_name": "QFT",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 186,
+            "num_gates_2q": 26,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.3608932495117188
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999999999999964,
+            "num_gates_1q": 186,
+            "num_gates_2q": 26,
+            "num_gates_3q": 0,
+            "wall_time_ms": 129.0421485900879
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 25,
+            "num_gates_2q": 22,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.493143081665039
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999996101298543,
+            "num_gates_1q": 25,
+            "num_gates_2q": 22,
+            "num_gates_3q": 0,
+            "wall_time_ms": 15.493154525756836
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 134,
+            "num_gates_2q": 26,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.3131370544433594
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9987894799359638,
+            "num_gates_1q": 134,
+            "num_gates_2q": 26,
+            "num_gates_3q": 0,
+            "wall_time_ms": 52.366018295288086
+          }
+        }
+      },
+      "Random Clifford": {
+        "circuit_name": "Random Clifford",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 88,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.126071929931641
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9988361664355256,
+            "num_gates_1q": 88,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 223.3731746673584
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 25,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.4601478576660156
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9826657938094036,
+            "num_gates_1q": 25,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 56.08201026916504
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 68,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.5988349914550781
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9073186198162195,
+            "num_gates_1q": 68,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 64.99099731445312
+          }
+        }
+      },
+      "Toffoli Circuit": {
+        "circuit_name": "Toffoli Circuit",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 161,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.146005630493164
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.994607837220152,
+            "num_gates_1q": 161,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 155.95221519470215
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 37,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.7870197296142578
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.906812367600307,
+            "num_gates_1q": 37,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 150.38704872131348
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 32,
+            "num_gates_2q": 0,
+            "num_gates_3q": 3,
+            "wall_time_ms": 0.6849765777587891
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9069395059072265,
+            "num_gates_1q": 32,
+            "num_gates_2q": 0,
+            "num_gates_3q": 3,
+            "wall_time_ms": 12.389898300170898
+          }
+        }
+      },
+      "QAOA": {
+        "circuit_name": "QAOA",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 124,
+            "num_gates_2q": 16,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.696918487548828
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.99999876004059,
+            "num_gates_1q": 124,
+            "num_gates_2q": 16,
+            "num_gates_3q": 0,
+            "wall_time_ms": 87.75973320007324
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 23,
+            "num_gates_2q": 16,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.2621879577636719
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9994886393834272,
+            "num_gates_1q": 23,
+            "num_gates_2q": 16,
+            "num_gates_3q": 0,
+            "wall_time_ms": 15.572071075439453
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 92,
+            "num_gates_2q": 16,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.2102127075195312
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9913272159155154,
+            "num_gates_1q": 92,
+            "num_gates_2q": 16,
+            "num_gates_3q": 0,
+            "wall_time_ms": 134.07397270202637
+          }
+        }
+      },
+      "Supremacy Circuit": {
+        "circuit_name": "Supremacy Circuit",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 110,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.639293670654297
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.999979424473735,
+            "num_gates_1q": 110,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 81.97569847106934
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 50,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.16200065612793
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9984560735875515,
+            "num_gates_1q": 50,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 36.8959903717041
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 50,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.0950565338134766
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9730369368990979,
+            "num_gates_1q": 50,
+            "num_gates_2q": 10,
+            "num_gates_3q": 0,
+            "wall_time_ms": 139.6620273590088
+          }
+        }
+      }
+    },
+    "6": {
+      "Bell State": {
+        "circuit_name": "Bell State",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 24,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.1830329895019531
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9997382940393313,
+            "num_gates_1q": 24,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 13.24915885925293
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 3,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.21505355834960938
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9871667830754428,
+            "num_gates_1q": 3,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.864858627319336
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 18,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.21576881408691406
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9432807980944411,
+            "num_gates_1q": 18,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 27.415037155151367
+          }
+        }
+      },
+      "GHZ State": {
+        "circuit_name": "GHZ State",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 32,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.2271404266357422
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9995638538410762,
+            "num_gates_1q": 32,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 18.655061721801758
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.4076957702636719
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9786847702635105,
+            "num_gates_1q": 1,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.086017608642578
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 22,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.225067138671875
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9069627060367602,
+            "num_gates_1q": 22,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 56.52904510498047
+          }
+        }
+      },
+      "QFT": {
+        "circuit_name": "QFT",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 276,
+            "num_gates_2q": 39,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.821943283081055
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999999999999836,
+            "num_gates_1q": 276,
+            "num_gates_2q": 39,
+            "num_gates_3q": 0,
+            "wall_time_ms": 539.5710468292236
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 36,
+            "num_gates_2q": 33,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.417346954345703
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999993330943358,
+            "num_gates_1q": 36,
+            "num_gates_2q": 33,
+            "num_gates_3q": 0,
+            "wall_time_ms": 138.6098861694336
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 198,
+            "num_gates_2q": 39,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.997968673706055
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9979742361093265,
+            "num_gates_1q": 198,
+            "num_gates_2q": 39,
+            "num_gates_3q": 0,
+            "wall_time_ms": 344.6168899536133
+          }
+        }
+      },
+      "Random Clifford": {
+        "circuit_name": "Random Clifford",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 125,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.644964218139648
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9979161088050612,
+            "num_gates_1q": 125,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 363.5401725769043
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 30,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.697177886962891
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.965562349521553,
+            "num_gates_1q": 30,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 85.86716651916504
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 95,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 27.864933013916016
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8342917161953258,
+            "num_gates_1q": 95,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 174.13091659545898
+          }
+        }
+      },
+      "Toffoli Circuit": {
+        "circuit_name": "Toffoli Circuit",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 212,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 114.18795585632324
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9929172555556093,
+            "num_gates_1q": 212,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 381.8995952606201
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 48,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.507230758666992
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8778042172138655,
+            "num_gates_1q": 48,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 333.44221115112305
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 40,
+            "num_gates_2q": 0,
+            "num_gates_3q": 4,
+            "wall_time_ms": 2.444028854370117
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8787445487241339,
+            "num_gates_1q": 40,
+            "num_gates_2q": 0,
+            "num_gates_3q": 4,
+            "wall_time_ms": 136.59286499023438
+          }
+        }
+      },
+      "QAOA": {
+        "circuit_name": "QAOA",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 154,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.5690326690673828
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999864132571648,
+            "num_gates_1q": 154,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 277.2490978240967
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 28,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.728057861328125
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9962767182607375,
+            "num_gates_1q": 28,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 44.99506950378418
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 114,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.3430328369140625
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9658620549723469,
+            "num_gates_1q": 114,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 384.807825088501
+          }
+        }
+      },
+      "Supremacy Circuit": {
+        "circuit_name": "Supremacy Circuit",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 138,
+            "num_gates_2q": 13,
+            "num_gates_3q": 0,
+            "wall_time_ms": 22.47786521911621
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9998439797931844,
+            "num_gates_1q": 138,
+            "num_gates_2q": 13,
+            "num_gates_3q": 0,
+            "wall_time_ms": 426.851749420166
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 60,
+            "num_gates_2q": 13,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.5169124603271484
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9941483765686978,
+            "num_gates_1q": 60,
+            "num_gates_2q": 13,
+            "num_gates_3q": 0,
+            "wall_time_ms": 195.93310356140137
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 60,
+            "num_gates_2q": 13,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.2510757446289062
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9462698533785956,
+            "num_gates_1q": 60,
+            "num_gates_2q": 13,
+            "num_gates_3q": 0,
+            "wall_time_ms": 310.3799819946289
+          }
+        }
+      }
+    },
+    "7": {
+      "Bell State": {
+        "circuit_name": "Bell State",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 24,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.5331039428710938
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9997382940393313,
+            "num_gates_1q": 24,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 15.007972717285156
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 3,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.4138946533203125
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9871667830754428,
+            "num_gates_1q": 3,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.6699771881103516
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 18,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.2129077911376953
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9432807980944411,
+            "num_gates_1q": 18,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 73.6391544342041
+          }
+        }
+      },
+      "GHZ State": {
+        "circuit_name": "GHZ State",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 38,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3509521484375
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9994750528034082,
+            "num_gates_1q": 38,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 97.32890129089355
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.217075347900391
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9744756513159799,
+            "num_gates_1q": 1,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 39.88289833068848
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 26,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3199577331542969
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8894159423319012,
+            "num_gates_1q": 26,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 201.89905166625977
+          }
+        }
+      },
+      "QFT": {
+        "circuit_name": "QFT",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 362,
+            "num_gates_2q": 51,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.4999847412109375
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999999999999933,
+            "num_gates_1q": 362,
+            "num_gates_2q": 51,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2221.65584564209
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 49,
+            "num_gates_2q": 45,
+            "num_gates_3q": 0,
+            "wall_time_ms": 9.908914566040039
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999989505423801,
+            "num_gates_1q": 49,
+            "num_gates_2q": 45,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1090.4581546783447
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 260,
+            "num_gates_2q": 51,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.373882293701172
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9970679477533204,
+            "num_gates_1q": 260,
+            "num_gates_2q": 51,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2711.69114112854
+          }
+        }
+      },
+      "Random Clifford": {
+        "circuit_name": "Random Clifford",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 130,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.197141647338867
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9987146747724381,
+            "num_gates_1q": 130,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 745.2211380004883
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 35,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 13.952016830444336
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9842936353705368,
+            "num_gates_1q": 35,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 703.0956745147705
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 100,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.801179885864258
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9114233487379155,
+            "num_gates_1q": 100,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 970.2839851379395
+          }
+        }
+      },
+      "Toffoli Circuit": {
+        "circuit_name": "Toffoli Circuit",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 263,
+            "num_gates_2q": 30,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.153966903686523
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9912255975587053,
+            "num_gates_1q": 263,
+            "num_gates_2q": 30,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1125.1778602600098
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 59,
+            "num_gates_2q": 30,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.046937942504883
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8497241569970045,
+            "num_gates_1q": 59,
+            "num_gates_2q": 30,
+            "num_gates_3q": 0,
+            "wall_time_ms": 314.1031265258789
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 48,
+            "num_gates_2q": 0,
+            "num_gates_3q": 5,
+            "wall_time_ms": 3.5152435302734375
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8514261422377358,
+            "num_gates_1q": 48,
+            "num_gates_2q": 0,
+            "num_gates_3q": 5,
+            "wall_time_ms": 478.23524475097656
+          }
+        }
+      },
+      "QAOA": {
+        "circuit_name": "QAOA",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 184,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.668018341064453
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.999976798105033,
+            "num_gates_1q": 184,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1323.3428001403809
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 33,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 6.54292106628418
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9943353880097138,
+            "num_gates_1q": 33,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 728.4398078918457
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 136,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.143953323364258
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9530653508461469,
+            "num_gates_1q": 136,
+            "num_gates_2q": 24,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1163.534164428711
+          }
+        }
+      },
+      "Supremacy Circuit": {
+        "circuit_name": "Supremacy Circuit",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 160,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.7789344787597656
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999727975493016,
+            "num_gates_1q": 160,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 940.8929347991943
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 70,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.032062530517578
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9981447745134631,
+            "num_gates_1q": 70,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 655.9469699859619
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 70,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.281831741333008
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.97593144378734,
+            "num_gates_1q": 70,
+            "num_gates_2q": 15,
+            "num_gates_3q": 0,
+            "wall_time_ms": 890.244722366333
+          }
+        }
+      }
+    },
+    "8": {
+      "Bell State": {
+        "circuit_name": "Bell State",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 32,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.7747879028320312
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9996489479737689,
+            "num_gates_1q": 32,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 788.8000011444092
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 4,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.5730133056640625
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9829257471354232,
+            "num_gates_1q": 4,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 137.24088668823242
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 24,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.4177093505859375
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9250985318969648,
+            "num_gates_1q": 24,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 769.9277400970459
+          }
+        }
+      },
+      "GHZ State": {
+        "circuit_name": "GHZ State",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 44,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.6150474548339844
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9993857282801892,
+            "num_gates_1q": 44,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 809.0500831604004
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.9140243530273438
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9702846349106085,
+            "num_gates_1q": 1,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 384.77587699890137
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 30,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.8661022186279297
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8722126535715317,
+            "num_gates_1q": 30,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1044.6510314941406
+          }
+        }
+      },
+      "QFT": {
+        "circuit_name": "QFT",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 480,
+            "num_gates_2q": 68,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.617950439453125
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.999999999999972,
+            "num_gates_1q": 480,
+            "num_gates_2q": 68,
+            "num_gates_3q": 0,
+            "wall_time_ms": 10874.792098999023
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 64,
+            "num_gates_2q": 60,
+            "num_gates_3q": 0,
+            "wall_time_ms": 9.696006774902344
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999984515093995,
+            "num_gates_1q": 64,
+            "num_gates_2q": 60,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7701.088905334473
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 344,
+            "num_gates_2q": 68,
+            "num_gates_3q": 0,
+            "wall_time_ms": 12.299060821533203
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9958136438789384,
+            "num_gates_1q": 344,
+            "num_gates_2q": 68,
+            "num_gates_3q": 0,
+            "wall_time_ms": 9310.705184936523
+          }
+        }
+      },
+      "Random Clifford": {
+        "circuit_name": "Random Clifford",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 165,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 104.2780876159668
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9976553373588775,
+            "num_gates_1q": 165,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3082.4429988861084
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 40,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 12.82811164855957
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9567778169886035,
+            "num_gates_1q": 40,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1193.7410831451416
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 125,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.0329227447509766
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.7898590996293727,
+            "num_gates_1q": 125,
+            "num_gates_2q": 20,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2526.456832885742
+          }
+        }
+      },
+      "Toffoli Circuit": {
+        "circuit_name": "Toffoli Circuit",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 314,
+            "num_gates_2q": 36,
+            "num_gates_3q": 0,
+            "wall_time_ms": 5.10096549987793
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9895328785191315,
+            "num_gates_1q": 314,
+            "num_gates_2q": 36,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2990.86594581604
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 70,
+            "num_gates_2q": 36,
+            "num_gates_3q": 0,
+            "wall_time_ms": 9.023189544677734
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.822542352383386,
+            "num_gates_1q": 70,
+            "num_gates_2q": 36,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1068.2599544525146
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 56,
+            "num_gates_2q": 0,
+            "num_gates_3q": 6,
+            "wall_time_ms": 6.553888320922852
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8249570102987965,
+            "num_gates_1q": 56,
+            "num_gates_2q": 0,
+            "num_gates_3q": 6,
+            "wall_time_ms": 590.4750823974609
+          }
+        }
+      },
+      "QAOA": {
+        "circuit_name": "QAOA",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 214,
+            "num_gates_2q": 28,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.161741256713867
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999826706344398,
+            "num_gates_1q": 214,
+            "num_gates_2q": 28,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1488.6598587036133
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 38,
+            "num_gates_2q": 28,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.674217224121094
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9952228768291529,
+            "num_gates_1q": 38,
+            "num_gates_2q": 28,
+            "num_gates_3q": 0,
+            "wall_time_ms": 776.7679691314697
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 158,
+            "num_gates_2q": 28,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.373218536376953
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.958211169167281,
+            "num_gates_1q": 158,
+            "num_gates_2q": 28,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1957.0209980010986
+          }
+        }
+      },
+      "Supremacy Circuit": {
+        "circuit_name": "Supremacy Circuit",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 188,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 3.565073013305664
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9999817814254184,
+            "num_gates_1q": 188,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1656.5120220184326
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 80,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 8.934974670410156
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9987979590455581,
+            "num_gates_1q": 80,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1359.7099781036377
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 80,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.0051727294921875
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9833381033988848,
+            "num_gates_1q": 80,
+            "num_gates_2q": 18,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1866.152048110962
+          }
+        }
+      }
+    }
+  },
+  "scaling": {
+    "3": [
+      {
+        "circuit_name": "GHZ State",
+        "num_qubits": 3,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 14,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.20694732666015625
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9998271146365126,
+            "num_gates_1q": 14,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.5467872619628906
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.0629425048828125
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9914215259431466,
+            "num_gates_1q": 1,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.9121170043945312
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 10,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.5240440368652344
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9617339380814912,
+            "num_gates_1q": 10,
+            "num_gates_2q": 2,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.5039443969726562
+          }
+        }
+      }
+    ],
+    "4": [
+      {
+        "circuit_name": "GHZ State",
+        "num_qubits": 4,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 20,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.16689300537109375
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9997398848972341,
+            "num_gates_1q": 20,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.270936965942383
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.07510185241699219
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9871576288889077,
+            "num_gates_1q": 1,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.1219978332519531
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 14,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.15997886657714844
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9431145558184347,
+            "num_gates_1q": 14,
+            "num_gates_2q": 3,
+            "num_gates_3q": 0,
+            "wall_time_ms": 2.4759769439697266
+          }
+        }
+      }
+    ],
+    "5": [
+      {
+        "circuit_name": "GHZ State",
+        "num_qubits": 5,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 26,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 8.458137512207031
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9996521312523582,
+            "num_gates_1q": 26,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 15.649080276489258
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.1518726348876953
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.982912069944742,
+            "num_gates_1q": 1,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.9979476928710938
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 18,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.4570484161376953
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9248598836536513,
+            "num_gates_1q": 18,
+            "num_gates_2q": 4,
+            "num_gates_3q": 0,
+            "wall_time_ms": 7.182121276855469
+          }
+        }
+      }
+    ],
+    "6": [
+      {
+        "circuit_name": "GHZ State",
+        "num_qubits": 6,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 32,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3027915954589844
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9995638538410762,
+            "num_gates_1q": 32,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 44.47793960571289
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.20003318786621094
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9786847702635105,
+            "num_gates_1q": 1,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 4.998207092285156
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 22,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.25177001953125
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9069627060367602,
+            "num_gates_1q": 22,
+            "num_gates_2q": 5,
+            "num_gates_3q": 0,
+            "wall_time_ms": 19.0579891204834
+          }
+        }
+      }
+    ],
+    "7": [
+      {
+        "circuit_name": "GHZ State",
+        "num_qubits": 7,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 38,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 1.0559558868408203
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9994750528034082,
+            "num_gates_1q": 38,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 64.92495536804199
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.36787986755371094
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9744756513159799,
+            "num_gates_1q": 1,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 17.542123794555664
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 26,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3070831298828125
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8894159423319012,
+            "num_gates_1q": 26,
+            "num_gates_2q": 6,
+            "num_gates_3q": 0,
+            "wall_time_ms": 52.49619483947754
+          }
+        }
+      }
+    ],
+    "8": [
+      {
+        "circuit_name": "GHZ State",
+        "num_qubits": 8,
+        "results": {
+          "ion_ideal": {
+            "backend_name": "trapped_ion_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 44,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.7691383361816406
+          },
+          "ion_noisy": {
+            "backend_name": "trapped_ion_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9993857282801892,
+            "num_gates_1q": 44,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 296.24390602111816
+          },
+          "sc_ideal": {
+            "backend_name": "superconducting_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 1,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.7300376892089844
+          },
+          "sc_noisy": {
+            "backend_name": "superconducting_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.9702846349106085,
+            "num_gates_1q": 1,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 97.32198715209961
+          },
+          "na_ideal": {
+            "backend_name": "neutral_atom_ideal",
+            "execution_mode": "ideal",
+            "fidelity_vs_ideal": 1.0,
+            "num_gates_1q": 30,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 0.3788471221923828
+          },
+          "na_noisy": {
+            "backend_name": "neutral_atom_noisy",
+            "execution_mode": "noisy",
+            "fidelity_vs_ideal": 0.8722126535715317,
+            "num_gates_1q": 30,
+            "num_gates_2q": 7,
+            "num_gates_3q": 0,
+            "wall_time_ms": 303.3137321472168
+          }
+        }
+      }
+    ]
+  },
+  "metadata": {
+    "qubit_range": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "clifford_depth": 5,
+    "clifford_seed": 42,
+    "qaoa_layers": 2,
+    "supremacy_depth": 5,
+    "supremacy_seed": 42
+  }
+}
